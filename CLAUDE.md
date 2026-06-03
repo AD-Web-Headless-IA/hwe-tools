@@ -12,7 +12,7 @@
 hwp-tools/          ← ESTE REPO — submodulo git
   .claude/          ← skills, agents, commands, settings
   docs/             ← arquitectura, contratos, specs, guías
-  templates/        ← plantillas para /design-block e /import-figma
+  .claude/templates/ ← plantillas para /design-block e /import-figma
   compatibility.json
 
 hwp-core/           ← repo separado — paquetes npm

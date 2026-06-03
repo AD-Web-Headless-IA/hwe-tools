@@ -124,9 +124,9 @@ hwp-tools/
 │   ├── catalog.md
 │   └── README.md
 │
-├── templates/                          ← templates used by skills
-│   ├── design-language.md
-│   └── visual-spec.md
+│   ├── templates/                      ← templates used by skills
+│   │   ├── design-language.md
+│   │   └── visual-spec.md
 │
 ├── compatibility.json                  ← maps tools version to compatible core-ui versions
 └── CLAUDE.md

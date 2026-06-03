@@ -1171,7 +1171,7 @@ Client repos are independent, created from the template, and consume tools via s
 
 - `CLAUDE.md` in hwp-tools describes the tools repo only, not the monorepo.
 - `compatibility.json` maps tool versions to compatible `@hwp/core-ui` versions.
-- `templates/design-language.md` and `templates/visual-spec.md` replace `docs/clients/_template/`.
+- `.claude/templates/design-language.md` and `.claude/templates/visual-spec.md` replace `docs/clients/_template/`.
 - Client repos use `.hwp-tools/` submodule path instead of a shared monorepo.
 - All skill paths updated: `hwp-platform/apps/{slug}/` → `site-{slug}/` or relative CWD paths.
 - Skill `globals.css` template updated to Tailwind v4 syntax (`@import "tailwindcss"` + `@theme {}`).
