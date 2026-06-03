@@ -8,18 +8,18 @@
 
 | En WordPress... | En HWP es... |
 |---|---|
-| **Tema** (Twenty-Twenty-Four, Divi...) | `apps/site-{cliente}/` + `tokens.json` |
-| **Tema padre** | `packages/core-ui` |
-| **Tema hijo** | `apps/site-{cliente}/src/compositions/` |
+| **Tema** (Twenty-Twenty-Four, Divi...) | `site-{cliente}/` + `src/theme/tokens.json` |
+| **Tema padre** | `@hwp/core-ui` (en `hwp-core/packages/core-ui/`) |
+| **Tema hijo** | `site-{cliente}/src/compositions/` |
 | **Template parts** (`header.php`, `footer.php`) | `SiteShell`, `Navbar`, `Footer` en `@hwp/core-ui` |
-| **Bloques Gutenberg (tema padre)** | Base-blocks en `packages/core-ui/src/base-blocks/` |
+| **Bloques Gutenberg (tema padre)** | Base-blocks en `hwp-core/packages/core-ui/src/base-blocks/` |
 | **Bloques Gutenberg (tema hijo)** | Client blocks en `site-{slug}/src/blocks/` |
 | **`register_block_type()` en tema hijo** | `site-{slug}/src/blocks/registry.ts` |
-| **`functions.php`** | `tailwind.config.ts` + `client.config.ts` |
+| **`functions.php`** | `src/app/globals.css @theme {}` + `client.config.ts` |
 | **`style.css`** | `tokens.json` → Tailwind preset → clases CSS |
 | **`wp-content/uploads/`** | CDN / Payload Media Storage |
 | **wp-admin** | Payload CMS |
-| **Plugins** | Packages en `packages/` (`@hwp/core-ui`, `@hwp/config`...) |
+| **Plugins** | Packages en `hwp-core/packages/` (`@hwp/core-ui`, `@hwp/config`) |
 | **ACF fields** | Zod schemas en cada bloque |
 | **Local by Flywheel / MAMP** | `pnpm dev` → `localhost:3000` |
 | **FTP deploy / WP Engine push** | `git push` → Vercel auto-deploy |
@@ -34,28 +34,29 @@
 
 ## Explicaciones por fila
 
-### 🎨 Tema → `apps/site-{cliente}/` + `tokens.json`
+### 🎨 Tema → `site-{cliente}/` + `tokens.json` + `globals.css @theme {}`
 
 En WordPress, el tema controla el aspecto visual de un site: colores, fuentes, layout. Aquí eso se divide en dos:
 
-- **`tokens.json`** — los valores de diseño (colores, fuentes, espaciados). Es como el `:root { --color-primary: #... }` de tu CSS.
-- **`apps/site-{cliente}/`** — la aplicación Next.js del cliente, que usa esos tokens.
+- **`src/theme/tokens.json`** — los valores de diseño (colores, fuentes, espaciados) en formato JSON validado.
+- **`src/app/globals.css @theme {}`** — las CSS custom properties que Tailwind v4 lee. Es aquí donde los tokens se aplican al site.
+- **`site-{cliente}/`** — el repo independiente del cliente, que usa esos tokens.
 
-Un dev no toca el código de "cómo se ve un botón" — eso está en `@hwp/core-ui`. Solo cambia los *valores* (el color, la fuente) en `tokens.json`.
+Un dev no toca el código de "cómo se ve un botón" — eso está en `@hwp/core-ui`. Solo cambia los *valores* en `tokens.json` y `globals.css @theme {}`.
 
 ---
 
-### 🧱 Tema padre → `packages/core-ui`
+### 🧱 Tema padre → `@hwp/core-ui` (en `hwp-core/`)
 
-El tema padre de WordPress define los bloques, estilos y funciones comunes. Aquí ese rol lo juega `@hwp/core-ui`: contiene todos los bloques React (Hero, Booking, Gallery...) que todos los clientes comparten.
+El tema padre de WordPress define los bloques, estilos y funciones comunes. Aquí ese rol lo juega `@hwp/core-ui`: contiene todos los bloques React (Hero, Booking, Gallery...) que todos los clientes comparten. Vive en `hwp-core/packages/core-ui/` y se consume como package npm en cada repo de cliente.
 
 Si modificas `@hwp/core-ui`, el cambio llega a **todos los clientes** al mismo tiempo. Igual que cuando actualizas un tema padre y todos los hijos lo heredan.
 
 ---
 
-### 👶 Tema hijo → Compositions en `apps/site-{cliente}/`
+### 👶 Tema hijo → Compositions en `site-{cliente}/`
 
-El tema hijo personalizaba el tema padre para un cliente concreto. Aquí eso se hace con **compositions**: componentes React en `apps/site-{cliente}/src/compositions/` que ensamblan y configuran los bloques de `@hwp/core-ui` con el toque específico del cliente.
+El tema hijo personalizaba el tema padre para un cliente concreto. Aquí eso se hace con **compositions**: componentes React en `site-{cliente}/src/compositions/` que ensamblan y configuran los bloques de `@hwp/core-ui` con el toque específico del cliente. Cada cliente tiene su propio repo independiente.
 
 ---
 
@@ -71,7 +72,7 @@ El `layout.tsx` de cada site los monta, igual que `header.php` y `footer.php` se
 
 Los bloques Gutenberg son componentes reutilizables. Aquí es lo mismo pero en React, con una distinción importante:
 
-**Base-blocks** (`packages/core-ui/src/base-blocks/`) son como el tema padre — los mantiene el equipo de plataforma y todos los clientes los heredan. No se editan directamente para un cliente concreto.
+**Base-blocks** (`hwp-core/packages/core-ui/src/base-blocks/`) son como el tema padre — los mantiene el equipo de plataforma y todos los clientes los heredan. No se editan directamente para un cliente concreto.
 
 **Client blocks** (`site-{slug}/src/blocks/`) son como los bloques del tema hijo — cada cliente puede tener los suyos. Existen tres niveles de personalización:
 
@@ -87,24 +88,24 @@ La diferencia clave vs WordPress: todos los bloques HWP son **tipados** con Type
 
 ---
 
-### ⚙️ `functions.php` → `tailwind.config.ts` + `client.config.ts`
+### ⚙️ `functions.php` → `globals.css @theme {}` + `client.config.ts`
 
 El `functions.php` registraba estilos, scripts, bloques y opciones del tema. Aquí eso se divide:
 
-- **`tailwind.config.ts`** — registra los estilos (convierte `tokens.json` en clases CSS de Tailwind).
-- **`client.config.ts`** — configura las opciones del cliente: qué bloques tiene, qué variante usa cada uno, qué features están activas.
+- **`src/app/globals.css @theme {}`** — define los tokens del cliente (Tailwind v4 CSS-first). Sobreescribe los tokens base de `@hwp/config/theme.css` con los valores específicos del cliente.
+- **`client.config.ts`** — configura las opciones del cliente: adaptadores, blockDefaults, features, tenantId.
 
 ---
 
-### 🎨 `style.css` → `tokens.json` → Tailwind preset
+### 🎨 `style.css` → `tokens.json` + `@theme {}` (Tailwind v4)
 
 En WordPress, el `style.css` define variables CSS con los colores y fuentes del tema. Aquí el flujo es:
 
 ```
-Figma (diseñador) → tokens.json → TokensContract (validación) → Tailwind preset → clases CSS
+Figma (diseñador) → /import-figma → tokens.json (DRAFT) → globals.css @theme {} → CSS custom properties → clases Tailwind
 ```
 
-El resultado es el mismo (clases CSS con los colores correctos), pero el proceso es más robusto: si el diseñador cambia un color en Figma y alguien lo pone mal en `tokens.json`, el build falla con un error claro.
+El resultado es el mismo (clases CSS con los colores correctos), pero el proceso es más robusto: los tokens se validan con `TokensContract` antes de llegar al build.
 
 ---
 
@@ -128,9 +129,11 @@ La ventaja: si alguien configura mal un bloque en el CMS (un texto donde deberí
 
 ---
 
-### 🔌 Plugins → Packages en `packages/`
+### 🔌 Plugins → Packages en `hwp-core/packages/`
 
-Los plugins de WordPress añaden funcionalidad al site. Aquí los packages de `packages/` hacen lo mismo: `@hwp/core-ui` añade los bloques, `@hwp/config` añade la configuración de Tailwind, y en el futuro habrá `@hwp/booking` para la integración con sistemas de reservas.
+Los plugins de WordPress añaden funcionalidad al site. Aquí los packages de `hwp-core/packages/` hacen lo mismo: `@hwp/core-ui` añade los bloques, schemas, adapters (booking, map, reviews) y el renderer; `@hwp/config` añade la configuración base de Tailwind.
+
+> No existe `@hwp/booking` como package separado — los adapters de booking viven dentro de `@hwp/core-ui/src/adapters/booking/` (DEC-017).
 
 ---
 
@@ -146,14 +149,15 @@ wp-admin/       ← interfaz de edición de contenido
 
 En HWP tienes:
 ```
-packages/core-ui/src/base-blocks/   ← bloques base de referencia (= tema padre)
-packages/core-ui/src/schemas/       ← schemas Zod compartidos
-site-{cliente}/src/blocks/          ← bloques propios del cliente (= tema hijo)
-site-{cliente}/src/blocks/registry.ts ← registro de bloques del cliente
-packages/{feature}/                 ← funcionalidades extra (= plugins)
-Payload CMS                         ← interfaz de edición de contenido (= wp-admin)
+hwp-core/packages/core-ui/src/base-blocks/  ← bloques base de referencia (= tema padre)
+hwp-core/packages/core-ui/src/schemas/      ← schemas Zod compartidos
+hwp-core/packages/core-ui/src/adapters/     ← adapters: booking, map, reviews (= plugins)
+site-{cliente}/src/blocks/                  ← bloques propios del cliente (= tema hijo)
+site-{cliente}/src/blocks/registry.ts       ← registro de bloques del cliente
+site-{cliente}/src/app/globals.css @theme{} ← tokens del cliente (= style.css del tema hijo)
+Payload CMS                                 ← interfaz de edición de contenido (= wp-admin)
 ```
 
-Los clientes reales viven en repos independientes (`site-{slug}/`). `apps/site-demo/` es el modelo de referencia dentro de este monorepo.
+Cada cliente vive en su propio repo independiente (`site-{slug}/`). `hwp-core/apps/site-demo/` es el modelo de referencia del equipo de plataforma. `hwp-tools/` provee las herramientas (skills, agentes, docs) via submódulo `.hwp-tools/`.
 
 La lógica es la misma. La tecnología es diferente, pero el mental model es el mismo.

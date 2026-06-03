@@ -7,11 +7,11 @@
 ## Resumen del flujo
 
 ```
-1. Abrir el proyecto        → abre la carpeta en VS Code
-2. Levantar el dev server   → pnpm dev
+1. Abrir el proyecto        → abre la carpeta site-{slug}/ en VS Code
+2. Levantar el dev server   → npm run dev
 3. Hacer cambios            → edita ficheros, el browser se actualiza solo
-4. Verificar               → mira el browser, revisa la consola
-5. Commit y push            → pnpm commit (o /commit en Claude Code)
+4. Verificar                → mira el browser, revisa la consola
+5. Commit y push            → /commit en Claude Code (o git manual)
 ```
 
 En WordPress sería: abrir Local → activar el site → editar el theme → F5 → subir por FTP.
@@ -26,14 +26,14 @@ En WordPress sería: abrir Local → activar el site → editar el theme → F5 
 
 ```bash
 # Opción A: desde VS Code
-# File → Open Folder → C:\laragon\www\Hospitality Web Platform\hwp-platform
+# File → Open Folder → C:\laragon\www\Hospitality Web Platform\site-{slug}
 
 # Opción B: desde terminal
-cd "C:\laragon\www\Hospitality Web Platform\hwp-platform"
+cd "C:\laragon\www\Hospitality Web Platform\site-{slug}"
 code .
 ```
 
-> 💡 Abre siempre `hwp-platform/` como la raíz del workspace en VS Code — no la carpeta del site del cliente. Así TypeScript y las importaciones funcionan correctamente.
+> 💡 Abre siempre `site-{slug}/` como la raíz del workspace en VS Code — no la carpeta del cliente ni hwp-core. Así TypeScript y las importaciones funcionan correctamente.
 
 ---
 
@@ -44,18 +44,18 @@ code .
 **En HWP:**
 
 ```bash
-# Desde hwp-platform/ (la raíz del monorepo)
-pnpm dev
+# Desde site-{slug}/ (la raíz del repo de cliente)
+npm run dev
 ```
 
 Verás algo así en la terminal:
 
 ```
-▲ Next.js 14.2.35
+▲ Next.js 15.x.x
   - Local:   http://localhost:3000
 
 ✓ Starting...
-✓ Ready in 6s
+✓ Ready in 4s
 ```
 
 Abre el browser en **http://localhost:3000** y ya tienes el site.
@@ -73,42 +73,44 @@ Abre el browser en **http://localhost:3000** y ya tienes el site.
 
 **En WordPress:** editabas un `.php`, guardabas, apretabas F5 en el browser.
 
-**En HWP:** editas un `.tsx` o `.json`, guardas. El browser **se actualiza solo** (Hot Module Replacement). No hay que apretar F5.
+**En HWP:** editas un `.tsx`, `.json` o `.css`, guardas. El browser **se actualiza solo** (Hot Module Replacement). No hay que apretar F5.
 
 ### Dónde trabajar según tu rol
 
 | Si eres... | Trabajas en... | Qué tocas |
 |---|---|---|
-| Dev de plataforma | `packages/core-ui/src/base-blocks/` | Base-blocks, schemas, types, composition-rules |
-| Dev de cliente | `apps/site-{slug}/src/blocks/` | Bloques propios del cliente, registry |
-| Cualquier dev (tokens) | `apps/site-{slug}/src/theme/tokens.json` | Colores, fuentes, espaciados |
-| Cualquier dev (páginas) | `apps/site-{slug}/src/app/` | Layout, páginas, globals.css |
+| Dev de cliente | `src/blocks/` | Bloques propios del cliente (Level 1/2/3), registry |
+| Dev de cliente (tokens) | `src/theme/tokens.json` | Colores, fuentes, espaciados |
+| Dev de cliente (páginas) | `src/app/` | Layout, páginas, `globals.css @theme {}` |
+| Dev de plataforma | `hwp-core/packages/core-ui/src/base-blocks/` | Base-blocks, schemas, adapters |
 
 > **Regla CSS:** toda la CSS del cliente va en `src/app/globals.css`. Nunca en ficheros dentro de `src/blocks/`.
 
-### Cambiar colores del cliente
+### Cambiar colores del cliente (Tailwind v4)
 
-```bash
-# Edita el fichero de tokens del cliente
-apps/site-demo/src/theme/tokens.json
-```
+En Tailwind v4 los tokens se definen en `globals.css` con `@theme {}`:
 
-```json
-{
-  "colors": {
-    "primary": { "value": "#1A4A52" },   ← Cambia este hex
-    "accent":  { "value": "#9FCAD0" }    ← o este
-  }
+```css
+/* src/app/globals.css */
+@import "tailwindcss";
+@import "@hwp/config/theme.css";
+
+@theme {
+  --color-primary: #2D5A27;    ← cambia aquí
+  --color-accent: #9FCAD0;
+  --font-heading: "Playfair Display", Georgia, serif;
 }
 ```
 
-Guarda → el browser se actualiza en ~1 segundo con el nuevo color.
+Guarda → el browser se actualiza en ~1 segundo.
+
+También puedes editar `src/theme/tokens.json` si el preset de `@hwp/config/theme.css` consume ese fichero en tu versión.
 
 ### Editar el contenido de una página
 
 ```bash
 # La página principal
-apps/site-demo/src/app/page.tsx
+src/app/page.tsx
 ```
 
 Es JSX (parecido a HTML dentro de JavaScript). Si en WordPress escribías:
@@ -130,14 +132,14 @@ En lugar de escribir CSS, usas clases de Tailwind directamente en el JSX:
 <div class="hero-section">   ← clase CSS definida en style.css
 
 // HWP (Tailwind en JSX)
-<div className="bg-primary text-text-on-dark py-16 px-6">   ← clases inline
+<div className="bg-primary text-on-dark py-[--spacing-section-y]">   ← clases inline
 ```
 
-Las clases más usadas son las que vienen de `tokens.json`:
+Las clases más usadas son las que vienen de los tokens:
 - `bg-primary`, `bg-accent`, `bg-surface` — colores de fondo
 - `text-foreground`, `text-muted-foreground` — colores de texto
 - `font-heading`, `font-body` — tipografías
-- `max-w-container`, `py-section-y` — espaciados
+- `max-w-[--width-container]`, `py-[--spacing-section-y]` — espaciados
 
 ---
 
@@ -149,28 +151,28 @@ Antes de hacer commit, comprueba tres cosas:
 
 **B) No hay errores de TypeScript:**
 ```bash
-pnpm typecheck
+npm run typecheck
 ```
 Si hay errores, los verás en la terminal con el fichero y la línea exacta.
 
 **C) No hay errores en la terminal del dev server** — mira que no aparezca nada en rojo.
 
-> 💡 En WordPress verificabas que el site no tuviera pantalla blanca. Aquí el equivalente es que `pnpm typecheck` salga en verde.
+> 💡 En WordPress verificabas que el site no tuviera pantalla blanca. Aquí el equivalente es que `npm run typecheck` salga en verde.
 
 ### Antes de desplegar a producción
 
 Hay una verificación adicional obligatoria: el **pre-deploy security checklist** de `docs/specs/security/security-standards.md`. Cubre items bloqueantes que no aparecen en TypeScript:
 
-- `pnpm audit --audit-level=high` — dependencias sin vulnerabilidades críticas
+- `npm audit --audit-level=high` — dependencias sin vulnerabilidades críticas
 - Cabeceras HTTP de seguridad (CSP, HSTS, X-Frame-Options...) en `next.config.mjs`
 - Cookie consent implementado
 - Página de política de privacidad enlazada desde el footer
 - Secrets en variables de entorno de Vercel, no en el código
 
-Si tienes dudas, pide al agente `security-specialist` que haga la auditoría:
+Si tienes dudas, invoca el agente `security-specialist`:
 
 ```
-Invoca el agente security-specialist para hacer el pre-deploy audit del site site-demo.
+Invoca el agente security-specialist para hacer el pre-deploy audit del site.
 ```
 
 🔄 **WP:** como pasar por la checklist de seguridad de Wordfence antes de publicar el site.
@@ -181,7 +183,7 @@ Invoca el agente security-specialist para hacer el pre-deploy audit del site sit
 
 **En WordPress:** subías por FTP o hacías click en "Deploy" en tu hosting. No había historial de cambios.
 
-**En HWP:** cada cambio se guarda con git. Esto te permite ver el historial, revertir cambios, y colaborar sin pisaros.
+**En HWP:** cada cambio se guarda con git.
 
 ### Opción A: con Claude Code (recomendado)
 
@@ -210,10 +212,10 @@ git status
 git diff
 
 # Añadir los ficheros que quieres commitear
-git add apps/site-demo/src/theme/tokens.json
+git add src/theme/tokens.json
 
 # Crear el commit con un mensaje descriptivo
-git commit -m "feat(site-demo): update Balneario palette — swap accent to terracotta"
+git commit -m "feat(theme): update Balneario palette — swap accent to terracotta"
 
 # Subir a GitHub (y Vercel lo desplegará automáticamente)
 git push
@@ -234,30 +236,38 @@ style     → cambio solo visual/formato
 
 Ejemplos:
 ```
-feat(site-demo): add hero section with booking widget
-fix(core-ui): correct token border radius value
-docs: add WordPress comparison guide
+feat(hero): add booking widget slot below headline
+fix(tokens): correct border-radius value for cards
+docs: update project map for DEC-017
 ```
 
 > ⚠️ Los commits van **en inglés**. La conversación con Claude Code puede ser en español.
 
 ---
 
-## 6. 📦 Actualizar los packages compartidos
+## 6. 📦 Actualizar dependencias
 
-Si alguien del equipo cambia algo en `packages/core-ui` o `packages/config`, tienes que traer esos cambios:
+### Actualizar `@hwp/core-ui` (nueva release del equipo de plataforma)
 
 ```bash
-# Traer los cambios del repositorio remoto
-git pull
-
-# Si hay nuevas dependencias instaladas por otros
-pnpm install
+# En el repo de cliente (site-{slug}/)
+npm update @hwp/core-ui @hwp/config
+npm install
 ```
 
-Después reinicia el dev server (`Ctrl+C` y `pnpm dev` de nuevo).
+Después revisa el changelog de `@hwp/core-ui` — si hay cambios en schemas (breaking), los bloques Level 3 pueden necesitar adaptarse.
 
-> 🔄 **Equivalente WP:** es como actualizar un plugin o tema padre. Pero en lugar de hacer click en "Actualizar" en wp-admin, corres `git pull`.
+### Actualizar hwp-tools (nuevas skills o specs)
+
+```bash
+cd .hwp-tools
+git pull origin main
+cd ..
+git add .hwp-tools
+git commit -m "chore: update hwp-tools"
+```
+
+> 🔄 **Equivalente WP:** como actualizar un plugin o tema padre. Para el core (`@hwp/core-ui`) es `npm update`; para las herramientas (`.hwp-tools`) es `git pull`.
 
 ---
 
@@ -271,9 +281,9 @@ Claude Code es el asistente de IA que vive en la terminal. Úsalo para:
 | Quieres crear algo nuevo | "Crea un bloque de galería de fotos" |
 | Tienes un error que no entiendes | Pega el error y pregunta "¿qué significa esto?" |
 | Quieres hacer un commit | "haz el commit" o `/commit` |
-| Necesitas saber una decisión técnica | "¿Por qué usamos Tailwind v3 y no v4?" |
+| Necesitas saber una decisión técnica | "¿Por qué usamos Tailwind v4 CSS-first?" |
 
-> 💡 Claude Code tiene acceso a toda la documentación del proyecto. Si no sabes algo, pregunta antes de buscarlo en Google — probablemente ya esté documentado aquí.
+> 💡 Claude Code tiene acceso a toda la documentación a través de `.hwp-tools/docs/`. Si no sabes algo, pregunta antes de buscarlo en Google — probablemente ya esté documentado aquí.
 
 ---
 
@@ -283,19 +293,19 @@ When you need to create a block that wasn't in the designer's deliverable:
 
 ### Prerequisites
 
-1. Verify `docs/clients/{slug}/design-language.md` exists — it is created automatically by `/import-figma`. If it does not exist, run `/import-figma` first and then review the generated draft.
-2. Verify at least 2 blocks are already implemented in `apps/site-{slug}/src/blocks/` (the agent needs existing patterns to stay consistent).
+1. Verify `docs/design-language.md` exists in the client repo — it is created automatically by `/import-figma`. If it does not exist, run `/import-figma` first and review the generated draft.
+2. Verify at least 2 blocks are already implemented in `src/blocks/`.
 
 ### Workflow
 
 ```
 1. /design-block {BlockName} --client {slug}
       → ux-ui-analyst (Mode B) reads design-language.md + tokens + existing blocks
-      → produces docs/clients/{slug}/block-specs/{BlockName}.visual-spec.md (DRAFT)
+      → produces docs/block-specs/{BlockName}.visual-spec.md (DRAFT)
 
 2. Review and approve the visual spec
       → confirm it matches the site's visual style
-      → edit the spec if needed, remove the DRAFT marker when satisfied
+      → edit if needed, remove the DRAFT marker when satisfied
 
 3. /propose {BlockName}
       → planner reads the visual spec as the visual guide
@@ -304,15 +314,13 @@ When you need to create a block that wasn't in the designer's deliverable:
 
 ### Why this matters
 
-Without a Figma reference, developers tend to improvise spacing, card style, and typography hierarchy. Across 300 clients and dozens of blocks per client, this produces visual inconsistency within a single site — the hero follows the designer's style, the FAQ section looks generic. The design language document captures what the designer intended; `/design-block` uses it to keep every new block consistent.
-
-> 💡 **Tip:** The visual spec is a checkpoint, not final code. The human reviews and approves before the implementer starts. This keeps the designer's intent in the loop without requiring a new Figma delivery.
+Without a Figma reference, developers tend to improvise spacing, card style, and typography hierarchy. Across 300 clients and dozens of blocks per client, this produces visual inconsistency within a single site. The design language document captures what the designer intended; `/design-block` uses it to keep every new block consistent.
 
 ---
 
 ## 9. 🤖 Trabajar con agentes
 
-Claude Code puede invocar agentes especializados para tareas concretas. En lugar de pedirle que lo haga todo, convocas al especialista correcto para cada momento.
+Claude Code puede invocar agentes especializados para tareas concretas.
 
 ### Cuándo invocar un agente
 
@@ -332,12 +340,8 @@ Claude Code puede invocar agentes especializados para tareas concretas. En lugar
 Invoca el agente seo-geo-specialist para auditar el bloque HeroBlock que acabamos de implementar.
 ```
 
-Claude Code seleccionará el agente correcto y te dará su informe. El agente solo puede actuar dentro de su dominio y no modifica código de aplicación — audita y reporta.
-
 > 📖 Lista completa de agentes: `docs/specs/ai/agent-directory.md`
 > 👥 Equipos predefinidos por tipo de tarea: `docs/specs/ai/agent-teams-playbook.md`
-
-🔄 **En WordPress:** hacías tú solo el SEO, la seguridad, el diseño y la documentación. Aquí cada especialista sabe exactamente qué mirar y no se mete en lo de los demás.
 
 ---
 
@@ -345,19 +349,21 @@ Claude Code seleccionará el agente correcto y te dará su informe. El agente so
 
 ```
 ☀️  Mañana
-    git pull                     ← traer cambios del equipo
-    pnpm install                 ← si hay nuevas dependencias
-    pnpm dev                     ← levantar el servidor
+    cd site-{slug}/
+    git pull                                  ← traer cambios del equipo
+    git submodule update --recursive          ← actualizar .hwp-tools si cambió
+    npm install                               ← si hay nuevas dependencias
+    npm run dev                               ← levantar el servidor
 
 ✏️  Durante el día
     Editar ficheros → guardar → ver en browser
     Si hay duda → preguntar a Claude Code
 
 🌙  Al final del día
-    pnpm typecheck               ← verificar que no hay errores
-    git status                   ← ver qué cambié
-    /commit en Claude Code       ← hacer commit con ayuda
-    git push                     ← subir al repositorio
+    npm run typecheck                         ← verificar que no hay errores
+    git status                                ← ver qué cambié
+    /commit en Claude Code                    ← hacer commit con ayuda
+    git push                                  ← subir al repositorio
 ```
 
 ---
@@ -366,10 +372,11 @@ Claude Code seleccionará el agente correcto y te dará su informe. El agente so
 
 | En WordPress... | En HWP... |
 |---|---|
-| Local / MAMP corriendo | `pnpm dev` corriendo |
+| Local / MAMP corriendo | `npm run dev` corriendo |
 | F5 en el browser | Auto-recarga (HMR) |
-| Editar `style.css` | Editar `tokens.json` |
+| Editar `style.css` | Editar `globals.css @theme {}` |
 | Editar `template.php` | Editar `page.tsx` |
 | Upload por FTP | `git push` |
-| Plugins actualizados en wp-admin | `git pull` + `pnpm install` |
+| Plugins actualizados en wp-admin | `npm update @hwp/core-ui` |
+| Actualizar tema padre | `cd .hwp-tools && git pull` |
 | Pantalla blanca = error | Error rojo en terminal |

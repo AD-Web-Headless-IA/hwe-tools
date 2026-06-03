@@ -10,6 +10,12 @@ Esta guía asume que estás en **Windows** con acceso a internet. Si estás en M
 
 **Tiempo estimado:** 30-45 minutos la primera vez.
 
+**¿Qué rol tienes?** Hay dos perfiles:
+- **Dev de cliente** — trabajas en `site-{slug}/`, el repo del cliente. Usas `npm`. Este es el caso más común.
+- **Dev de plataforma** — trabajas en `hwp-core/`, los paquetes compartidos. Usas `pnpm`.
+
+Sigue los pasos de tu perfil en el Paso 3.
+
 ---
 
 ## Paso 1 — Instalar las herramientas base
@@ -25,31 +31,14 @@ Node.js es el motor que ejecuta JavaScript fuera del browser. Sin él, nada func
 
 ```powershell
 node --version
-# Debe mostrar algo como: v20.18.1 (o superior)
+# Debe mostrar algo como: v22.x.x (o superior a v20)
 ```
 
 ---
 
-### 1b. pnpm
+### 1b. Git
 
-pnpm es el gestor de dependencias (como npm, pero más rápido y diseñado para monorepos).
-
-```powershell
-# Instalar pnpm globalmente
-npm install -g pnpm
-
-# Verificar
-pnpm --version
-# Debe mostrar: 10.x.x (o superior)
-```
-
-> 🔄 **Equivalente WP:** es como Composer (el gestor de PHP) pero para JavaScript. En WordPress raramente lo usabas directamente, pero aquí lo usarás todos los días.
-
----
-
-### 1c. Git
-
-Git es el sistema de control de versiones. Probablemente ya lo tienes si usabas GitHub Desktop o similar.
+Git es el sistema de control de versiones.
 
 ```powershell
 git --version
@@ -63,9 +52,9 @@ Si no lo tienes:
 
 ---
 
-### 1d. VS Code
+### 1c. VS Code
 
-El editor de código. Si ya tienes otro (WebStorm, Sublime...) puedes usarlo, pero VS Code tiene las mejores extensiones para este proyecto.
+El editor de código.
 
 1. Ve a **https://code.visualstudio.com**
 2. Descarga e instala
@@ -78,12 +67,23 @@ El editor de código. Si ya tienes otro (WebStorm, Sublime...) puedes usarlo, pe
 
 ---
 
+### 1d. pnpm (solo para devs de plataforma)
+
+pnpm es el gestor de dependencias de `hwp-core/`. Los devs de cliente usan npm, que ya viene con Node.js.
+
+```powershell
+# Solo instalar si trabajarás en hwp-core/
+npm install -g pnpm
+pnpm --version
+# Debe mostrar: 10.x.x (o superior)
+```
+
+---
+
 ## Paso 2 — Obtener acceso al repositorio
 
-1. Pide a tu responsable que te dé acceso al repositorio de GitHub del proyecto.
-2. Cuando tengas acceso, verás la URL del repo (algo como `https://github.com/septeo-hospitality/hwp-platform`).
-
-**Configura git con tu nombre y email:**
+1. Pide a tu responsable que te dé acceso a GitHub.
+2. Configura git con tu nombre y email:
 
 ```powershell
 git config --global user.name "Tu Nombre"
@@ -92,72 +92,93 @@ git config --global user.email "tu.email@septeo.com"
 
 ---
 
-## Paso 3 — Clonar el repositorio
+## Paso 3 — Clonar el proyecto
 
 "Clonar" significa descargar el código a tu máquina por primera vez.
 
 ```powershell
-# Navega a la carpeta donde quieres el proyecto
-# Por ejemplo, si usas Laragon:
+# Navega a la carpeta del workspace
 cd C:\laragon\www
-
-# Crea la carpeta del proyecto
 mkdir "Hospitality Web Platform"
 cd "Hospitality Web Platform"
-
-# Descarga el código
-git clone https://github.com/septeo-hospitality/hwp-platform.git hwp-platform
-
-# Entra en la carpeta
-cd hwp-platform
 ```
 
-Verás cómo se descargan todos los ficheros. Puede tardar un minuto.
+### Si eres dev de cliente (`site-{slug}/`)
 
-> 🔄 **Equivalente WP:** es como hacer "Exportar" en WP y luego "Importar" en tu Local. Pero en lugar de un XML, descargas el código fuente completo.
+Los repos de cliente incluyen `hwp-tools` como submódulo. Usa `--recurse-submodules` para clonarlo todo de una vez:
+
+```powershell
+# Reemplaza {slug} con el nombre del cliente (ej: camping-sol, hotel-balneario)
+git clone --recurse-submodules https://github.com/septeo-hospitality/site-{slug}.git site-{slug}
+cd site-{slug}
+```
+
+Verás que se descarga el repo principal y después el submódulo `.hwp-tools/`.
+
+> 🔄 **Equivalente WP:** es como hacer "Exportar" en WP e "Importar" en tu Local, pero para el código fuente.
+
+### Si eres dev de plataforma (`hwp-core/`)
+
+```powershell
+git clone https://github.com/septeo-hospitality/hwp-core.git hwp-core
+cd hwp-core
+```
 
 ---
 
 ## Paso 4 — Instalar las dependencias
 
-Las dependencias son las librerías externas que usa el proyecto (React, Next.js, Tailwind...). No vienen en el repositorio — hay que descargarlas por separado.
+### Dev de cliente
 
 ```powershell
-# Asegúrate de estar en la carpeta hwp-platform/
+# Desde site-{slug}/
+npm install
+```
+
+Esto descarga `@hwp/core-ui`, `@hwp/config`, `next`, `react` y el resto desde el registro npm privado.
+
+> ⚠️ Si `npm install` falla con "404 @hwp/core-ui", necesitas configurar el acceso al registro privado. Pide al responsable las credenciales de GitHub Packages.
+
+### Dev de plataforma
+
+```powershell
+# Desde hwp-core/
 pnpm install
 ```
 
-Verás cómo se descargan cientos de paquetes. Esto puede tardar 2-5 minutos la primera vez. Cuando termine verás algo como:
-
+Verás cómo se descargan cientos de paquetes. Cuando termine:
 ```
-✓ Packages: 847
-✓ Progress: resolved 847, reused 847, downloaded 0, added 847
-Done in 45s
+✓ Packages: 847 — Done in 45s
 ```
 
-> 🔄 **Equivalente WP:** es como hacer click en "Activar todos los plugins" justo después de instalar WordPress. El código de los plugins viene de internet, no del repositorio.
+> 🔄 **Equivalente WP:** es como hacer click en "Activar todos los plugins" justo después de instalar WordPress.
 
 ---
 
 ## Paso 5 — Levantar el proyecto
 
+### Dev de cliente
+
 ```powershell
-pnpm dev
+# Desde site-{slug}/
+npm run dev
 ```
 
 Espera hasta ver:
-
 ```
-▲ Next.js 14.2.35
+▲ Next.js 15.x.x
   - Local:   http://localhost:3000
-
-✓ Starting...
-✓ Ready in 6s
+✓ Ready in 4s
 ```
 
-Abre tu browser y ve a **http://localhost:3000**.
+Abre tu browser en **http://localhost:3000**.
 
-Si ves una página con colores verdes y un título que dice "HWP token probe", ¡felicidades! El proyecto está funcionando.
+### Dev de plataforma
+
+```powershell
+# Desde hwp-core/ — levanta apps/site-demo/
+pnpm dev
+```
 
 > 🔄 **Equivalente WP:** es como hacer click en "Start" en Local y que el site aparezca en el browser.
 
@@ -167,24 +188,21 @@ Si ves una página con colores verdes y un título que dice "HWP token probe", �
 
 ### Prueba 1: TypeScript no tiene errores
 
-Abre una **segunda terminal** (sin cerrar la del dev server) y ejecuta:
+Abre una **segunda terminal** (sin cerrar la del dev server):
 
 ```powershell
+# Dev de cliente
+npm run typecheck
+
+# Dev de plataforma
 pnpm typecheck
 ```
 
-Si ves `Tasks: 1 successful, X total` sin errores en rojo, todo está bien.
-
-> ⚠️ Es normal que aparezca un error en `@hwp/config` sobre `@hwp/core-ui` — es un stub temporal de la fase de bootstrap. No es un problema tuyo.
+Si ves `Tasks: X successful` sin errores en rojo, todo está bien.
 
 ### Prueba 2: Los colores se ven correctos
 
-En el browser (http://localhost:3000) deberías ver:
-- Una barra de navegación verde oscuro
-- Swatches de colores
-- Ejemplos de tipografía con Playfair Display y Montserrat
-
-Si los colores se ven bien y las fuentes cargan, el pipeline de tokens funciona correctamente.
+En el browser deberías ver los colores del cliente y las fuentes correctas cargadas.
 
 ---
 
@@ -192,55 +210,68 @@ Si los colores se ven bien y las fuentes cargan, el pipeline de tokens funciona 
 
 Para confirmar que puedes editar el proyecto, haz un cambio pequeño:
 
-1. Abre `apps/site-demo/src/theme/tokens.json` en VS Code
-2. Cambia el valor de `"primary"` a cualquier color hex, por ejemplo `"#2D5A27"` (verde bosque)
+1. Abre `src/theme/tokens.json` en VS Code
+2. Cambia el valor de `primary` a cualquier color hex, por ejemplo `"#2D5A27"` (verde bosque)
 3. Guarda el fichero (`Ctrl+S`)
-4. Mira el browser — la barra de navegación debería cambiar de color automáticamente
+4. Mira el browser — el color principal debería cambiar automáticamente
 
-Deshazte del cambio cuando lo hayas probado:
+Deshazte del cambio:
 
 ```powershell
-git restore apps/site-demo/src/theme/tokens.json
+git restore src/theme/tokens.json
 ```
 
 ---
 
-## Dónde vive cada cosa — la separación clave de DEC-015
+## Dónde vive cada cosa — la separación clave (DEC-015 + DEC-017)
 
-Después de la migración DEC-015, el código de bloques está dividido en dos lugares. Es importante entender esta separación desde el primer día:
+El código está dividido entre dos repos. Es importante entender esta separación desde el primer día:
 
 | Qué | Dónde vive | Quién lo toca |
 |---|---|---|
-| **Base-blocks** (bloques de referencia de la plataforma) | `packages/core-ui/src/base-blocks/` | Dev de plataforma |
-| **Schemas Zod compartidos** | `packages/core-ui/src/schemas/` | Dev de plataforma |
-| **Tipos TypeScript compartidos** | `packages/core-ui/src/types/` | Dev de plataforma |
-| **Bloques de cliente** (custom o re-exports) | `site-{slug}/src/blocks/` | Dev de cliente |
-| **Registry de bloques del cliente** | `site-{slug}/src/blocks/registry.ts` | Dev de cliente |
-| **CSS del site** | `site-{slug}/src/app/globals.css` | Dev de cliente |
+| **Base-blocks** (bloques de referencia) | `hwp-core/packages/core-ui/src/base-blocks/` | Dev de plataforma |
+| **Schemas Zod compartidos** | `hwp-core/packages/core-ui/src/schemas/` | Dev de plataforma |
+| **Adapters** (booking, map, reviews) | `hwp-core/packages/core-ui/src/adapters/` | Dev de plataforma |
+| **Bloques del cliente** | `src/blocks/` | Dev de cliente |
+| **Registry del cliente** | `src/blocks/registry.ts` | Dev de cliente |
+| **Tokens del cliente** | `src/theme/tokens.json` | Dev de cliente + diseñador |
+| **CSS del site** | `src/app/globals.css` | Dev de cliente |
 
 > **Regla CSS:** hay **un único `globals.css` por cliente** y **cero CSS por bloque**. Nunca se añade CSS dentro de una carpeta de bloque.
 
 ### Los tres niveles de uso de un bloque en un cliente
 
-Cuando un cliente necesita un bloque, puede elegir el nivel de personalización:
-
 ```
 Level 1 — Re-export: usa el base-block tal cual
-  src/blocks/HeroBlock/index.ts → re-exporta desde @hwp/core-ui/base-blocks
+  src/blocks/HeroBlock/HeroBlock.tsx
+  → export { HeroBlock } from '@hwp/core-ui/base-blocks'
 
 Level 2 — Slots: rellena zonas predefinidas del base-block
-  src/blocks/HeroBlock/index.ts → importa HeroBlock + rellena HeroBlock.slots.ts
+  src/blocks/HeroBlock/HeroBlock.tsx
+  → <BaseHeroBlock {...props} CtaSlot={MyBookingCta} />
 
 Level 3 — Custom: componente nuevo completo (DOM propio)
-  src/blocks/HeroBlock/HeroBlock.tsx → componente React desde cero
+  src/blocks/HeroBlock/HeroBlock.tsx
+  → JSX propio, solo importa tipos de @hwp/core-ui/schemas
 ```
-
-Para desarrolladores de plataforma (que trabajan en `packages/`): añadir funcionalidad en `base-blocks/`.
-Para desarrolladores de cliente (que trabajan en `apps/site-{slug}/`): trabajar en `src/blocks/`.
 
 ---
 
-## Paso 8 — Leer a continuación
+## Paso 8 — Actualizar el submódulo hwp-tools
+
+Si ves mensajes de que `.hwp-tools` está desactualizado:
+
+```powershell
+cd .hwp-tools
+git pull origin main
+cd ..
+git add .hwp-tools
+git commit -m "chore: update hwp-tools"
+```
+
+---
+
+## Paso 9 — Leer a continuación
 
 Ahora que el proyecto funciona, lee en este orden:
 
@@ -254,30 +285,39 @@ Cuando tengas dudas sobre términos técnicos, consulta el **[📖 Glosario](./g
 
 ## Si algo va mal
 
-### "command not found: pnpm"
-Node.js no está instalado o pnpm no se instaló correctamente. Vuelve al Paso 1.
+### "404 @hwp/core-ui" o "registry not found"
+
+Necesitas acceso al registro npm privado (GitHub Packages). Pide las credenciales a tu responsable.
+
+### "command not found: npm" o "node: No such file"
+
+Node.js no está instalado. Vuelve al Paso 1a.
 
 ### "Port 3000 is already in use"
-Otro proceso usa el puerto 3000. En PowerShell:
+
 ```powershell
 netstat -ano | findstr :3000
-# Anota el número PID de la línea que dice LISTENING
+# Anota el PID de la línea que dice LISTENING
 Stop-Process -Id {ese-PID} -Force
-# Vuelve a ejecutar pnpm dev
+# Vuelve a ejecutar npm run dev
+```
+
+### "Submodule '.hwp-tools' not initialized"
+
+```powershell
+git submodule update --init --recursive
 ```
 
 ### "Module not found" o errores de TypeScript extraños
-Prueba reinstalar las dependencias:
+
 ```powershell
 # Eliminar la caché y reinstalar
-pnpm install --force
+npm install --force  # o pnpm install --force en hwp-core
 ```
 
-### No aparece ninguna página en http://localhost:3000
-Comprueba la terminal donde ejecutaste `pnpm dev`. Si hay un error en rojo, cópialo y compártelo con el equipo (o pregunta a Claude Code).
-
 ### Cualquier otra cosa
-Escríbelo en el canal del equipo o pregunta directamente a Claude Code:
+
+Pregunta directamente a Claude Code:
 ```
 Tengo este error en el setup inicial: [pega el error]
 ```
@@ -288,10 +328,10 @@ Tengo este error en el setup inicial: [pega el error]
 
 El proceso completo es equivalente a:
 
-1. Instalar Local by Flywheel → **instalar Node + pnpm**
-2. Crear un nuevo site en Local → **git clone**
-3. Instalar los plugins → **pnpm install**
-4. Hacer click en "Start" → **pnpm dev**
+1. Instalar Local by Flywheel → **instalar Node + Git**
+2. Crear un nuevo site en Local → **git clone --recurse-submodules**
+3. Instalar los plugins → **npm install**
+4. Hacer click en "Start" → **npm run dev**
 5. Abrir el site → **http://localhost:3000**
 
 Misma lógica, herramientas diferentes.

@@ -8,7 +8,7 @@
 
 ### Base-block
 
-A reference block implementation that lives in `packages/core-ui/src/base-blocks/` and is shipped as part of the `@hwp/core-ui` package (accessible via the `@hwp/core-ui/base-blocks` subpath export). Base-blocks are the canonical, platform-maintained implementations — they are not meant to be edited by client developers. Instead, client sites can re-export them unchanged (Level 1), extend them via slots (Level 2), or replace them with a fully custom component (Level 3) in their own `src/blocks/` folder.
+A reference block implementation that lives in `hwp-core/packages/core-ui/src/base-blocks/` and is shipped as part of the `@hwp/core-ui` package (accessible via the `@hwp/core-ui/base-blocks` subpath export). Base-blocks are the canonical, platform-maintained implementations — they are not meant to be edited by client developers. Instead, client sites can re-export them unchanged (Level 1), extend them via slots (Level 2), or replace them with a fully custom component (Level 3) in their own `src/blocks/` folder.
 
 Before DEC-015, these were called simply "blocks" and lived in `packages/core-ui/src/blocks/`. The rename to `base-blocks` signals their new role as a starting point, not a hard constraint.
 
@@ -69,7 +69,7 @@ export const clientBlocks = { HeroBlock };
 ---
 
 ### Client (Cliente HWP)
-Un camping u hotel que tiene su propio site en la plataforma. Cada cliente tiene su `apps/site-{slug}/` con sus colores, fuentes y configuración. El mismo código de bloques sirve para todos.
+Un camping u hotel que tiene su propio site en la plataforma. Cada cliente tiene su `site-{slug}/` — un repo independiente con sus colores, fuentes y configuración. El mismo código de bloques sirve para todos.
 
 🔄 **WP:** como una instalación de WordPress por cliente, pero todos comparten el mismo tema padre y plugins.
 
@@ -105,7 +105,7 @@ The `composition-rules/` module inside `@hwp/core-ui` that defines the constrain
 ---
 
 ### Composition (Composición)
-Una página o sección específica de un cliente que ensambla bloques de `@hwp/core-ui`. Vive en `apps/site-{cliente}/src/compositions/`. Es el punto donde se personalizan los bloques para ese cliente concreto.
+Una página o sección específica de un cliente que ensambla bloques de `@hwp/core-ui`. Vive en `src/compositions/` del repo del cliente (`site-{slug}/`). Es el punto donde se personalizan los bloques para ese cliente concreto.
 
 🔄 **WP:** como un tema hijo que sobreescribe templates del tema padre, pero en React.
 
@@ -129,7 +129,7 @@ Una librería para gestionar variantes de estilos en componentes React. Permite 
 
 ### Design language
 
-A document at `docs/clients/{slug}/design-language.md` that captures the visual patterns of a client's design, beyond the raw token values. Where `tokens.json` records the _values_ (colors, fonts, spacings), the design language records _how_ those values are applied: card style (shadow vs border, corner radius, padding), section spacing density, typography hierarchy (eyebrow → h2 → body), interaction style (hover effects, animation approach), and visual density.
+A document at `docs/design-language.md` in the client repo that captures the visual patterns of a client's design, beyond the raw token values. Where `tokens.json` records the _values_ (colors, fonts, spacings), the design language records _how_ those values are applied: card style (shadow vs border, corner radius, padding), section spacing density, typography hierarchy (eyebrow → h2 → body), interaction style (hover effects, animation approach), and visual density.
 
 Generated as a DRAFT by `/import-figma` from the Figma Make components, then reviewed and approved by the designer or a senior developer. Once approved, it becomes the **visual contract for the client** — any block built without a Figma reference must follow these patterns.
 
@@ -234,7 +234,7 @@ Ver **GEO**. Prácticas para que el contenido sea legible y citable por Large La
 
 ### Mode B
 
-The design-proposal operating mode of the `ux-ui-analyst` agent, used when there is no Figma reference for the block being worked on. In Mode B, the agent reads `docs/clients/{slug}/design-language.md`, the client's `tokens.json`, and 2–3 already-implemented blocks, then produces a **visual specification** describing how the new block should look and behave — layout, spacing, typography, container style, hover effects, responsive behavior, and slot recommendations.
+The design-proposal operating mode of the `ux-ui-analyst` agent, used when there is no Figma reference for the block being worked on. In Mode B, the agent reads `docs/design-language.md` (in the client repo), the client's `src/theme/tokens.json`, and 2–3 already-implemented blocks, then produces a **visual specification** describing how the new block should look and behave — layout, spacing, typography, container style, hover effects, responsive behavior, and slot recommendations.
 
 Mode B never produces code. It produces a spec that feeds into the SPECBOOT `/propose` phase. Contrast with Mode A (validation against Figma). Introduced in DEC-016.
 
@@ -243,9 +243,9 @@ Mode B never produces code. It produces a spec that feeds into the SPECBOOT `/pr
 ---
 
 ### Monorepo
-Un único repositorio de git que contiene múltiples proyectos relacionados: los packages compartidos (`packages/`) y los sites de los clientes (`apps/`). Turborepo gestiona la compilación en el orden correcto.
+Un único repositorio de git que contiene múltiples proyectos relacionados. En HWP, `hwp-core/` es el único monorepo real: contiene `packages/core-ui` y `packages/config` gestionados con Turborepo + pnpm. Los repos de cliente (`site-{slug}/`) son repos independientes — no son un monorepo.
 
-🔄 **WP:** imagina tener el tema padre, todos los temas hijos (un por cliente) y todos los plugins en el mismo repositorio de git. Esto es exactamente un monorepo.
+🔄 **WP:** imagina tener el tema padre y todos los plugins en un repositorio de git (eso es `hwp-core/`), y cada tema hijo en su propio repositorio separado (eso es `site-{slug}/`). El monorepo de plataforma + repos independientes por cliente es la estructura de DEC-017.
 
 ---
 
@@ -304,16 +304,18 @@ La secuencia de cuatro fases que transforma una user story en código mergeado y
 ---
 
 ### Preset (Tailwind Preset)
-Una configuración de Tailwind reutilizable. La función `createHwpPreset(tokens)` en `@hwp/config` toma los tokens del cliente y devuelve una configuración de Tailwind que define todas las clases de color, fuentes y espaciado.
+En Tailwind v4, la configuración base de la plataforma se distribuye como `@hwp/config/theme.css` — un fichero CSS que define el `@theme {}` base con los tokens globales y semánticos. El cliente lo importa en `globals.css` con `@import "@hwp/config/theme.css"` y luego sobreescribe solo los tokens que difieren en su propio `@theme {}`.
 
-🔄 **WP:** como tener un `functions.php` que genera automáticamente las variables CSS correctas para cada cliente.
+> Nota: en versiones anteriores con Tailwind v3 existía `createHwpPreset(tokens)` en `@hwp/config/tailwind-preset`. Eso es la API v3 — **no se usa en proyectos nuevos**.
+
+🔄 **WP:** como tener un `functions.php` en el tema padre que genera automáticamente las variables CSS base, y el tema hijo sobreescribe las que necesita.
 
 ---
 
 ### pnpm
-El gestor de paquetes que usamos. Más rápido que npm y mejor para monorepos porque no duplica las dependencias entre proyectos.
+El gestor de paquetes usado en `hwp-core/` (el monorepo de packages). Más rápido que npm y mejor para monorepos porque no duplica las dependencias entre proyectos. Los repos de cliente (`site-{slug}/`) usan **npm** estándar.
 
-🔄 **WP:** como npm o Composer, pero más eficiente. Instala `react`, `next`, `tailwindcss` y el resto de librerías externas.
+🔄 **WP:** como npm o Composer, pero más eficiente. Instala `react`, `next`, `tailwindcss` y el resto de librerías externas. Si trabajas en el monorepo de plataforma usas pnpm; si trabajas en un repo de cliente usas npm.
 
 ---
 
@@ -454,7 +456,7 @@ global → semantic → brand
 
 1. **Global tokens** — platform-wide constants (e.g. a palette of raw hex values) in `@hwp/core-ui`.
 2. **Semantic tokens** — role-based aliases (e.g. `primary`, `surface`, `foreground`) that reference global tokens.
-3. **Brand tokens** — client-specific overrides declared in `apps/site-{slug}/src/theme/tokens.json` that set the final values for their semantic roles.
+3. **Brand tokens** — client-specific overrides declared via `@theme {}` in `src/app/globals.css` (Tailwind v4 CSS-first) that set the final values for their semantic roles.
 
 The cascade runs entirely at build time — Tailwind JIT generates the CSS using the resolved values. There is no runtime token switching (except for seasonized clients per DEC-005, which swap token files between seasons).
 
@@ -470,7 +472,7 @@ Un valor de diseño con nombre: un color (`"primary": "#1A4A52"`), una fuente (`
 ---
 
 ### Turborepo
-El orquestador del monorepo. Sabe en qué orden compilar los packages (primero `@hwp/core-ui`, luego `@hwp/config`, luego `apps/`), cachea los resultados para no recompilar lo que no cambió, y permite ejecutar `pnpm dev` o `pnpm build` para todos los proyectos a la vez.
+El orquestador del monorepo `hwp-core/`. Sabe en qué orden compilar los packages (primero `@hwp/config`, luego `@hwp/core-ui`, luego `apps/site-demo/`), cachea los resultados para no recompilar lo que no cambió, y permite ejecutar `pnpm dev` o `pnpm build` para todos los proyectos a la vez. Solo vive en `hwp-core/` — los repos de cliente no lo usan.
 
 🔄 **WP:** no tiene equivalente directo en WordPress. Imagina un Makefile inteligente que sabe qué plugins compilar antes de compilar el tema, y que no repite trabajo innecesario.
 
@@ -487,7 +489,7 @@ JavaScript con tipos. En lugar de `let color = "rojo"`, escribes `let color: str
 
 ### Visual spec
 
-A document at `docs/clients/{slug}/block-specs/{BlockName}.visual-spec.md` describing how a specific block should look and behave for a specific client, written when no Figma design exists for that block. Generated by the `/design-block` skill via `ux-ui-analyst` Mode B. Contains: layout (grid/flex, columns, alignment), spacing tokens, typography hierarchy, container style, hover effects, responsive behavior, and slot recommendations.
+A document at `docs/block-specs/{BlockName}.visual-spec.md` (in the client repo) describing how a specific block should look and behave for a specific client, written when no Figma design exists for that block. Generated by the `/design-block` skill via `ux-ui-analyst` Mode B. Contains: layout (grid/flex, columns, alignment), spacing tokens, typography hierarchy, container style, hover effects, responsive behavior, and slot recommendations.
 
 The visual spec is a **human-approved checkpoint** between the AI's design proposal and the implementer's work. It begins as a DRAFT — the human reviews it and removes the DRAFT marker when satisfied. The `planner` agent reads it as the visual guide during `/propose`, the same way it would read a Figma reference.
 
@@ -512,9 +514,11 @@ El hosting donde se despliegan los sites de cliente. Cada `git push` a la rama `
 ---
 
 ### Workspace (pnpm Workspace)
-La configuración que le dice a pnpm que `hwp-platform/` contiene múltiples proyectos relacionados (`apps/*` y `packages/*`). Permite instalar dependencias compartidas una sola vez y referenciar packages locales con `@hwp/core-ui` sin publicarlos a npm.
+La configuración que le dice a pnpm que `hwp-core/` contiene múltiples proyectos relacionados (`packages/*` y `apps/*`). Permite instalar dependencias compartidas una sola vez y referenciar packages locales con `@hwp/core-ui` sin publicarlos al registro externo. Vive en `hwp-core/pnpm-workspace.yaml`.
 
-🔄 **WP:** no tiene equivalente directo. Es la magia que hace que `import { HeroBlock } from '@hwp/core-ui'` funcione sin tener que publicar `@hwp/core-ui` a internet.
+Los repos de cliente (`site-{slug}/`) no son workspaces de pnpm — consumen `@hwp/core-ui` como package publicado en el registro privado.
+
+🔄 **WP:** no tiene equivalente directo. En el monorepo de plataforma es la magia que hace que `import { HeroBlock } from '@hwp/core-ui'` funcione durante el desarrollo sin publicar a internet. En el repo de cliente, `@hwp/core-ui` viene del registro privado como cualquier otro package npm.
 
 ---
 
