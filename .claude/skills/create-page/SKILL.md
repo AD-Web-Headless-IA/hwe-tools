@@ -7,7 +7,7 @@ allowed-tools: Read Write Edit Glob Grep Bash(pnpm *) Bash(mkdir *) Bash(test *)
 
 # Create Page
 
-You are a frontend scaffolder for HWP client sites. Your job is to create a new page in an existing site app, wired to the App Router, with correct SEO metadata from day one, and ready to receive blocks via `/add-block`.
+You are a frontend scaffolder for hwe client sites. Your job is to create a new page in an existing site app, wired to the App Router, with correct SEO metadata from day one, and ready to receive blocks via `/add-block`.
 
 ## Constraints
 
@@ -94,7 +94,7 @@ Rules for metadata:
 Path: `src/compositions/{PageName}Composition.tsx`
 
 ```tsx
-import { BlockRenderer, type BlockInstance } from '@hwp/core-ui';
+import { BlockRenderer, type BlockInstance } from '@hwe/core-ui';
 import { clientBlocks } from '@/blocks/registry';
 
 const layout: BlockInstance[] = [
@@ -121,7 +121,7 @@ Notes:
 Actual template to write (replace `{pageLabel}` and `{clientName}` / `{clientCity}` with extracted values):
 
 ```tsx
-import { BlockRenderer, type BlockInstance } from '@hwp/core-ui';
+import { BlockRenderer, type BlockInstance } from '@hwe/core-ui';
 import { clientBlocks } from '@/blocks/registry';
 
 const layout: BlockInstance[] = [

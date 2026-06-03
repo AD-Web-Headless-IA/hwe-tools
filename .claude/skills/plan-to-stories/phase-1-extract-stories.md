@@ -19,7 +19,7 @@ Read the plan and extract a comprehensive list of user stories. Each story must 
 1. **One capability per story.** If a feature involves a new API endpoint, a new data model, AND a new background job, consider whether they can be delivered independently. If yes, split them.
 2. **Respect dependency order.** Stories that are prerequisites for others must be identified. Call out dependencies explicitly.
 3. **Infrastructure and scaffolding stories are valid.** Setting up a new module, adding configuration, creating an abstraction layer, or establishing a provider pattern — these are real stories that deserve their own scope.
-4. **Keep service boundaries visible.** When the plan spans multiple services or components, extract stories per service boundary and note the contract between them. For HWP, respect the four bounded contexts: Booking, Content, Tenant, AI.
+4. **Keep service boundaries visible.** When the plan spans multiple services or components, extract stories per service boundary and note the contract between them. For hwe, respect the four bounded contexts: Booking, Content, Tenant, AI.
 5. **Don't merge unrelated concerns.** Two features that happen to touch the same file but solve different problems are separate stories.
 6. **Include migration and coexistence stories.** If the plan involves replacing or running alongside an existing system, feature flags, dual-provider support, and gradual rollout are their own stories.
 7. **Don't skip edge cases.** If the plan mentions edge cases, error scenarios, or special conditions, they should appear in the relevant story's acceptance criteria — or as their own story if sufficiently complex.
@@ -43,7 +43,7 @@ Return a single markdown document. For each story use **exactly** this structure
 
 #### Scope
 
-- **Components affected:** {list packages/@hwp/* or apps/* directories}
+- **Components affected:** {list packages/@hwe/* or apps/* directories}
 - **Bounded context:** {Booking | Content | Tenant | AI | Cross-cutting}
 - **External APIs involved:** {list or "None"}
 - **Key business rules:** {1–3 bullet summary of the most critical rules for this story}

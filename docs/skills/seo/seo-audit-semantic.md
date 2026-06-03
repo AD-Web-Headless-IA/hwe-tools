@@ -36,42 +36,42 @@ Assumes the dev server is running at `http://localhost:3000`. Adjust the URL for
 
 **Step 1 — Fetch the rendered HTML**
 ```bash
-curl -s http://localhost:3000 -o /tmp/hwp-page.html
+curl -s http://localhost:3000 -o /tmp/hwe-page.html
 ```
 
 **Step 2 — Count H1 elements (must be exactly 1)**
 ```bash
-grep -c '<h1' /tmp/hwp-page.html
+grep -c '<h1' /tmp/hwe-page.html
 ```
 Expected: `1`. Zero = Blocker (no page heading). Two or more = Blocker (duplicate H1).
 
 **Step 3 — Extract all heading tags and inspect hierarchy**
 ```bash
-grep -oE '<h[1-6][^>]*>' /tmp/hwp-page.html
+grep -oE '<h[1-6][^>]*>' /tmp/hwe-page.html
 ```
 Verify: sequence starts at `h1`, each level increments by one. A jump from `h2` to `h4` is a Blocker.
 
 **Step 4 — Verify landmark elements are present**
 ```bash
-grep -oE '<(header|nav|main|section|article|footer)[^>]*>' /tmp/hwp-page.html
+grep -oE '<(header|nav|main|section|article|footer)[^>]*>' /tmp/hwe-page.html
 ```
 Required per page: at least one `<header>`, one `<nav>`, one `<main>`, one `<footer>`. Flag any missing landmark as a Blocker.
 
 **Step 5 — Check every `<nav>` has `aria-label`**
 ```bash
-grep -oE '<nav[^>]*>' /tmp/hwp-page.html
+grep -oE '<nav[^>]*>' /tmp/hwe-page.html
 ```
 Every `<nav>` must include `aria-label="..."` (e.g. `aria-label="Primary navigation"`, `aria-label="Footer navigation"`). Missing `aria-label` = Major.
 
 **Step 6 — Check every `<section>` has `aria-labelledby` or `aria-label`**
 ```bash
-grep -oE '<section[^>]*>' /tmp/hwp-page.html
+grep -oE '<section[^>]*>' /tmp/hwe-page.html
 ```
 Every `<section>` must include either `aria-labelledby="{heading-id}"` or `aria-label="..."`. Missing = Major.
 
 **Step 7 — Detect no-div violations**
 ```bash
-grep -oE '<div[^>]*class="[^"]*"' /tmp/hwp-page.html | grep -iE 'nav|header|footer|section|card|address|review|date'
+grep -oE '<div[^>]*class="[^"]*"' /tmp/hwe-page.html | grep -iE 'nav|header|footer|section|card|address|review|date'
 ```
 Any match indicates a `<div>` used where a semantic element applies. Cross-reference `docs/specs/seo/semantic-html.md §The no-div rule` for the correct replacement.
 
@@ -126,7 +126,7 @@ Read `docs/specs/seo/semantic-html.md §Per-block semantic requirements`. For th
 ## Fix flow
 
 1. **implementer** reads the findings and fixes the JSX in the block file.
-2. Runs the test suite: `pnpm test --filter @hwp/core-ui`.
+2. Runs the test suite: `pnpm test --filter @hwe/core-ui`.
 3. **seo-geo-specialist** re-runs Steps 2–8 after the fix is pushed.
 4. Green verdict required for the block to advance to `beta`.
 5. If the fix requires changing a block's contract (e.g. adding a new required prop for `aria-labelledby`), escalate to **architect** first.
@@ -141,7 +141,7 @@ Como la checklist de accesibilidad de Yoast antes de publicar en WordPress, pero
 |---|---|
 | Un solo H1 por página | Yoast "Multiple H1 detected" warning |
 | `<nav>` con `aria-label` | Menú accesible — sin plugin equivalente en WP |
-| `<section>` con `aria-labelledby` | Sin equivalente — regla nueva en HWP |
+| `<section>` con `aria-labelledby` | Sin equivalente — regla nueva en hwe |
 | No divs donde haya semántica | Tema bien codificado vs plantilla genérica |
 
 **Por qué importa:** Google entiende la página a través de los elementos semánticos. Un `<main>` le indica dónde está el contenido principal. Un `<nav>` le dice que hay navegación. Sin estos elementos, el crawler adivina — y penaliza cuando adivina mal.

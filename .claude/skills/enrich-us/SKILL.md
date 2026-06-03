@@ -15,15 +15,15 @@ Read the story file at `$0`. If the path doesn't exist, stop and tell the user.
 
 ## Step 2 — Discover the project structure
 
-Build a mental map of the HWP project:
+Build a mental map of the hwe project:
 
 1. List the top-level directory structure.
-2. Look for documentation directories. The canonical locations for HWP are:
+2. Look for documentation directories. The canonical locations for hwe are:
    - `docs/` — system architecture (`architecture.md`, `architecture-all-options.md`)
    - `docs/architecture/` — project context (`briefing.md`, `decisions.md`, and any `clients/`)
    - `docs/` — development standards (`specs/`, `skills/`)
 3. Read `docs/architecture/briefing.md` first — it is the project brief. Then scan `docs/architecture/architecture.md` table of contents.
-4. Identify source code directories under `packages/@hwp/*` and `apps/*` (these may not exist yet in early phases).
+4. Identify source code directories under `packages/@hwe/*` and `apps/*` (these may not exist yet in early phases).
 5. Summarize your findings — you will pass this to the sub-agent.
 
 ## Step 3 — Execute enrichment
@@ -47,7 +47,7 @@ Build a single string by concatenating these three parts, separated by `---` on 
 > 1. START by reading the project brief at `docs/architecture/briefing.md` and the architecture index at `docs/architecture/architecture.md`.
 > 2. Read the documentation files listed in this story's "Documentation Pointers" section.
 > 3. If this story depends on other stories, look for their enriched specs in `docs/plans/*/stories/`.
-> 4. LOOK AT THE ACTUAL CODE. Find the modules/files related to this story using Grep and Glob. Read existing implementations of similar features to understand patterns and conventions. Check `packages/@hwp/*` for shared abstractions and `apps/*` for site-level code. Note naming conventions, error handling patterns, test file structure.
+> 4. LOOK AT THE ACTUAL CODE. Find the modules/files related to this story using Grep and Glob. Read existing implementations of similar features to understand patterns and conventions. Check `packages/@hwe/*` for shared abstractions and `apps/*` for site-level code. Note naming conventions, error handling patterns, test file structure.
 >
 > Your specification MUST reference specific file paths, function names, and patterns you found in the codebase. Do not guess — read the code first.
 

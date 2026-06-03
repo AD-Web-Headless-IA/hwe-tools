@@ -77,9 +77,9 @@ graph TD
 
 **En WordPress:** cuando construyes el site de un camping, lo haces todo tú — configuras el plugin de reservas, ajustas el theme, optimizas el SEO, revisas que funcione en móvil, compruebas el RGPD.
 
-**En HWP con agentes:** tienes un equipo de especialistas que convocas según la tarea. Cada uno sabe exactamente lo que tiene que hacer y no se mete en lo de los demás.
+**En hwe con agentes:** tienes un equipo de especialistas que convocas según la tarea. Cada uno sabe exactamente lo que tiene que hacer y no se mete en lo de los demás.
 
-| En WordPress... | En HWP con agentes... |
+| En WordPress... | En hwe con agentes... |
 |---|---|
 | Tú solo diseñas cómo implementar algo | `planner` diseña la solución técnica |
 | Tú solo escribes el código | `implementer` escribe el código TDD-first |

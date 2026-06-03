@@ -43,7 +43,7 @@ Run:
 
 ## Steps
 
-All commands run from `hwp-platform/`.
+All commands run from `hwe-platform/`.
 
 **Step 1 — Scan for common secret patterns in source code**
 ```bash
@@ -85,7 +85,7 @@ Review each match manually:
 
 **Step 5 — Verify `.env` files are gitignored**
 ```bash
-cat hwp-platform/.gitignore | grep -E "\.env"
+cat hwe-platform/.gitignore | grep -E "\.env"
 ```
 Expected: `.env`, `.env.local`, `.env.*.local` are listed.
 - Any `.env` variant NOT in `.gitignore` → **Blocker**
@@ -170,7 +170,7 @@ A site with any **Blocker** secrets finding cannot be deployed under any circums
 
 ## In simple terms
 
-Como revisar que el `wp-config.php` no está en el repositorio de git — en WordPress ese fichero tiene la contraseña de la base de datos y nunca debe commitearse. En HWP, todas las claves van en variables de entorno de Vercel, nunca en el código.
+Como revisar que el `wp-config.php` no está en el repositorio de git — en WordPress ese fichero tiene la contraseña de la base de datos y nunca debe commitearse. En hwe, todas las claves van en variables de entorno de Vercel, nunca en el código.
 
 **WordPress equivalent:** `wp-config.php` nunca en git. `wp-config-sample.php` es el equivalente de `.env.example` — tiene los nombres de las variables pero sin valores reales.
 

@@ -1,7 +1,7 @@
 # Security standards
 
-> Security and data-protection rules for every HWP site. Extends [`base-standards.md`](../general/base-standards.md).
-> HWP operates in the EU (Spain + France). RGPD compliance is a legal obligation — treat every violation as a blocker, not a warning.
+> Security and data-protection rules for every hwe site. Extends [`base-standards.md`](../general/base-standards.md).
+> hwe operates in the EU (Spain + France). RGPD compliance is a legal obligation — treat every violation as a blocker, not a warning.
 > The `security-specialist` agent uses this file as its primary reference when producing audit reports.
 
 ## RGPD / Personal data
@@ -130,7 +130,7 @@ If a secret is accidentally committed, rotate it immediately — do not rely on 
 
 ## Prompt injection (AI integrations)
 
-HWP uses the Claude API for content generation and booking assistance. Prompt injection is a class of attack where malicious input in external data manipulates LLM behavior.
+hwe uses the Claude API for content generation and booking assistance. Prompt injection is a class of attack where malicious input in external data manipulates LLM behavior.
 
 ### Core rule: external input is data, never instructions
 

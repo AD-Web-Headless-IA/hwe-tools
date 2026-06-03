@@ -8,7 +8,7 @@ Empieza aquí — en este orden:
 
 1. **[🚀 Tu primer día](./guides/first-day-setup.md)** — instala las herramientas y levanta el proyecto
 2. **[🗺️ Mapa del proyecto](./guides/project-map.md)** — entiende dónde vive cada cosa
-3. **[🔄 Diccionario WordPress → HWP](./guides/wordpress-to-hwp.md)** — traduce lo que ya sabes
+3. **[🔄 Diccionario WordPress → hwe](./guides/wordpress-to-hwe.md)** — traduce lo que ya sabes
 4. **[🗓️ Tu día a día](./guides/daily-workflow.md)** — el flujo de trabajo diario
 5. **[📖 Glosario](./guides/glossary.md)** — cuando encuentres un término que no reconoces
 6. **[🤖 Agentes](./specs/ai/agent-directory.md)** — qué agentes hay y cuándo convocarlos
@@ -113,7 +113,7 @@ docs/
 |---|---|---|
 | `guides/first-day-setup.md` | Step-by-step onboarding for a new developer | Day 1 setup |
 | `guides/project-map.md` | Visual map of the full project structure | Orientation, finding files |
-| `guides/wordpress-to-hwp.md` | Concept translation dictionary WP → HWP | Onboarding from WP background |
+| `guides/wordpress-to-hwe.md` | Concept translation dictionary WP → hwe | Onboarding from WP background |
 | `guides/daily-workflow.md` | Day-to-day commands and patterns | Reference during normal work |
 | `guides/glossary.md` | Plain-language definitions of all technical terms | When a term is unfamiliar |
 | `architecture/architecture.md` | The constitution — full system architecture (~4.2k lines, ~50k tokens) | Only when asked, or when reading a specific section by number |
@@ -122,7 +122,7 @@ docs/
 | `architecture/domain-model.md` | Multi-tenant model — types, features, accommodation entity | **Always** when classifying Figma modules, designing blocks/templates, modeling Payload schemas, or wiring routes |
 | `architecture/decisions.md` | DEC-001 → latest | Before proposing structural changes — grep for related DECs first |
 | `contracts/frontend/structure.md` | Monorepo layout, naming, imports | Scaffolding packages/apps, moving files |
-| `contracts/frontend/block-contract.md` | How to build a `@hwp/core-ui` block — the *what* (files, exports, registry) | New block, modifying a block, wiring BlockRenderer |
+| `contracts/frontend/block-contract.md` | How to build a `@hwe/core-ui` block — the *what* (files, exports, registry) | New block, modifying a block, wiring BlockRenderer |
 | `specs/frontend/block-architecture.md` | 4-layer block system — the *how* (content schema, variants, config schema, adapter). SEO/security gates. Lifecycle. | **Always** for any block task — decides which layers to build before writing a line of code |
 | `contracts/frontend/template-contract.md` | How to build a page template (3-layer schema) | New template, extending a template per client |
 | `contracts/frontend/theme-tokens.md` | Figma → tokens.json → Tailwind preset | New client theme, token issues, designer onboarding |
@@ -172,7 +172,7 @@ These are short. **Every agent working on this repo loads them as system context
 
 Concrete recipes — copy the load list for the task at hand. The token budget is approximate.
 
-### Scaffold a new block in `@hwp/core-ui` or in a client site
+### Scaffold a new block in `@hwe/core-ui` or in a client site
 
 ```
 Always:   docs/specs/general/base-standards.md
@@ -184,7 +184,7 @@ On demand: docs/contracts/frontend/block-contract.md   (mandatory files, exports
            docs/specs/security/security-standards.md   (if block has user inputs or connects to an adapter)
 ```
 
-> **DEC-015 + DEC-017:** base-blocks go to `hwp-core/packages/core-ui/src/base-blocks/`; client-specific blocks go to `src/blocks/` inside the client's independent repo. Use `/scaffold-block {Name} --target client` for client blocks. See `docs/skills/frontend/block-creation.md §Decide the target`.
+> **DEC-015 + DEC-017:** base-blocks go to `hwe-core/packages/core-ui/src/base-blocks/`; client-specific blocks go to `src/blocks/` inside the client's independent repo. Use `/scaffold-block {Name} --target client` for client blocks. See `docs/skills/frontend/block-creation.md §Decide the target`.
 
 **Budget:** ~4k tokens. **vs. loading `architecture/architecture.md` whole:** ~50k tokens. **Reduction:** ~12×.
 
@@ -323,7 +323,7 @@ On demand (per story):
 Always:   docs/specs/security/security-standards.md
 On demand: next.config.mjs                                (headers config)
           src/app/api/**                                 (Route Handlers — Zod coverage)
-          hwp-core/packages/core-ui/src/base-blocks/**   (base-blocks with user input)
+          hwe-core/packages/core-ui/src/base-blocks/**   (base-blocks with user input)
           src/blocks/**                                  (client blocks with user input)
           docs/skills/security/security-audit-headers.md  (header audit steps)
           docs/skills/security/security-audit-cookies.md  (cookie consent steps)

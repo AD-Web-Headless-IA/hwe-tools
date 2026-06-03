@@ -29,9 +29,9 @@ Do not edit test files unless a type-check failure forces it. Do not edit `.env.
 ## What this skill loads
 
 Before starting, read:
-- `.hwp-tools/docs/specs/security/security-standards.md` — CSP template, cookie rules, RGPD obligations, input validation pipeline
-- `.hwp-tools/docs/skills/security/security-audit-headers.md` — exact header values and CSP directives for hospitality sites
-- `.hwp-tools/docs/skills/security/security-audit-rgpd.md` — privacy policy content requirements and data inventory template
+- `.hwe-tools/docs/specs/security/security-standards.md` — CSP template, cookie rules, RGPD obligations, input validation pipeline
+- `.hwe-tools/docs/skills/security/security-audit-headers.md` — exact header values and CSP directives for hospitality sites
+- `.hwe-tools/docs/skills/security/security-audit-rgpd.md` — privacy policy content requirements and data inventory template
 
 ## Process
 
@@ -72,9 +72,9 @@ Re-run /security-audit {SLUG} to verify the current state.
 ### Step 2 — Read specs and site files
 
 Read (in parallel):
-- `hwp-platform/docs/specs/security/security-standards.md`
-- `hwp-platform/docs/skills/security/security-audit-headers.md`
-- `hwp-platform/docs/skills/security/security-audit-rgpd.md`
+- `hwe-platform/docs/specs/security/security-standards.md`
+- `hwe-platform/docs/skills/security/security-audit-headers.md`
+- `hwe-platform/docs/skills/security/security-audit-rgpd.md`
 - `{APP_DIR}/next.config.mjs`
 - `{SRC_DIR}/app/layout.tsx`
 
@@ -90,7 +90,7 @@ Replace (or add) the `headers` async function. The target block — **CSP templa
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@hwp/core-ui', '@hwp/config'],
+  transpilePackages: ['@hwe/core-ui', '@hwe/config'],
   async headers() {
     return [
       {
@@ -265,7 +265,7 @@ For each file+line reported:
 2. Determine the pattern:
    - **JSON-LD pattern:** the value is `JSON.stringify(jsonLd)` or similar, and the element is `<script type="application/ld+json">`. → **Safe.** Add a clarifying comment: `{/* safe: JSON.stringify output is not HTML — no XSS risk */}`. No DOMPurify needed.
    - **Raw HTML from external data:** value comes from a user-controlled prop, CMS field, or API response. → **Blocker.** Add DOMPurify:
-     1. `pnpm add dompurify @types/dompurify --filter @hwp/core-ui` (or the affected package).
+     1. `pnpm add dompurify @types/dompurify --filter @hwe/core-ui` (or the affected package).
      2. Add `import DOMPurify from 'dompurify';` at the top of the file.
      3. Wrap the value: `dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(rawHtml) }}`.
 

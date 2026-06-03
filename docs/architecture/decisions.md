@@ -1,4 +1,4 @@
-# HWP — Decision Log
+# hwe — Decision Log
 
 ---
 
@@ -12,7 +12,7 @@ We started building tooling skills directly in `.claude/commands/*.md` as narrat
 
 ### Decision
 
-Adopt the boilerplate's SKILL.md format for all reusable HWP tooling:
+Adopt the boilerplate's SKILL.md format for all reusable hwe tooling:
 
 - **Location:** `.claude/skills/{name}/SKILL.md` plus supporting `*.md` files in the same folder.
 - **Frontmatter:** `name`, `description`, `argument-hint`, `allowed-tools`. The `allowed-tools` field is mandatory and constrains the tool surface for each skill.
@@ -38,11 +38,11 @@ Created during DEC-001:
 
 Deferred to future User Stories (Step 0b):
 - US-002 — Add Context7 MCP to `.claude/settings.json`.
-- US-003 — Define `docs/specs/general/base-standards.md` for HWP.
+- US-003 — Define `docs/specs/general/base-standards.md` for hwe.
 - US-004 — Define `docs/specs/frontend/frontend-standards.md`.
 - US-005 — Define `docs/specs/backend-standards.md`.
-- US-006 — Create agent templates for the 5 HWP product agents.
-- US-007 — Define component lifecycle (`alpha → beta → stable`) adapted to HWP.
+- US-006 — Create agent templates for the 5 hwe product agents.
+- US-007 — Define component lifecycle (`alpha → beta → stable`) adapted to hwe.
 
 ### Consequences
 
@@ -75,17 +75,17 @@ Adopt a fixed layout:
 
 ```
 C:\laragon\www\Hospitality Web Platform\
-├── hwp-platform\                           ← the platform repo (this one)
+├── hwe-platform\                           ← the platform repo (this one)
 └── figma-makes\                            ← plain container, NOT a git repo
     ├── hotel-balneario-fuente-de-cabriel\  ← own .git, clone of designer's repo
     ├── camping-sol\                        ← own .git, clone of designer's repo
     └── {slug}\                             ← one folder per client
 ```
 
-- One git repo per client at `figma-makes/{slug}/`, with its own `.git/`, independent from `hwp-platform/`.
+- One git repo per client at `figma-makes/{slug}/`, with its own `.git/`, independent from `hwe-platform/`.
 - Every import (initial clone or subsequent re-import) is sealed with `git tag import-YYYY-MM-DD`. Re-imports run `git pull --ff-only` against the same origin — never `rm -rf` + re-clone, so history is preserved.
-- Generated artifacts (`figma-analysis.md`, `figma-notes.md`) live under `hwp-platform/docs/clients/{slug}/`, NOT inside the cloned repo. This keeps `figma-makes/{slug}/` pristine and avoids untracked-file noise on future `git pull`.
-- The `figma-makes/` container is a sibling of `hwp-platform/` — outside it on purpose, so it never contaminates the platform repo.
+- Generated artifacts (`figma-analysis.md`, `figma-notes.md`) live under `hwe-platform/docs/clients/{slug}/`, NOT inside the cloned repo. This keeps `figma-makes/{slug}/` pristine and avoids untracked-file noise on future `git pull`.
+- The `figma-makes/` container is a sibling of `hwe-platform/` — outside it on purpose, so it never contaminates the platform repo.
 
 ### Why
 
@@ -97,7 +97,7 @@ C:\laragon\www\Hospitality Web Platform\
 ### Migration applied today
 
 - Moved `figma-make/` → `figma-makes/hotel-balneario-fuente-de-cabriel/` (preserved the original `.git/`).
-- Moved `ANALYSIS.md` → `hwp-platform/docs/clients/hotel-balneario-fuente-de-cabriel/figma-analysis.md`.
+- Moved `ANALYSIS.md` → `hwe-platform/docs/clients/hotel-balneario-fuente-de-cabriel/figma-analysis.md`.
 - Created tag `import-2026-05-18` on the relocated repo.
 - Updated `.claude/skills/import-figma/SKILL.md` to use the new layout, support re-imports via `git pull` + new tag, and write analysis/notes under `docs/clients/{slug}/`.
 - Updated `docs/docs/plans/phase-1-design-system/plan.md` references.
@@ -106,7 +106,7 @@ C:\laragon\www\Hospitality Web Platform\
 
 - **Snapshot subdirectories per import (`{slug}/YYYY-MM-DD/`)** — rejected. Duplicates files on every import, bloats disk, breaks the "this is the designer's repo with upstream" mental model.
 - **Keep one `figma-make/` and rename on each client** — rejected. Lossy, manual, and `/import-figma` would have to be a destructive operation.
-- **Nest `figma-makes/` inside `hwp-platform/`** — rejected. The cloned repos would be nested git repos relative to the platform repo, which means either ignoring them via `.gitignore` (so they're invisible from the platform's POV anyway) or adopting them as submodules (overhead for no benefit, since they're third-party design references, not platform code).
+- **Nest `figma-makes/` inside `hwe-platform/`** — rejected. The cloned repos would be nested git repos relative to the platform repo, which means either ignoring them via `.gitignore` (so they're invisible from the platform's POV anyway) or adopting them as submodules (overhead for no benefit, since they're third-party design references, not platform code).
 
 ### Consequences
 
@@ -122,7 +122,7 @@ C:\laragon\www\Hospitality Web Platform\
 
 ### Context
 
-We were ready to start implementing `@hwp/core-ui` and the first client site, but the architecture (`docs/architecture/architecture.md`) defines only the high-level monorepo shape and the block system principles — not the React file layout, naming conventions, or where validation schemas live. Without these settled and written down, every Claude Code session would re-derive them from `architecture.md` (4.224 lines, ~50k tokens), and they would drift across the 300 sites planned.
+We were ready to start implementing `@hwe/core-ui` and the first client site, but the architecture (`docs/architecture/architecture.md`) defines only the high-level monorepo shape and the block system principles — not the React file layout, naming conventions, or where validation schemas live. Without these settled and written down, every Claude Code session would re-derive them from `architecture.md` (4.224 lines, ~50k tokens), and they would drift across the 300 sites planned.
 
 Two problems to solve together:
 
@@ -138,7 +138,7 @@ Two problems to solve together:
 3. **`src/` inside every `apps/site-{slug}/`** — so the apps layout matches the packages layout. Cross-monorepo scripts and codemods use a single pattern (`apps/*/src/**`, `packages/*/src/**`).
 4. **Client compositions in `apps/site-{slug}/src/compositions/`**, separate from `app/`. Routes (`app/[locale]/page.tsx`) are thin wrappers that import a composition. Compositions are testable in isolation and reusable across routes.
 
-Naming summary: folders kebab-case, React components PascalCase, hooks/utils camelCase, dynamic route param always `[slug]`, no internal barrels (only one `index.ts` at each package root), cross-package imports via `@hwp/...`, intra-package via `@/` alias to `src/`.
+Naming summary: folders kebab-case, React components PascalCase, hooks/utils camelCase, dynamic route param always `[slug]`, no internal barrels (only one `index.ts` at each package root), cross-package imports via `@hwe/...`, intra-package via `@/` alias to `src/`.
 
 #### Page template flexibility
 
@@ -182,7 +182,7 @@ docs/specs/
 ### Alternatives considered
 
 - **Flat files in `blocks/`** (instead of folders) — rejected. With 20+ blocks the directory becomes noise; co-located variants/schemas/tests get spread.
-- **Schemas in `@hwp/content`** — rejected. Splits a block across two packages; creates a "which is the source of truth?" question for automation; sub-agents need to read two folders to understand one block.
+- **Schemas in `@hwe/content`** — rejected. Splits a block across two packages; creates a "which is the source of truth?" question for automation; sub-agents need to read two folders to understand one block.
 - **No `src/` in apps** (Next.js default) — rejected. Diverges from packages convention; mixes source and config at app root.
 - **Compositions inline in `page.tsx`** — rejected. Couples routing to view assembly, hard to test, doesn't reuse across routes.
 - **Compositions under `app/[locale]/_compositions/`** — rejected. Mixes routing with view code; sharing across nesting levels gets awkward.
@@ -285,11 +285,11 @@ apps/site-{slug}/src/theme/
 
 For clients without `hasSeasons` (the default — 90%+ of the customer base today), the file remains a single `tokens.json`. The build pipeline detects which mode applies by inspecting the presence of `tokens-*.json` vs `tokens.json` files — clients pick one shape and stick to it.
 
-The `TokensContract` Zod schema (in `@hwp/core-ui/src/theme/tokens.contract.ts`) accepts either:
+The `TokensContract` Zod schema (in `@hwe/core-ui/src/theme/tokens.contract.ts`) accepts either:
 - A single `Tokens` object (legacy, default), OR
 - A `Record<seasonSlug, Tokens>` keyed by the season's `slug` field.
 
-The `createHwpPreset()` helper in `@hwp/config/tailwind-preset` accepts either and produces either a single Tailwind theme or N themes accessible via the `data-season` HTML attribute (e.g. `[data-season="winter"]` selectors override the base).
+The `createhwePreset()` helper in `@hwe/config/tailwind-preset` accepts either and produces either a single Tailwind theme or N themes accessible via the `data-season` HTML attribute (e.g. `[data-season="winter"]` selectors override the base).
 
 ### Why
 
@@ -301,7 +301,7 @@ The `createHwpPreset()` helper in `@hwp/config/tailwind-preset` accepts either a
 
 - `docs/contracts/frontend/theme-tokens.md` updated to describe both the single-theme and seasonized layouts.
 - `TokensContract` becomes a discriminated union — implemented during Phase 0 US-004.
-- `createHwpPreset()` returns a Tailwind config whose `theme.extend` includes per-season overrides via `:where([data-season="..."])` selectors when given the seasonized input — implemented during Phase 0 US-002.
+- `createhwePreset()` returns a Tailwind config whose `theme.extend` includes per-season overrides via `:where([data-season="..."])` selectors when given the seasonized input — implemented during Phase 0 US-002.
 - Phase 0 US-007 (Balneario bootstrap) probably uses the single-`tokens.json` form (Balneario does not currently declare `hasSeasons`). The first seasonized client validates the multi-file path.
 
 ### Alternatives considered
@@ -330,7 +330,7 @@ The stack is Next.js 14 (App Router, static export), Turborepo, pnpm workspaces,
 
 ### Decision
 
-The HWP testing toolchain is:
+The hwe testing toolchain is:
 
 | Concern | Tool | Notes |
 |---|---|---|
@@ -367,10 +367,10 @@ Conventions:
 
 ### Consequences
 
-- Phase 0 US-002 (`@hwp/config`) ships `vitest.config.ts` + a `@hwp/config/vitest` export for packages to extend.
+- Phase 0 US-002 (`@hwe/config`) ships `vitest.config.ts` + a `@hwe/config/vitest` export for packages to extend.
 - Phase 0 US-009 (CI) runs `pnpm test` (Vitest) and `pnpm test:e2e` (Playwright). Coverage thresholds enforced.
 - Both Phase 2 enrich-story prompts (`enrich-us/phase-2-enrich-story.md`, `plan-to-stories/phase-2-enrich-story.md`) drop the Jest reference and the `should_..._when_...` naming convention. The pointer becomes "Vitest + @testing-library/react for unit/integration, Playwright for E2E".
-- The `vitest-axe` dependency lands as part of `@hwp/core-ui`'s dev deps in US-003 (`@hwp/core-ui` skeleton).
+- The `vitest-axe` dependency lands as part of `@hwe/core-ui`'s dev deps in US-003 (`@hwe/core-ui` skeleton).
 - No tool is added to the catalog as a skill — these are runtime dependencies, not reusable components.
 
 ### Alternatives considered
@@ -378,7 +378,7 @@ Conventions:
 - **Jest + Playwright** — rejected. Workable but pays a setup tax (TS, ESM, JSX transform, workspaces) that Vitest avoids. Equal capability, worse DX in 2026 Turborepo + Next 14 + TS.
 - **Vitest + Cypress** — rejected. Cypress remains Chromium-only at the time of writing; cross-browser regression is part of the spec for a 300-client platform with varied admin browsers.
 - **Vitest + Playwright + Storybook test-runner** — deferred. Storybook is a useful documentation surface for `core-ui` but adding it pre-Phase-0 inflates bootstrap. Revisit when there are ≥5 blocks worth documenting.
-- **Vitest with `happy-dom` instead of `jsdom`** — accepted as default (it's already Vitest's default in 1.x), explicit pin via `environment: 'happy-dom'` in `@hwp/config/vitest`. `jsdom` reserved for the very rare test that needs full DOM compliance.
+- **Vitest with `happy-dom` instead of `jsdom`** — accepted as default (it's already Vitest's default in 1.x), explicit pin via `environment: 'happy-dom'` in `@hwe/config/vitest`. `jsdom` reserved for the very rare test that needs full DOM compliance.
 
 ---
 
@@ -403,7 +403,7 @@ By 2026-05-20, when the platform is still pre-bootstrap (no `apps/`, no `package
 
 ### Decision
 
-The HWP hosting stack is **Vercel for everything**:
+The hwe hosting stack is **Vercel for everything**:
 
 | Concern | Target | Notes |
 |---|---|---|
@@ -439,7 +439,7 @@ The **monorepo Turborepo + pnpm** layout stays unchanged from DEC-003. Each clie
 - **A new bootstrap phase (Phase 0.5 or Phase 2)** must be planned to cover: Vercel project provisioning per client, Vercel Postgres schema scaffolding, Vercel Blob Storage bucket layout, env-var management strategy. Not in scope for Phase 0.
 - **The PHP proxy section of `architecture.md`** describes a layer that no longer exists. New equivalent: `apps/site-{slug}/src/app/api/*` and `apps/cms-{type}/src/app/api/*` Route Handlers. To be documented in a future `docs/contracts/frontend/api-routes.md` when the first route is implemented.
 - **Multi-tenant DB isolation rule from `base-standards.md`** still applies — every query is scoped by `tenantId`. The mechanism changes from "one MariaDB per client" to "one Postgres per client", but the constraint is identical.
-- **The `BookingAdapter` and Payload schemas are unaffected.** They are defined in `@hwp/booking` and `@hwp/content` regardless of where they run.
+- **The `BookingAdapter` and Payload schemas are unaffected.** They are defined in `@hwe/booking` and `@hwe/content` regardless of where they run.
 
 ### Alternatives considered
 
@@ -553,7 +553,7 @@ A `GalleryCarousel` may itself accept a CVA `tone` variant; that is a styling co
 
 #### `index.ts` exception to `structure.md`
 
-`docs/contracts/frontend/structure.md` states: "No `src/blocks/index.ts`, no `src/blocks/HeroBlock/index.ts`". This DEC creates a controlled exception: a block with structural variants MUST have an `index.ts` that acts as the variant resolver. That `index.ts` is NOT a barrel re-export — it contains the resolver function. Consumers still import from `@hwp/core-ui` root (the public API rule is unchanged).
+`docs/contracts/frontend/structure.md` states: "No `src/blocks/index.ts`, no `src/blocks/HeroBlock/index.ts`". This DEC creates a controlled exception: a block with structural variants MUST have an `index.ts` that acts as the variant resolver. That `index.ts` is NOT a barrel re-export — it contains the resolver function. Consumers still import from `@hwe/core-ui` root (the public API rule is unchanged).
 
 ### Consequences
 
@@ -635,39 +635,39 @@ Meanwhile, several blocks need **per-client configuration** that a string array 
 
 ---
 
-## DEC-010 — `BookingBlock` in `@hwp/core-ui`, `BookingProvider` in `@hwp/booking`
+## DEC-010 — `BookingBlock` in `@hwe/core-ui`, `BookingProvider` in `@hwe/booking`
 **Date:** 2026-05-21
 **Status:** Accepted
-**Supersedes:** the `@hwp/booking/react/` location for `BookingBlock` mentioned in `docs/architecture/architecture.md` (§Booking Engine).
+**Supersedes:** the `@hwe/booking/react/` location for `BookingBlock` mentioned in `docs/architecture/architecture.md` (§Booking Engine).
 
 ### Context
 
 Two documents place `BookingBlock` in different locations:
 
-- `docs/architecture/architecture.md` §Booking Engine shows `BookingBlock` in `@hwp/booking/react/`.
-- `docs/contracts/frontend/block-contract.md` and `docs/contracts/frontend/structure.md` state that all blocks live in `@hwp/core-ui/src/blocks/`.
+- `docs/architecture/architecture.md` §Booking Engine shows `BookingBlock` in `@hwe/booking/react/`.
+- `docs/contracts/frontend/block-contract.md` and `docs/contracts/frontend/structure.md` state that all blocks live in `@hwe/core-ui/src/blocks/`.
 
-This creates ambiguity about where the UI component lives versus where the domain logic lives. It also blurs the boundary of `@hwp/booking`, which should be a domain + infrastructure package (interface + adapters), not a UI package.
+This creates ambiguity about where the UI component lives versus where the domain logic lives. It also blurs the boundary of `@hwe/booking`, which should be a domain + infrastructure package (interface + adapters), not a UI package.
 
 ### Decision
 
 1. **`BookingBlock`** (the React component family) lives in `packages/core-ui/src/blocks/BookingBlock/`, like every other block. It MAY have structural variants per DEC-008 (e.g. `BookingInline`, `BookingModal`, `BookingIframe`).
 
-2. **`BookingBlock` depends on the `BookingAdapter` interface** from `@hwp/booking` — never on a concrete adapter. It receives the adapter via React context, accessed through a `useBookingAdapter()` hook re-exported by `@hwp/booking`.
+2. **`BookingBlock` depends on the `BookingAdapter` interface** from `@hwe/booking` — never on a concrete adapter. It receives the adapter via React context, accessed through a `useBookingAdapter()` hook re-exported by `@hwe/booking`.
 
-3. **`@hwp/booking` exports:**
+3. **`@hwe/booking` exports:**
    - The `BookingAdapter` interface (the port).
    - Stock adapters: THR, Masterbooking, Witbooking, Resalys (the infrastructure).
    - `BookingProvider` — the React context provider that wraps the app and injects the active adapter.
    - `useBookingAdapter()` — the hook blocks use to consume the adapter.
 
-4. **`@hwp/booking` does NOT export React UI components.** Remove the planned `@hwp/booking/react/` directory. Keeping `BookingProvider` and `useBookingAdapter()` in the package is acceptable because they are domain-layer plumbing for context, not UI; they carry no JSX of their own beyond `<Context.Provider>`.
+4. **`@hwe/booking` does NOT export React UI components.** Remove the planned `@hwe/booking/react/` directory. Keeping `BookingProvider` and `useBookingAdapter()` in the package is acceptable because they are domain-layer plumbing for context, not UI; they carry no JSX of their own beyond `<Context.Provider>`.
 
 5. **The app's root layout wires the provider:**
 
    ```tsx
    // apps/site-{slug}/src/app/layout.tsx
-   import { BookingProvider } from '@hwp/booking';
+   import { BookingProvider } from '@hwe/booking';
    import { config } from '@/client.config';
 
    export default function RootLayout({ children }) {
@@ -684,16 +684,16 @@ This creates ambiguity about where the UI component lives versus where the domai
 ### Consequences
 
 - `docs/architecture/architecture.md` §Booking Engine receives a superseded banner pointing to this DEC.
-- `@hwp/booking` stays a domain + infrastructure package: adapter interface, concrete adapters, provider, hook. No `.tsx` page-section components.
-- `BookingBlock` in `@hwp/core-ui` can be unit-tested without any concrete PMS adapter — tests mock the adapter via `BookingProvider`. This matches DEC-006 (Testing toolchain) and keeps coverage targets achievable.
-- The architectural rule that "no block lives outside `@hwp/core-ui/src/blocks/`" becomes a hard invariant — `BookingBlock` was the exception that no longer exists.
-- Multi-PMS clients (rare but specified in the domain model) compose their own adapter at `apps/site-{slug}/src/booking/` without changing `@hwp/core-ui`.
+- `@hwe/booking` stays a domain + infrastructure package: adapter interface, concrete adapters, provider, hook. No `.tsx` page-section components.
+- `BookingBlock` in `@hwe/core-ui` can be unit-tested without any concrete PMS adapter — tests mock the adapter via `BookingProvider`. This matches DEC-006 (Testing toolchain) and keeps coverage targets achievable.
+- The architectural rule that "no block lives outside `@hwe/core-ui/src/blocks/`" becomes a hard invariant — `BookingBlock` was the exception that no longer exists.
+- Multi-PMS clients (rare but specified in the domain model) compose their own adapter at `apps/site-{slug}/src/booking/` without changing `@hwe/core-ui`.
 
 ### Alternatives considered
 
-- **`BookingBlock` in `@hwp/booking/react/`** — rejected. Puts UI inside a domain package, violates the single-responsibility of `@hwp/booking`, and breaks the "all blocks in core-ui" invariant. Also forces `@hwp/booking` to depend on React and Tailwind, which it currently does not.
+- **`BookingBlock` in `@hwe/booking/react/`** — rejected. Puts UI inside a domain package, violates the single-responsibility of `@hwe/booking`, and breaks the "all blocks in core-ui" invariant. Also forces `@hwe/booking` to depend on React and Tailwind, which it currently does not.
 - **No provider — pass `adapter` as a prop to every `BookingBlock`** — rejected. Every composition that uses `BookingBlock` would need to import and wire the adapter. The provider does that once at the root, and other adapters that may follow (analytics, AI) can reuse the same pattern.
-- **`BookingBlock` in `@hwp/core-ui` but `BookingProvider` also in `@hwp/core-ui`** — rejected. The provider's job is to expose the active `BookingAdapter`, which is `@hwp/booking`'s contract. Putting the provider in `@hwp/core-ui` would make `@hwp/core-ui` depend on knowledge that belongs to the booking domain.
+- **`BookingBlock` in `@hwe/core-ui` but `BookingProvider` also in `@hwe/core-ui`** — rejected. The provider's job is to expose the active `BookingAdapter`, which is `@hwe/booking`'s contract. Putting the provider in `@hwe/core-ui` would make `@hwe/core-ui` depend on knowledge that belongs to the booking domain.
 
 ## DEC-011 — Client sites live in independent repos, monorepo holds only platform + reference site
 **Date:** 2026-05-21
@@ -701,7 +701,7 @@ This creates ambiguity about where the UI component lives versus where the domai
 
 ### Context
 
-The walking skeleton (per `docs/docs/plans/walking-skeleton.md`) bootstraps the platform as a full monorepo containing `packages/*` (the `@hwp/*` packages) AND `apps/site-demo/` (a reference camping site). That layout is fast for validation: one `pnpm install`, one Turborepo cache, one local dev loop.
+The walking skeleton (per `docs/docs/plans/walking-skeleton.md`) bootstraps the platform as a full monorepo containing `packages/*` (the `@hwe/*` packages) AND `apps/site-demo/` (a reference camping site). That layout is fast for validation: one `pnpm install`, one Turborepo cache, one local dev loop.
 
 The scale target is **300 clients**. Continuing the monorepo path means 300 apps inside `apps/`:
 
@@ -714,32 +714,32 @@ The hosting target ([DEC-007](#dec-007--vercel-full-stack-hosting-replaces-cdmon
 
 ### Decision
 
-1. **Production client sites live in independent git repos**, one per client (e.g. `site-{slug}/`, hosted under the agency's org on the same git provider as `hwp-platform/`).
-2. **The `hwp-platform/` monorepo holds only:**
-   - `packages/*` — the `@hwp/*` packages (`core-ui`, `booking`, `content`, `config`, etc.).
+1. **Production client sites live in independent git repos**, one per client (e.g. `site-{slug}/`, hosted under the agency's org on the same git provider as `hwe-platform/`).
+2. **The `hwe-platform/` monorepo holds only:**
+   - `packages/*` — the `@hwe/*` packages (`core-ui`, `booking`, `content`, `config`, etc.).
    - `apps/site-demo/` — a single reference site used to validate package releases end-to-end before publishing.
    - Platform documentation, decisions, plans, skills (`docs/`, `docs/architecture/`, `docs/`, `docs/plans/`, `.claude/`).
-3. **Client repos consume `@hwp/*` via a private npm registry** (GitHub Packages or Verdaccio — final choice resolved before client #1; default position is GitHub Packages because it is already the registry referenced in [DEC-007](#dec-007--vercel-full-stack-hosting-replaces-cdmon--hetzner--mariadb) §npm registry).
-4. **Client repos are bootstrapped from a template repo** (`site-template`, TBD before client #1) that ships: `package.json` with `@hwp/*` dependencies pinned, `client.config.ts`, `src/theme/tokens.json`, `src/compositions/`, `src/app/` skeleton, `next.config.mjs`, Vercel config.
+3. **Client repos consume `@hwe/*` via a private npm registry** (GitHub Packages or Verdaccio — final choice resolved before client #1; default position is GitHub Packages because it is already the registry referenced in [DEC-007](#dec-007--vercel-full-stack-hosting-replaces-cdmon--hetzner--mariadb) §npm registry).
+4. **Client repos are bootstrapped from a template repo** (`site-template`, TBD before client #1) that ships: `package.json` with `@hwe/*` dependencies pinned, `client.config.ts`, `src/theme/tokens.json`, `src/compositions/`, `src/app/` skeleton, `next.config.mjs`, Vercel config.
 5. **The walking skeleton (this milestone)** stays in `apps/site-demo/` inside the monorepo. Migration of the per-client model — splitting into independent repos + standing up the private registry + writing the template — happens **before the first real client onboarding**, not during walking-skeleton validation.
 
 ### Consequences
 
-- **Package versioning becomes load-bearing.** `@hwp/core-ui` and friends ship as semver releases via the private registry. Client repos pin to a version and consciously bump. Breaking changes in `core-ui` no longer ripple silently into every client.
-- **Cross-cutting changes need a propagation step.** A new block contract is a PR to `hwp-platform/` → release → bump in N client repos. Accepted cost in exchange for client isolation and the freedom for clients to stay on older versions when business reasons demand it.
+- **Package versioning becomes load-bearing.** `@hwe/core-ui` and friends ship as semver releases via the private registry. Client repos pin to a version and consciously bump. Breaking changes in `core-ui` no longer ripple silently into every client.
+- **Cross-cutting changes need a propagation step.** A new block contract is a PR to `hwe-platform/` → release → bump in N client repos. Accepted cost in exchange for client isolation and the freedom for clients to stay on older versions when business reasons demand it.
 - **CI per client is small, independent, and fast.** A failing build in client A does not block client B's deploy.
-- **`apps/site-demo/`** is the canonical "what does a real client app look like" reference. The template repo is generated from it (or kept in lockstep). The demo must always build green or releases of `@hwp/*` are blocked.
+- **`apps/site-demo/`** is the canonical "what does a real client app look like" reference. The template repo is generated from it (or kept in lockstep). The demo must always build green or releases of `@hwe/*` are blocked.
 - **Deferred work, sequenced before client #1:**
   - Stand up the private npm registry (GitHub Packages provisioning + tokens).
-  - Publish `@hwp/core-ui@0.1.0`, `@hwp/config@0.1.0`, `@hwp/booking@0.1.0` from the monorepo.
-  - Create `site-template/` repo (separate from `hwp-platform/`) that bootstraps a new client.
+  - Publish `@hwe/core-ui@0.1.0`, `@hwe/config@0.1.0`, `@hwe/booking@0.1.0` from the monorepo.
+  - Create `site-template/` repo (separate from `hwe-platform/`) that bootstraps a new client.
   - Define the version-bump workflow (Changesets candidate, decided in its own DEC).
 - **The "all clients in a single Turborepo" mental model is dropped.** Tooling like Renovate / Dependabot operates per client repo against the private registry, not via shared lockfiles.
 
 ### Alternatives considered
 
-- **Keep all 300 client apps inside `hwp-platform/apps/`.** Rejected. Build and CI time grow with N; agency operations couple across clients; one broken `apps/site-foo/` blocks `pnpm -r build`; storage and clone time scale poorly.
-- **`@hwp/core-ui` consumed via git submodule from each client repo.** Rejected. Submodule operational pain (developers forget to update, detached HEADs, weird CI states); loses semantic versioning; updates require touching every client repo's `.gitmodules` instead of a version bump.
+- **Keep all 300 client apps inside `hwe-platform/apps/`.** Rejected. Build and CI time grow with N; agency operations couple across clients; one broken `apps/site-foo/` blocks `pnpm -r build`; storage and clone time scale poorly.
+- **`@hwe/core-ui` consumed via git submodule from each client repo.** Rejected. Submodule operational pain (developers forget to update, detached HEADs, weird CI states); loses semantic versioning; updates require touching every client repo's `.gitmodules` instead of a version bump.
 - **Single client repo containing all clients, separate from the platform monorepo.** Rejected. Re-creates the same monorepo problems one layer down — a "monorepo of clients" instead of "monorepo of platform + clients" still couples 300 deploys.
 - **Publish to public npm.** Rejected. The packages encode agency-specific design decisions, partner adapter wiring, and patterns the platform does not want public until the offering is mature. Private registry preserves optionality.
 
@@ -755,11 +755,11 @@ The hosting target ([DEC-007](#dec-007--vercel-full-stack-hosting-replaces-cdmon
 
 The walking skeleton (per `docs/docs/plans/walking-skeleton.md`) needs Tailwind wired into `apps/site-demo` so the Camping Mer et Camargue palette and fonts reach the browser. The reference Figma export (`figma-makes/base-template/src/styles/theme.css`) is authored in **Tailwind v4 syntax** — CSS-first config via `@theme inline` directives. That tempts us to adopt v4 directly.
 
-But the HWP token pipeline documented in `docs/contracts/frontend/theme-tokens.md` is built around a **JavaScript preset**:
+But the hwe token pipeline documented in `docs/contracts/frontend/theme-tokens.md` is built around a **JavaScript preset**:
 
-1. `apps/site-{slug}/src/theme/tokens.json` is parsed at build time by `TokensContract` (Zod schema in `@hwp/core-ui`).
-2. The parsed `Tokens` object is passed to `createHwpPreset(tokens)` in `@hwp/config`, which returns a `Partial<Config>`.
-3. `apps/site-{slug}/tailwind.config.ts` lists `[createHwpPreset(tokens)]` under `presets`.
+1. `apps/site-{slug}/src/theme/tokens.json` is parsed at build time by `TokensContract` (Zod schema in `@hwe/core-ui`).
+2. The parsed `Tokens` object is passed to `createhwePreset(tokens)` in `@hwe/config`, which returns a `Partial<Config>`.
+3. `apps/site-{slug}/tailwind.config.ts` lists `[createhwePreset(tokens)]` under `presets`.
 
 That `Partial<Config>` + `presets: [...]` shape is **Tailwind v3 API**. Tailwind v4 removes JS presets in favor of CSS `@theme` directives — the token pipeline as designed in `docs/contracts/frontend/theme-tokens.md` cannot be expressed in v4 without rewriting the contract.
 
@@ -770,7 +770,7 @@ That `Partial<Config>` + `presets: [...]` shape is **Tailwind v3 API**. Tailwind
 3. Migration to Tailwind v4 is **deferred** until both gates clear:
    - The Next.js + Tailwind v4 + Turborepo + pnpm combination is stable for production use (no recurring HMR / build pipeline issues).
    - The CVA + Tailwind v4 ecosystem is stable (CVA's variant compilation works against v4's CSS-first theme without contract drift).
-4. When the migration is on the table, it ships as a new DEC that supersedes the v3 sections of `docs/contracts/frontend/theme-tokens.md` and rewrites `createHwpPreset` against the v4 contract — not as a silent dependency bump.
+4. When the migration is on the table, it ships as a new DEC that supersedes the v3 sections of `docs/contracts/frontend/theme-tokens.md` and rewrites `createhwePreset` against the v4 contract — not as a silent dependency bump.
 
 ### Consequences
 
@@ -781,7 +781,7 @@ That `Partial<Config>` + `presets: [...]` shape is **Tailwind v3 API**. Tailwind
 
 ### Alternatives considered
 
-- **Adopt Tailwind v4 now and rewrite the token contract.** Rejected for the walking skeleton. Rewriting `theme-tokens.md`, `tokens.contract.ts`, and `createHwpPreset` in CSS-first form would block delivery of the walking skeleton on a tooling redesign whose payoff is uncertain (CVA + Next.js + Turborepo + v4 still has rough edges). Deferring keeps the path to localhost short.
+- **Adopt Tailwind v4 now and rewrite the token contract.** Rejected for the walking skeleton. Rewriting `theme-tokens.md`, `tokens.contract.ts`, and `createhwePreset` in CSS-first form would block delivery of the walking skeleton on a tooling redesign whose payoff is uncertain (CVA + Next.js + Turborepo + v4 still has rough edges). Deferring keeps the path to localhost short.
 - **Run v3 and v4 side-by-side** (v3 in `core-ui`, v4 in `apps/`). Rejected. Two Tailwind generators in one monorepo doubles the build surface and creates token-mapping drift between the package and the app that consumes it.
 - **Skip Tailwind entirely, ship CSS-in-JS or vanilla CSS.** Rejected. The contracts (`block-contract.md`, `theme-tokens.md`) presume Tailwind; switching off it is a far larger change than waiting for v4 to stabilize.
 ---
@@ -840,7 +840,7 @@ This made navigation expensive: to answer "what decisions have been made about t
 
 ### Context
 
-The team building HWP comes entirely from a WordPress background. In WordPress, one developer typically handles design fidelity, SEO, security, and documentation manually — relying on their own judgment for every concern. At the scale of 300 clients and a multi-package monorepo, this single-developer mental model does not scale: quality gates get skipped under pressure, concerns get mixed in the wrong layer, and the knowledge base drifts.
+The team building hwe comes entirely from a WordPress background. In WordPress, one developer typically handles design fidelity, SEO, security, and documentation manually — relying on their own judgment for every concern. At the scale of 300 clients and a multi-package monorepo, this single-developer mental model does not scale: quality gates get skipped under pressure, concerns get mixed in the wrong layer, and the knowledge base drifts.
 
 The SPECBOOT methodology (DEC-001) introduced a sequential pipeline for implementing user stories, but defined only narrative phases without binding agents to specific models or tool scopes. As the number of `.claude/agents/` files grew, there was no documented system for when to invoke which agent, in what combination, or with what authority.
 
@@ -908,7 +908,7 @@ Adopt a **dual-layer agent system**:
 
 ### Context
 
-The current architecture places all block implementations (`.tsx` files with JSX, Tailwind classes, and visual structure) in `packages/core-ui/src/blocks/`. Client sites — which per DEC-011 live in **independent git repos** and consume `@hwp/core-ui` as an npm package from a private registry — import these blocks with no ability to change the DOM structure.
+The current architecture places all block implementations (`.tsx` files with JSX, Tailwind classes, and visual structure) in `packages/core-ui/src/blocks/`. Client sites — which per DEC-011 live in **independent git repos** and consume `@hwe/core-ui` as an npm package from a private registry — import these blocks with no ability to change the DOM structure.
 
 This creates a fundamental tension:
 
@@ -964,7 +964,7 @@ packages/core-ui/
 }
 ```
 
-The root export (`@hwp/core-ui`) does NOT re-export base-blocks. Client code explicitly chooses whether to use the base-block or its own implementation.
+The root export (`@hwe/core-ui`) does NOT re-export base-blocks. Client code explicitly chooses whether to use the base-block or its own implementation.
 
 #### 3. Client repo structure (per DEC-011)
 
@@ -995,16 +995,16 @@ site-{slug}/
 
 ```tsx
 // Level 1 — Re-export (~70% of cases)
-export { HeroBlock } from '@hwp/core-ui/base-blocks';
+export { HeroBlock } from '@hwe/core-ui/base-blocks';
 
 // Level 2 — Slots (~20% of cases)
-import { HeroBlock as BaseHero } from '@hwp/core-ui/base-blocks';
+import { HeroBlock as BaseHero } from '@hwe/core-ui/base-blocks';
 export function HeroBlock({ content }) {
   return <BaseHero content={content} slots={{ heading: myCustomHeading }} />;
 }
 
 // Level 3 — Full custom (~10% of cases)
-import type { HeroBlockContent } from '@hwp/core-ui/schemas';
+import type { HeroBlockContent } from '@hwe/core-ui/schemas';
 export function HeroBlock({ content }: { content: HeroBlockContent }) {
   return <section>/* completely custom JSX */</section>;
 }
@@ -1024,7 +1024,7 @@ export type HeroBlockSlots = {
 
 #### 8. Token cascade: global → semantic → brand
 
-Three levels, resolved at build time inside `createHwpPreset()`. Compatible with Tailwind v3 (DEC-012). Client `tailwind.config.ts` files continue to work as-is — the cascade is internal to the preset function.
+Three levels, resolved at build time inside `createhwePreset()`. Compatible with Tailwind v3 (DEC-012). Client `tailwind.config.ts` files continue to work as-is — the cascade is internal to the preset function.
 
 #### 9. CSS rules
 
@@ -1039,7 +1039,7 @@ Three levels, resolved at build time inside `createHwpPreset()`. Compatible with
 - `scaffold-block` skill changes: now scaffolds into `base-blocks/` (for platform) or a client repo's `src/blocks/` (for client).
 - New template: `scaffold-site` creates a client repo with base-block re-exports, registry, theme, globals.css.
 - `apps/site-demo/` gains `src/blocks/` + `registry.ts` to mirror the client repo structure.
-- Client repos that consume `@hwp/core-ui@<version>` get base-blocks as part of the package — no extra install needed.
+- Client repos that consume `@hwe/core-ui@<version>` get base-blocks as part of the package — no extra install needed.
 
 ### Alternatives considered
 
@@ -1077,7 +1077,7 @@ Today, no one in the system fills this role:
 
 ### Decision
 
-Three additions to the HWP tooling system:
+Three additions to the hwe tooling system:
 
 #### 1. Design language extraction (amplify `/import-figma`)
 
@@ -1142,23 +1142,23 @@ Once the human approves the visual spec, the normal SPECBOOT cycle continues:
 > **Status:** Accepted
 > **Date:** 2026-06-03
 > **Extends:** DEC-011 (independent client repos), DEC-015 (client-owned blocks)
-> **Supersedes:** The single `hwp-platform/` monorepo containing tools + code + docs together
+> **Supersedes:** The single `hwe-platform/` monorepo containing tools + code + docs together
 
 See full spec: `docs/architecture/DEC-017-Repo-Split.md`
 
 ### The decision
 
-Split the current `hwp-platform/` monorepo into three purpose-built repos:
+Split the current `hwe-platform/` monorepo into three purpose-built repos:
 
 | Repo | Contains | Delivery |
 |---|---|---|
-| `hwp-tools` | Skills, agents, commands, docs, specs, contracts, guides | **Git submodule** (mounted as `.hwp-tools/`) |
-| `hwp-core` | React packages: schemas, base-blocks, primitives, renderer, theme, adapters | **npm packages** (`@hwp/core-ui`, `@hwp/config`) |
-| `hwp-template` | Empty starter structure for new clients | **GitHub template repo** |
+| `hwe-tools` | Skills, agents, commands, docs, specs, contracts, guides | **Git submodule** (mounted as `.hwe-tools/`) |
+| `hwe-core` | React packages: schemas, base-blocks, primitives, renderer, theme, adapters | **npm packages** (`@hwe/core-ui`, `@hwe/config`) |
+| `hwe-template` | Empty starter structure for new clients | **GitHub template repo** |
 
 Client repos are independent, created from the template, and consume tools via submodule + core via npm.
 
-`@hwp/booking` package is eliminated — booking adapters move to `@hwp/core-ui/src/adapters/booking/`.
+`@hwe/booking` package is eliminated — booking adapters move to `@hwe/core-ui/src/adapters/booking/`.
 
 ### Stack versions (binding from this DEC)
 
@@ -1169,10 +1169,10 @@ Client repos are independent, created from the template, and consume tools via s
 
 ### Consequences
 
-- `CLAUDE.md` in hwp-tools describes the tools repo only, not the monorepo.
-- `compatibility.json` maps tool versions to compatible `@hwp/core-ui` versions.
+- `CLAUDE.md` in hwe-tools describes the tools repo only, not the monorepo.
+- `compatibility.json` maps tool versions to compatible `@hwe/core-ui` versions.
 - `.claude/templates/design-language.md` and `.claude/templates/visual-spec.md` replace `docs/clients/_template/`.
-- Client repos use `.hwp-tools/` submodule path instead of a shared monorepo.
-- All skill paths updated: `hwp-platform/apps/{slug}/` → `site-{slug}/` or relative CWD paths.
+- Client repos use `.hwe-tools/` submodule path instead of a shared monorepo.
+- All skill paths updated: `hwe-platform/apps/{slug}/` → `site-{slug}/` or relative CWD paths.
 - Skill `globals.css` template updated to Tailwind v4 syntax (`@import "tailwindcss"` + `@theme {}`).
-- `docs/audits/`, `docs/clients/`, `docs/stories/`, `docs/plans/` removed from hwp-tools — these belong in project repos, not in the tools submodule.
+- `docs/audits/`, `docs/clients/`, `docs/stories/`, `docs/plans/` removed from hwe-tools — these belong in project repos, not in the tools submodule.

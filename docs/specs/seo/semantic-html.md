@@ -62,7 +62,7 @@ Do not use `<div>` when a semantic element applies:
 
 El HTML semántico es como los titulares y párrafos de un periódico: si todo fuera el mismo tamaño y tipo de texto, el lector (y Google) no sabría qué es importante.
 
-| En WordPress (PHP)... | En HWP (React)... |
+| En WordPress (PHP)... | En hwe (React)... |
 |---|---|
 | `<div class="entry-content">` | `<main>` |
 | `<div class="widget-area">` | `<aside>` |

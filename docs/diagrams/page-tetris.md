@@ -18,7 +18,7 @@ flowchart TB
     client_registry["src/blocks/registry.ts\n(client block overrides — Level 1/2/3)"]
   end
 
-  subgraph render["@hwp/core-ui/src/renderer/"]
+  subgraph render["@hwe/core-ui/src/renderer/"]
     blockrenderer["BlockRenderer\nmerge(baseBlockRegistry, clientBlocks)\nsort by order → for each block:"]
     base_registry["baseBlockRegistry\n(platform base-blocks)"]
     parse["contentSchema.parse(block.content)\n(Zod boundary)"]
@@ -29,7 +29,7 @@ flowchart TB
     direction TB
     hero["<HeroBlock variant=video>"]
     gallery["<GalleryBlock variant=masonry>  →  GalleryMasonry"]
-    booking["<BookingBlock variant=inline>  →  BookingInline\n(uses useBookingAdapter() from @hwp/core-ui)"]
+    booking["<BookingBlock variant=inline>  →  BookingInline\n(uses useBookingAdapter() from @hwe/core-ui)"]
     services["<ServicesBlock variant=cards>"]
     map["<MapBlock>"]
     hero --> gallery --> booking --> services --> map
@@ -50,7 +50,7 @@ Pages are not custom-coded per client. They are **assembled** from a fixed catal
 
 Key consequences:
 
-- **Adding a new block to the catalog** means one folder in `@hwp/core-ui/src/base-blocks/` plus one entry in `baseBlockRegistry.ts`. Every page in every client site can use it immediately (after publishing a new version).
+- **Adding a new block to the catalog** means one folder in `@hwe/core-ui/src/base-blocks/` plus one entry in `baseBlockRegistry.ts`. Every page in every client site can use it immediately (after publishing a new version).
 - **Changing the order of a page** is a CMS edit, not a code change. The editor reorders `layout[]` in Payload.
 - **Per-client styling** comes from `@theme {}` token overrides in `globals.css` (Tailwind v4), not from forking a page. A `HeroBlock` looks different on `client-a` and `client-b` because the tokens differ, not because the component differs.
 - **Per-client structural choices** come from `blockDefaults` in `client.config.ts` ([DEC-009](../architecture/decisions.md#dec-009--remove-activeblocks-add-blockdefaults-to-clientconfigts)) — e.g. one client defaults to `BookingInline`, another defaults to `BookingIframe`. Both use the same `BookingBlock`.

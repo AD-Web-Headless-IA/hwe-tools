@@ -46,7 +46,7 @@ Run:
 
 ## Steps
 
-All grep commands run from `hwp-platform/` unless specified.
+All grep commands run from `hwe-platform/` unless specified.
 
 **Step 1 — Find all `dangerouslySetInnerHTML` usages**
 ```bash
@@ -177,6 +177,6 @@ A block handling user input cannot advance past `alpha` with any **Blocker** inp
 
 Como `sanitize_text_field()` y `esc_html()` en cada handler de formulario de WordPress — pero aquí la herramienta es Zod en el Route Handler y JSX para el render.
 
-**WordPress equivalent:** `wp_kses_post()` para rich text, `sanitize_text_field()` para campos simples, `wp_verify_nonce()` para CSRF. En HWP: Zod schema en el Route Handler + JSX por defecto (React escapa todo texto en JSX automáticamente, a menos que uses `dangerouslySetInnerHTML`).
+**WordPress equivalent:** `wp_kses_post()` para rich text, `sanitize_text_field()` para campos simples, `wp_verify_nonce()` para CSRF. En hwe: Zod schema en el Route Handler + JSX por defecto (React escapa todo texto en JSX automáticamente, a menos que uses `dangerouslySetInnerHTML`).
 
 **Day-to-day impact:** cuando crees un Route Handler que lea el body de una petición, la primera línea de código (después del `await request.json()`) debe ser un `Schema.parse()`. Si no está, es un Blocker en el pre-deploy audit.

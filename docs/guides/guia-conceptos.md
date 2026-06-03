@@ -1,6 +1,6 @@
-# Guía de conceptos HWP — Para nuevos miembros del equipo
+# Guía de conceptos hwe — Para nuevos miembros del equipo
 
-> Esta guía explica cómo está organizado el proyecto HWP, qué piezas lo componen y cómo trabajarás con ellas en tu día a día. Está pensada para alguien que acaba de incorporarse al equipo y viene de un entorno WordPress o similar.
+> Esta guía explica cómo está organizado el proyecto hwe, qué piezas lo componen y cómo trabajarás con ellas en tu día a día. Está pensada para alguien que acaba de incorporarse al equipo y viene de un entorno WordPress o similar.
 >
 > **No necesitas memorizar todo esto.** Úsalo como referencia cuando tengas dudas sobre dónde buscar algo o cómo funciona un proceso.
 
@@ -8,7 +8,7 @@
 
 ## La idea general
 
-HWP es una plataforma para crear webs de campings y hoteles. En vez de hacer cada web desde cero (como haríamos en WordPress con un theme nuevo cada vez), tenemos un sistema de piezas reutilizables que se combinan de forma diferente para cada cliente.
+hwe es una plataforma para crear webs de campings y hoteles. En vez de hacer cada web desde cero (como haríamos en WordPress con un theme nuevo cada vez), tenemos un sistema de piezas reutilizables que se combinan de forma diferente para cada cliente.
 
 Piensa en LEGO: las piezas (bloques) son las mismas para todos los clientes, pero cada cliente monta su propio modelo. Algunos clientes usan las piezas tal cual. Otros las pintan de otro color. Y unos pocos crean piezas totalmente nuevas porque su diseño lo requiere.
 
@@ -63,7 +63,7 @@ docs/
 │   ├── daily-workflow.md       ← Tu rutina diaria de trabajo
 │   ├── project-map.md          ← Mapa visual de dónde está cada cosa
 │   ├── glossary.md             ← Diccionario de términos del proyecto
-│   └── wordpress-to-hwp.md     ← "En WordPress hacías X, aquí se hace Y"
+│   └── wordpress-to-hwe.md     ← "En WordPress hacías X, aquí se hace Y"
 │
 ├── plans/               ← Planes de trabajo por fase
 ├── diagrams/            ← Diagramas visuales de la arquitectura
@@ -142,7 +142,7 @@ Estas reglas aplican siempre, sin excepciones:
 
 ### Analogía WordPress
 
-En WordPress, las normas de codificación son los WPCS (WordPress Coding Standards). Las specs de HWP son el equivalente, pero cubren más: no solo cómo escribir PHP/React, sino también SEO, seguridad, accesibilidad, y la metodología de trabajo con IA.
+En WordPress, las normas de codificación son los WPCS (WordPress Coding Standards). Las specs de hwe son el equivalente, pero cubren más: no solo cómo escribir PHP/React, sino también SEO, seguridad, accesibilidad, y la metodología de trabajo con IA.
 
 ---
 
@@ -212,7 +212,7 @@ Claude Code lee el skill, carga las reglas del proyecto, y ejecuta la tarea. No 
 
 ### Analogía WordPress
 
-En WordPress, usarías WP-CLI para scaffoldear un plugin (`wp scaffold plugin mi-plugin`). Los skills de HWP son eso pero mucho más potentes: no solo crean ficheros, sino que los crean siguiendo las specs, con tests incluidos, y validando que todo cuadre con la arquitectura.
+En WordPress, usarías WP-CLI para scaffoldear un plugin (`wp scaffold plugin mi-plugin`). Los skills de hwe son eso pero mucho más potentes: no solo crean ficheros, sino que los crean siguiendo las specs, con tests incluidos, y validando que todo cuadre con la arquitectura.
 
 ---
 
@@ -286,7 +286,7 @@ Porque garantiza que:
 - **Nada se mezcla sin pasar calidad** (paso 4)
 - **Nada queda sin documentar** (paso 5)
 
-En WordPress, estos pasos suelen saltarse bajo presión ("ya lo documentaré luego", "los tests los pongo después"). En HWP, el propio sistema de IA los refuerza — no puedes avanzar al siguiente paso sin completar el anterior.
+En WordPress, estos pasos suelen saltarse bajo presión ("ya lo documentaré luego", "los tests los pongo después"). En hwe, el propio sistema de IA los refuerza — no puedes avanzar al siguiente paso sin completar el anterior.
 
 ### Analogía WordPress
 
@@ -315,7 +315,7 @@ Esto clona el diseño en `figma-makes/camping-sol-y-luna/`, extrae los colores y
 ```
 
 Esto crea un repositorio independiente con:
-- Todos los bloques base (re-exportados desde `@hwp/core-ui`)
+- Todos los bloques base (re-exportados desde `@hwe/core-ui`)
 - El registry de bloques
 - La estructura de tema con los tokens del Figma
 - El `globals.css` con las fuentes del cliente
@@ -422,7 +422,7 @@ No exactamente. SPECBOOT define el ciclo de una historia individual (enrich → 
 
 Un bloque es como una pieza de LEGO. Una composición es el modelo que montas con esas piezas.
 
-### ¿Qué pasa cuando actualicemos `@hwp/core-ui`?
+### ¿Qué pasa cuando actualicemos `@hwe/core-ui`?
 
 Los clientes que usan Level 1 (re-export) reciben las mejoras automáticamente al hacer `npm update`. Los que usan Level 2 (slots) o Level 3 (custom) solo se ven afectados si cambia el schema de datos — y eso es un cambio de versión major que se comunica y se planifica.
 
@@ -434,7 +434,7 @@ Los clientes que usan Level 1 (re-export) reciben las mejoras automáticamente a
 □ Leer esta guía (ya lo estás haciendo)
 □ Leer docs/guides/first-day-setup.md
 □ Leer docs/guides/project-map.md
-□ Echar un vistazo a docs/guides/wordpress-to-hwp.md
+□ Echar un vistazo a docs/guides/wordpress-to-hwe.md
 □ Abrir el proyecto en VS Code y explorar la estructura de carpetas
 □ Ejecutar pnpm install y pnpm build para verificar que todo compila
 □ Abrir apps/site-demo en localhost y navegar el camping de ejemplo

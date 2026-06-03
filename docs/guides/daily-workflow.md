@@ -22,7 +22,7 @@ En WordPress sería: abrir Local → activar el site → editar el theme → F5 
 
 **En WordPress:** abras Local by Flywheel, iniciabas el site, y abrías la carpeta del tema en VS Code.
 
-**En HWP:**
+**En hwe:**
 
 ```bash
 # Opción A: desde VS Code
@@ -33,7 +33,7 @@ cd "C:\laragon\www\Hospitality Web Platform\site-{slug}"
 code .
 ```
 
-> 💡 Abre siempre `site-{slug}/` como la raíz del workspace en VS Code — no la carpeta del cliente ni hwp-core. Así TypeScript y las importaciones funcionan correctamente.
+> 💡 Abre siempre `site-{slug}/` como la raíz del workspace en VS Code — no la carpeta del cliente ni hwe-core. Así TypeScript y las importaciones funcionan correctamente.
 
 ---
 
@@ -41,7 +41,7 @@ code .
 
 **En WordPress:** hacías click en "Start" en Local y ya estaba.
 
-**En HWP:**
+**En hwe:**
 
 ```bash
 # Desde site-{slug}/ (la raíz del repo de cliente)
@@ -73,7 +73,7 @@ Abre el browser en **http://localhost:3000** y ya tienes el site.
 
 **En WordPress:** editabas un `.php`, guardabas, apretabas F5 en el browser.
 
-**En HWP:** editas un `.tsx`, `.json` o `.css`, guardas. El browser **se actualiza solo** (Hot Module Replacement). No hay que apretar F5.
+**En hwe:** editas un `.tsx`, `.json` o `.css`, guardas. El browser **se actualiza solo** (Hot Module Replacement). No hay que apretar F5.
 
 ### Dónde trabajar según tu rol
 
@@ -82,7 +82,7 @@ Abre el browser en **http://localhost:3000** y ya tienes el site.
 | Dev de cliente | `src/blocks/` | Bloques propios del cliente (Level 1/2/3), registry |
 | Dev de cliente (tokens) | `src/theme/tokens.json` | Colores, fuentes, espaciados |
 | Dev de cliente (páginas) | `src/app/` | Layout, páginas, `globals.css @theme {}` |
-| Dev de plataforma | `hwp-core/packages/core-ui/src/base-blocks/` | Base-blocks, schemas, adapters |
+| Dev de plataforma | `hwe-core/packages/core-ui/src/base-blocks/` | Base-blocks, schemas, adapters |
 
 > **Regla CSS:** toda la CSS del cliente va en `src/app/globals.css`. Nunca en ficheros dentro de `src/blocks/`.
 
@@ -93,7 +93,7 @@ En Tailwind v4 los tokens se definen en `globals.css` con `@theme {}`:
 ```css
 /* src/app/globals.css */
 @import "tailwindcss";
-@import "@hwp/config/theme.css";
+@import "@hwe/config/theme.css";
 
 @theme {
   --color-primary: #2D5A27;    ← cambia aquí
@@ -104,7 +104,7 @@ En Tailwind v4 los tokens se definen en `globals.css` con `@theme {}`:
 
 Guarda → el browser se actualiza en ~1 segundo.
 
-También puedes editar `src/theme/tokens.json` si el preset de `@hwp/config/theme.css` consume ese fichero en tu versión.
+También puedes editar `src/theme/tokens.json` si el preset de `@hwe/config/theme.css` consume ese fichero en tu versión.
 
 ### Editar el contenido de una página
 
@@ -131,7 +131,7 @@ En lugar de escribir CSS, usas clases de Tailwind directamente en el JSX:
 // WordPress (style.css + PHP)
 <div class="hero-section">   ← clase CSS definida en style.css
 
-// HWP (Tailwind en JSX)
+// hwe (Tailwind en JSX)
 <div className="bg-primary text-on-dark py-[--spacing-section-y]">   ← clases inline
 ```
 
@@ -183,7 +183,7 @@ Invoca el agente security-specialist para hacer el pre-deploy audit del site.
 
 **En WordPress:** subías por FTP o hacías click en "Deploy" en tu hosting. No había historial de cambios.
 
-**En HWP:** cada cambio se guarda con git.
+**En hwe:** cada cambio se guarda con git.
 
 ### Opción A: con Claude Code (recomendado)
 
@@ -247,27 +247,27 @@ docs: update project map for DEC-017
 
 ## 6. 📦 Actualizar dependencias
 
-### Actualizar `@hwp/core-ui` (nueva release del equipo de plataforma)
+### Actualizar `@hwe/core-ui` (nueva release del equipo de plataforma)
 
 ```bash
 # En el repo de cliente (site-{slug}/)
-npm update @hwp/core-ui @hwp/config
+npm update @hwe/core-ui @hwe/config
 npm install
 ```
 
-Después revisa el changelog de `@hwp/core-ui` — si hay cambios en schemas (breaking), los bloques Level 3 pueden necesitar adaptarse.
+Después revisa el changelog de `@hwe/core-ui` — si hay cambios en schemas (breaking), los bloques Level 3 pueden necesitar adaptarse.
 
-### Actualizar hwp-tools (nuevas skills o specs)
+### Actualizar hwe-tools (nuevas skills o specs)
 
 ```bash
-cd .hwp-tools
+cd .hwe-tools
 git pull origin main
 cd ..
-git add .hwp-tools
-git commit -m "chore: update hwp-tools"
+git add .hwe-tools
+git commit -m "chore: update hwe-tools"
 ```
 
-> 🔄 **Equivalente WP:** como actualizar un plugin o tema padre. Para el core (`@hwp/core-ui`) es `npm update`; para las herramientas (`.hwp-tools`) es `git pull`.
+> 🔄 **Equivalente WP:** como actualizar un plugin o tema padre. Para el core (`@hwe/core-ui`) es `npm update`; para las herramientas (`.hwe-tools`) es `git pull`.
 
 ---
 
@@ -283,7 +283,7 @@ Claude Code es el asistente de IA que vive en la terminal. Úsalo para:
 | Quieres hacer un commit | "haz el commit" o `/commit` |
 | Necesitas saber una decisión técnica | "¿Por qué usamos Tailwind v4 CSS-first?" |
 
-> 💡 Claude Code tiene acceso a toda la documentación a través de `.hwp-tools/docs/`. Si no sabes algo, pregunta antes de buscarlo en Google — probablemente ya esté documentado aquí.
+> 💡 Claude Code tiene acceso a toda la documentación a través de `.hwe-tools/docs/`. Si no sabes algo, pregunta antes de buscarlo en Google — probablemente ya esté documentado aquí.
 
 ---
 
@@ -351,7 +351,7 @@ Invoca el agente seo-geo-specialist para auditar el bloque HeroBlock que acabamo
 ☀️  Mañana
     cd site-{slug}/
     git pull                                  ← traer cambios del equipo
-    git submodule update --recursive          ← actualizar .hwp-tools si cambió
+    git submodule update --recursive          ← actualizar .hwe-tools si cambió
     npm install                               ← si hay nuevas dependencias
     npm run dev                               ← levantar el servidor
 
@@ -370,13 +370,13 @@ Invoca el agente seo-geo-specialist para auditar el bloque HeroBlock que acabamo
 
 ## En términos simples
 
-| En WordPress... | En HWP... |
+| En WordPress... | En hwe... |
 |---|---|
 | Local / MAMP corriendo | `npm run dev` corriendo |
 | F5 en el browser | Auto-recarga (HMR) |
 | Editar `style.css` | Editar `globals.css @theme {}` |
 | Editar `template.php` | Editar `page.tsx` |
 | Upload por FTP | `git push` |
-| Plugins actualizados en wp-admin | `npm update @hwp/core-ui` |
-| Actualizar tema padre | `cd .hwp-tools && git pull` |
+| Plugins actualizados en wp-admin | `npm update @hwe/core-ui` |
+| Actualizar tema padre | `cd .hwe-tools && git pull` |
 | Pantalla blanca = error | Error rojo en terminal |

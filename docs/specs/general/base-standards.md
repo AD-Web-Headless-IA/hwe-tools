@@ -1,6 +1,6 @@
 # Base standards
 
-> Common rules every artifact in HWP respects, regardless of layer (frontend, backend, scripts, prompts).
+> Common rules every artifact in hwe respects, regardless of layer (frontend, backend, scripts, prompts).
 > Every other `docs/specs/*.md` extends these — do not repeat them elsewhere.
 > Always loaded into agent context. Keep this file short — under 200 lines.
 
@@ -39,7 +39,7 @@
 ## Architecture
 
 - **Adapter pattern** at every external boundary: `BookingAdapter`, `ContentRepository`, `AIProviderAdapter`. Concrete implementations (`CloudbedsAdapter`, `PayloadAdapter`) inject through the interface. The core never imports a concrete adapter.
-- **No `if (client === '...')` in the core** — ever. Per-client behavior goes in the client repo's `src/` or in `client.config.ts`, not in `hwp-core/packages/*`.
+- **No `if (client === '...')` in the core** — ever. Per-client behavior goes in the client repo's `src/` or in `client.config.ts`, not in `hwe-core/packages/*`.
 - **DDD 4 layers** (Presentation / Application / Domain / Infrastructure). Domain does not import Infrastructure. Application orchestrates Domain via interfaces.
 - **Bounded contexts**: Booking, Content, Tenant, AI. Same real-world concept gets different names per context if semantics differ — never share types across contexts just because the shape matches.
 
@@ -123,5 +123,5 @@ For agent invocation rules, see `docs/specs/general/agent-standards.md`.
 
 ## Related specs
 
-- [`docs/specs/frontend/coding-standards.md`](../frontend/coding-standards.md) — HWP-specific elaboration of these rules for frontend code: component structure, React patterns, import grouping, anti-patterns table.
+- [`docs/specs/frontend/coding-standards.md`](../frontend/coding-standards.md) — hwe-specific elaboration of these rules for frontend code: component structure, React patterns, import grouping, anti-patterns table.
 - [`docs/specs/security/security-standards.md`](../security/security-standards.md) — security and RGPD rules that extend the security baseline above.

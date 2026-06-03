@@ -1,9 +1,9 @@
 # Template contract
 
-> **How** to build a reusable page template in `@hwp/core-ui`. Companion to the binding rules in [`ai-specs/specs/frontend-standards.md`](../../specs/frontend-standards.md) and complement to [`block-contract.md`](./block-contract.md).
+> **How** to build a reusable page template in `@hwe/core-ui`. Companion to the binding rules in [`ai-specs/specs/frontend-standards.md`](../../specs/frontend-standards.md) and complement to [`block-contract.md`](./block-contract.md).
 > Load this file when scaffolding a new page template, extending one for a client, or deciding "is this a block or a template?".
 >
-> **DEC-015:** Platform blocks live in `@hwp/core-ui/base-blocks`; client-owned overrides live in the client repo. Block schemas are importable separately via `@hwp/core-ui/schemas`. Subpath exports: `@hwp/core-ui`, `@hwp/core-ui/base-blocks`, `@hwp/core-ui/schemas`, `@hwp/core-ui/theme`.
+> **DEC-015:** Platform blocks live in `@hwe/core-ui/base-blocks`; client-owned overrides live in the client repo. Block schemas are importable separately via `@hwe/core-ui/schemas`. Subpath exports: `@hwe/core-ui`, `@hwe/core-ui/base-blocks`, `@hwe/core-ui/schemas`, `@hwe/core-ui/theme`.
 >
 > **Template name and field examples** (`AccommodationDetailTemplate`, `price`, `bedrooms`) **are illustrative.** The canonical catalog of templates and their domain fields comes from a separate domain-modeling session — names and fields below are placeholders.
 
@@ -41,8 +41,8 @@ import { z } from 'zod';
 import { BlockContent } from '@/renderer/baseBlockRegistry';
 // Schemas are imported from the canonical schemas barrel — not directly from base-blocks
 // (illustrative imports — real block names come from the domain session)
-import { GalleryBlockContent }   from '@hwp/core-ui/schemas';
-import { AmenitiesBlockContent } from '@hwp/core-ui/schemas';
+import { GalleryBlockContent }   from '@hwe/core-ui/schemas';
+import { AmenitiesBlockContent } from '@hwe/core-ui/schemas';
 
 // ─── Layer 1: BASE ──────────────────────────────────────────
 // Required for every instance of this template. If a field is here,
@@ -96,8 +96,8 @@ The template reads Base, conditionally renders Optional, delegates Sections.
 // packages/core-ui/src/templates/{Name}/{Name}.tsx
 import { BlockRenderer } from '@/renderer/BlockRenderer';
 // Blocks imported from the base-blocks subpath, not the package root
-import { GalleryBlock }   from '@hwp/core-ui/base-blocks';
-import { AmenitiesBlock } from '@hwp/core-ui/base-blocks';
+import { GalleryBlock }   from '@hwe/core-ui/base-blocks';
+import { AmenitiesBlock } from '@hwe/core-ui/base-blocks';
 import type { {Name}Content } from './{Name}.types';
 
 export function {Name}Template({ data }: { data: {Name}Content }) {
@@ -141,7 +141,7 @@ When a client needs fields the base template does not know about:
 
 ```ts
 // apps/site-{slug}/payload/schemas/accommodation.ts
-import { extendAccommodation } from '@hwp/core-ui'; // re-exported from the template
+import { extendAccommodation } from '@hwe/core-ui'; // re-exported from the template
 import { z } from 'zod';
 
 export const {Slug}AccommodationContent = extendAccommodation({
@@ -166,7 +166,7 @@ Two strategies, in order of preference:
 
 ```tsx
 // apps/site-{slug}/src/compositions/{Slug}AccommodationComposition.tsx
-import { AccommodationDetailTemplate } from '@hwp/core-ui';
+import { AccommodationDetailTemplate } from '@hwe/core-ui';
 import type { {Slug}AccommodationContent } from '@/payload-types';
 
 export function {Slug}AccommodationComposition({ data }: { data: {Slug}AccommodationContent }) {
@@ -196,7 +196,7 @@ A template is consumed by a dynamic route:
 
 ```tsx
 // apps/site-{slug}/src/app/[locale]/{collection}/[slug]/page.tsx
-import { AccommodationDetailTemplate } from '@hwp/core-ui';
+import { AccommodationDetailTemplate } from '@hwe/core-ui';
 import { contentRepository } from '@/lib/repositories';
 
 export async function generateStaticParams() {
@@ -214,13 +214,13 @@ One template → N routes, one per item in the collection. Adding an item in Pay
 
 ### Client compositions and the local block registry
 
-When a client composition wraps a template and passes a `BlockRenderer` to render dynamic sections, it must wire the client's own block registry into the renderer. Client blocks live in `src/blocks/registry.ts` — they are **not** imported directly from `@hwp/core-ui`:
+When a client composition wraps a template and passes a `BlockRenderer` to render dynamic sections, it must wire the client's own block registry into the renderer. Client blocks live in `src/blocks/registry.ts` — they are **not** imported directly from `@hwe/core-ui`:
 
 ```tsx
 // apps/site-{slug}/src/compositions/{Slug}AccommodationComposition.tsx
-import { AccommodationDetailTemplate } from '@hwp/core-ui';
-import { BlockRenderer } from '@hwp/core-ui';
-import { clientBlocks } from '@/blocks/registry';   // local registry, NOT @hwp/core-ui
+import { AccommodationDetailTemplate } from '@hwe/core-ui';
+import { BlockRenderer } from '@hwe/core-ui';
+import { clientBlocks } from '@/blocks/registry';   // local registry, NOT @hwe/core-ui
 import type { {Slug}AccommodationContent } from '@/payload-types';
 
 export function {Slug}AccommodationComposition({ data }: { data: {Slug}AccommodationContent }) {

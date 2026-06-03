@@ -43,7 +43,7 @@ Run:
 
 ## Steps
 
-All commands run from `hwp-platform/`.
+All commands run from `hwe-platform/`.
 
 **Step 1 — Run `pnpm audit`**
 ```bash
@@ -114,11 +114,11 @@ console.log(JSON.stringify({...pkg.dependencies, ...pkg.devDependencies}, null, 
 " 2>/dev/null
 ```
 Then manually verify any unfamiliar package name against npmjs.com.
-- Package with < 1000 weekly downloads that is not an internal `@hwp/*` package → **Major** (investigate)
+- Package with < 1000 weekly downloads that is not an internal `@hwe/*` package → **Major** (investigate)
 
 **Step 7 — Check that `pnpm audit` is in the CI pipeline**
 ```bash
-cat hwp-platform/.github/workflows/*.yml 2>/dev/null | grep "pnpm audit" || echo "NOT IN CI"
+cat hwe-platform/.github/workflows/*.yml 2>/dev/null | grep "pnpm audit" || echo "NOT IN CI"
 ```
 Expected: `pnpm audit` appears in at least one CI workflow.
 - Not in CI → **Minor** (vulnerabilities may accumulate between manual checks)

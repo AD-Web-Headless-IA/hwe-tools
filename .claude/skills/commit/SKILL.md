@@ -1,13 +1,13 @@
 ---
 name: commit
-description: Stage and commit pending changes following HWP's Conventional Commits rules. Inspects git status/diff, detects whether the change is one logical unit or several (proposing a split), drafts type/scope/subject/body, asks the user to confirm, and creates the commit(s). Refuses to commit secrets, never skips hooks, never amends published commits.
+description: Stage and commit pending changes following hwe's Conventional Commits rules. Inspects git status/diff, detects whether the change is one logical unit or several (proposing a split), drafts type/scope/subject/body, asks the user to confirm, and creates the commit(s). Refuses to commit secrets, never skips hooks, never amends published commits.
 argument-hint: [scope-hint]
 allowed-tools: Read Glob Grep Bash(git status:*) Bash(git diff:*) Bash(git log:*) Bash(git branch:*) Bash(git show:*) Bash(git ls-files:*) Bash(git add:*) Bash(git reset:*) Bash(git commit:*) Bash(git rev-parse:*)
 ---
 
 # Commit
 
-You are a release engineer. Your job is to take the pending changes in the working tree and turn them into one or more Conventional Commits that comply with HWP's rules — without surprising the user, without losing changes, and without bypassing the project's safeguards.
+You are a release engineer. Your job is to take the pending changes in the working tree and turn them into one or more Conventional Commits that comply with hwe's rules — without surprising the user, without losing changes, and without bypassing the project's safeguards.
 
 The rules you enforce come from [`ai-specs/specs/base-standards.md`](../../../docs/specs/general/base-standards.md) §Commits and from `CLAUDE.md`. This skill is the automation of those rules — the developer should never have to remember them.
 

@@ -1,6 +1,6 @@
 # Frontend standards
 
-> Rules for all frontend code in HWP. Extends [`base-standards.md`](base-standards.md).
+> Rules for all frontend code in hwe. Extends [`base-standards.md`](base-standards.md).
 > Always loaded into agent context for any frontend task. Short — keep under 200 lines.
 > Detailed layout / patterns / examples live in `docs/contracts/frontend/*` — load on demand per `docs/README.md`.
 
@@ -20,8 +20,8 @@
 
 See `docs/contracts/frontend/structure.md` for the full layout. Summary of the binding rules:
 
-- **Three independent repos (DEC-017)**: `hwp-core/` (packages), `hwp-template/` (starter), `site-{slug}/` (client repos). Client repos consume `@hwp/*` via npm. All use `src/`.
-- **Three component categories in `hwp-core/packages/core-ui/`** (cannot be mixed in the same folder):
+- **Three independent repos (DEC-017)**: `hwe-core/` (packages), `hwe-template/` (starter), `site-{slug}/` (client repos). Client repos consume `@hwe/*` via npm. All use `src/`.
+- **Three component categories in `hwe-core/packages/core-ui/`** (cannot be mixed in the same folder):
   - `primitives/` — shadcn/Radix atomic UI (Button, Input, Dialog).
   - `base-blocks/` — reference block implementations (DEC-015: renamed from `blocks/`). Each `{Name}Block/` folder holds `{Name}Block.tsx`, `{Name}Block.slots.ts` (if slots needed), `{Name}Block.variants.ts`, `{Name}Block.test.tsx`.
   - `schemas/` — Zod content + config schemas for all blocks (DEC-015: moved out of block folders).
@@ -30,17 +30,17 @@ See `docs/contracts/frontend/structure.md` for the full layout. Summary of the b
 - **Client sites have their own `src/blocks/`** (`site-{slug}/src/blocks/`) with their block implementations (Level 1 re-exports, Level 2 slot overrides, or Level 3 full custom). A `registry.ts` wires them to `BlockRenderer`.
 - **Compositions** live in `site-{slug}/src/compositions/`, NOT in `app/`. Routes are thin wrappers that call a composition.
 - **No barrel files** inside packages (only one `index.ts` at the package root that re-exports the public API).
-- **Imports**: use the correct `@hwp/core-ui` subpath (DEC-015): `@hwp/core-ui` for primitives/renderer/providers, `@hwp/core-ui/schemas` for Zod schemas + types, `@hwp/core-ui/base-blocks` for reference implementations. Use `@/` for intra-package (alias to `src/`). No deep path imports across packages.
+- **Imports**: use the correct `@hwe/core-ui` subpath (DEC-015): `@hwe/core-ui` for primitives/renderer/providers, `@hwe/core-ui/schemas` for Zod schemas + types, `@hwe/core-ui/base-blocks` for reference implementations. Use `@/` for intra-package (alias to `src/`). No deep path imports across packages.
 
 ## Block contract (binding)
 
 Detail in `docs/contracts/frontend/block-contract.md`. The rules:
 
 - A block is a function component that accepts `content: ContentType` and optionally `variant: VariantName`.
-- The block's `.schema.ts` lives in `hwp-core/packages/core-ui/src/schemas/` and exports a Zod schema for `content`. The block's `.types.ts` (in `types/`) derives the TS type from it (`z.infer`).
+- The block's `.schema.ts` lives in `hwe-core/packages/core-ui/src/schemas/` and exports a Zod schema for `content`. The block's `.types.ts` (in `types/`) derives the TS type from it (`z.infer`).
 - The block's `.variants.ts` exports a CVA recipe. Variants are a fixed set, declared at design time.
 - Payload stores `{ type, variant, order, content }` per block instance. **Never layout, colors, or spacing.**
-- The `BlockRenderer` (in `hwp-core/packages/core-ui/src/renderer/`) maps `type` to component via `baseBlockRegistry` with an optional client override map (`blocks` prop). Adding a platform block = one row in `baseBlockRegistry` + a base-block implementation in `base-blocks/`. Adding a client block = one entry in the client's `src/blocks/registry.ts` + the implementation in `src/blocks/{Name}/`.
+- The `BlockRenderer` (in `hwe-core/packages/core-ui/src/renderer/`) maps `type` to component via `baseBlockRegistry` with an optional client override map (`blocks` prop). Adding a platform block = one row in `baseBlockRegistry` + a base-block implementation in `base-blocks/`. Adding a client block = one entry in the client's `src/blocks/registry.ts` + the implementation in `src/blocks/{Name}/`.
 
 ## Template contract (binding)
 
@@ -55,8 +55,8 @@ Detail in `docs/contracts/frontend/template-contract.md`. The rules:
 Detail in `docs/contracts/frontend/theme-tokens.md`. The rules:
 
 - Tokens come from `src/theme/tokens.json` (in client repo, exported from Figma Variables).
-- `tokens.json` must satisfy the `TokensContract` type from `@hwp/core-ui/src/theme/tokens.contract.ts`. Failing this contract fails the build.
-- Tailwind v4: `src/app/globals.css` imports `"tailwindcss"` + `"@hwp/config/theme.css"` and overrides with `@theme { ... }` blocks. No `tailwind.config.ts` + `createHwpPreset()` (that was v3).
+- `tokens.json` must satisfy the `TokensContract` type from `@hwe/core-ui/src/theme/tokens.contract.ts`. Failing this contract fails the build.
+- Tailwind v4: `src/app/globals.css` imports `"tailwindcss"` + `"@hwe/config/theme.css"` and overrides with `@theme { ... }` blocks. No `tailwind.config.ts` + `createhwePreset()` (that was v3).
 - CSS custom properties are emitted from tokens — never hardcoded in components.
 
 ## Accessibility — WCAG 2.1 AA (binding)
@@ -98,7 +98,7 @@ A block without an a11y test in its `.test.tsx` cannot be promoted past `alpha`.
 ## Anti-patterns specific to frontend (don't)
 
 - Don't import a block, template, or primitive directly by deep path. Use the package's public API.
-- Don't put business logic in a block. Blocks render `content`; logic lives in `@hwp/booking`, `@hwp/content`, services, or the composition layer.
+- Don't put business logic in a block. Blocks render `content`; logic lives in `@hwe/booking`, `@hwe/content`, services, or the composition layer.
 - Don't add a prop to a block to satisfy one client. Add a variant, or split into two blocks, or move the logic to a composition.
 - Don't create a `useEffect` that fetches data on mount — Server Components or `generateStaticParams` are the answer.
 - Don't add `"use client"` higher in the tree than necessary. Each marked component "infects" its subtree.

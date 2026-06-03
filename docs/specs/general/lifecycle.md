@@ -1,6 +1,6 @@
 # Component lifecycle
 
-> Stages every reusable HWP component (skill, agent, MCP, agent team, `@hwp/core-ui` block, template, primitive) passes through, and what each stage requires.
+> Stages every reusable hwe component (skill, agent, MCP, agent team, `@hwe/core-ui` block, template, primitive) passes through, and what each stage requires.
 > Status is tracked in `docs/catalog.md` (one row per component).
 > Loaded by agents that promote, demote, or audit components. Short — keep under 150 lines.
 

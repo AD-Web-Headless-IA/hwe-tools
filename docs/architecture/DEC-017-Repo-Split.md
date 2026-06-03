@@ -3,19 +3,19 @@
 > **Status:** Proposed
 > **Date:** 2026-06-03
 > **Extends:** DEC-011 (independent client repos), DEC-015 (client-owned blocks)
-> **Supersedes:** The single `hwp-platform/` monorepo containing tools + code + docs together
+> **Supersedes:** The single `hwe-platform/` monorepo containing tools + code + docs together
 
 ---
 
 ## The decision
 
-Split the current `hwp-platform/` monorepo into three purpose-built repos. Each uses the delivery mechanism natural to what it contains:
+Split the current `hwe-platform/` monorepo into three purpose-built repos. Each uses the delivery mechanism natural to what it contains:
 
 | Repo | Contains | Delivery | Why this mechanism |
 |---|---|---|---|
-| `hwp-tools` | Skills, agents, commands, docs, specs, contracts, guides | **Git submodule** | Text files that Claude Code and humans read directly. No compilation, no dependencies. |
-| `hwp-core` | React packages: schemas, base-blocks, primitives, renderer, theme, adapters | **npm packages** (`@hwp/core-ui`, `@hwp/config`) | Compiled code with dependencies (React, Zod, CVA). Needs semver, bundling, import resolution. |
-| `hwp-template` | Empty starter structure for new clients | **GitHub template repo** | Cloned once per client via "Use this template". Not published as npm. |
+| `hwe-tools` | Skills, agents, commands, docs, specs, contracts, guides | **Git submodule** | Text files that Claude Code and humans read directly. No compilation, no dependencies. |
+| `hwe-core` | React packages: schemas, base-blocks, primitives, renderer, theme, adapters | **npm packages** (`@hwe/core-ui`, `@hwe/config`) | Compiled code with dependencies (React, Zod, CVA). Needs semver, bundling, import resolution. |
+| `hwe-template` | Empty starter structure for new clients | **GitHub template repo** | Cloned once per client via "Use this template". Not published as npm. |
 
 Client repos are independent, created from the template, and consume tools via submodule + core via npm.
 
@@ -23,12 +23,12 @@ Figma Make repos remain independent per DEC-002 — outside all project repos.
 
 ---
 
-## Repo 1: `hwp-tools` (git submodule)
+## Repo 1: `hwe-tools` (git submodule)
 
 Everything the team and Claude Code need to **work correctly** — rules, skills, agents, methodology. No runtime code.
 
 ```
-hwp-tools/
+hwe-tools/
 ├── .claude/
 │   ├── skills/                         ← executable skills for Claude Code
 │   │   ├── scaffold-block/
@@ -110,7 +110,7 @@ hwp-tools/
 │   │   ├── daily-workflow.md
 │   │   ├── project-map.md
 │   │   ├── glossary.md
-│   │   └── wordpress-to-hwp.md
+│   │   └── wordpress-to-hwe.md
 │   │
 │   ├── diagrams/
 │   │   ├── monorepo-overview.mmd
@@ -136,14 +136,14 @@ hwp-tools/
 
 ---
 
-## Repo 2: `hwp-core` (npm packages)
+## Repo 2: `hwe-core` (npm packages)
 
 Everything that **compiles, bundles, and runs** in client sites. Turborepo workspace for developing the packages together.
 
 ```
-hwp-core/
+hwe-core/
 ├── packages/
-│   ├── core-ui/                        ← published as @hwp/core-ui
+│   ├── core-ui/                        ← published as @hwe/core-ui
 │   │   ├── src/
 │   │   │   ├── schemas/                ← Zod content + config schemas
 │   │   │   │   ├── HeroBlock.schema.ts
@@ -225,9 +225,9 @@ hwp-core/
 │   │   ├── package.json                ← exports: ".", "./base-blocks", "./schemas", "./theme"
 │   │   └── tsconfig.json
 │   │
-│   └── config/                         ← published as @hwp/config
+│   └── config/                         ← published as @hwe/config
 │       ├── src/
-│       │   ├── tailwind-preset.ts      ← createHwpPreset(tokens)
+│       │   ├── tailwind-preset.ts      ← createhwePreset(tokens)
 │       │   └── index.ts
 │       ├── tsconfig.json               ← base tsconfig for all projects
 │       └── package.json
@@ -254,7 +254,7 @@ hwp-core/
 └── package.json
 ```
 
-**npm subpath exports** for `@hwp/core-ui`:
+**npm subpath exports** for `@hwe/core-ui`:
 ```json
 {
   "exports": {
@@ -270,13 +270,13 @@ hwp-core/
 
 ---
 
-## Repo 3: `hwp-template` (GitHub template)
+## Repo 3: `hwe-template` (GitHub template)
 
 Empty starter cloned via "Use this template" on GitHub. Not published as npm.
 
 ```
-hwp-template/
-├── .hwp-tools/                         ← git submodule → hwp-tools repo
+hwe-template/
+├── .hwe-tools/                         ← git submodule → hwe-tools repo
 │   ├── .claude/
 │   └── docs/
 │
@@ -292,7 +292,7 @@ hwp-template/
 │   │
 │   ├── blocks/                         ← Level 1 re-exports of all base-blocks
 │   │   ├── HeroBlock/
-│   │   │   └── HeroBlock.tsx           ← export { HeroBlock } from '@hwp/core-ui/base-blocks'
+│   │   │   └── HeroBlock.tsx           ← export { HeroBlock } from '@hwe/core-ui/base-blocks'
 │   │   ├── BookingBlock/
 │   │   │   └── BookingBlock.tsx
 │   │   ├── MediaTextBlock/
@@ -341,8 +341,8 @@ hwp-template/
 ├── postcss.config.mjs
 ├── next.config.mjs
 ├── tsconfig.json
-├── package.json                        ← depends on @hwp/core-ui + @hwp/config
-├── CLAUDE.md                           ← points to .hwp-tools/ for context
+├── package.json                        ← depends on @hwe/core-ui + @hwe/config
+├── CLAUDE.md                           ← points to .hwe-tools/ for context
 ├── README.md
 └── .gitignore
 ```
@@ -355,7 +355,7 @@ A real client after `/import-figma` + block customization + audits:
 
 ```
 site-camping-sol/
-├── .hwp-tools/                         ← git submodule (skills, agents, docs, specs)
+├── .hwe-tools/                         ← git submodule (skills, agents, docs, specs)
 │
 ├── src/
 │   ├── app/
@@ -474,9 +474,9 @@ figma-makes/                            ← plain folder, NOT a git repo
 ## Client onboarding flow
 
 ```
-1. Create repo    → GitHub "Use this template" from hwp-template
+1. Create repo    → GitHub "Use this template" from hwe-template
 2. Clone          → git clone --recurse-submodules site-camping-sol
-3. Install        → npm install (@hwp/core-ui + @hwp/config)
+3. Install        → npm install (@hwe/core-ui + @hwe/config)
 4. Import Figma   → /import-figma → writes tokens.json + design-language.md + figma-analysis.md
 5. Configure      → client.config.ts, globals.css fonts, layout.tsx lang
 6. Customize      → blocks (Level 1/2/3), pages (/create-page), content (/add-block)
@@ -491,25 +491,25 @@ figma-makes/                            ← plain folder, NOT a git repo
 ### Updating tools
 
 ```bash
-cd .hwp-tools && git pull origin main && cd ..
-git add .hwp-tools
-git commit -m "chore: update hwp-tools to v1.2.0"
+cd .hwe-tools && git pull origin main && cd ..
+git add .hwe-tools
+git commit -m "chore: update hwe-tools to v1.2.0"
 ```
 
 ### Updating core
 
 ```bash
-npm update @hwp/core-ui
+npm update @hwe/core-ui
 # Level 1 blocks: changes apply automatically
 # Level 2/3: check changelog for schema changes
 pnpm test
 git add package.json package-lock.json
-git commit -m "chore: update @hwp/core-ui to v2.1.0"
+git commit -m "chore: update @hwe/core-ui to v2.1.0"
 ```
 
 ### Compatibility check
 
-`hwp-tools/compatibility.json` maps tool versions to compatible core-ui versions:
+`hwe-tools/compatibility.json` maps tool versions to compatible core-ui versions:
 
 ```json
 {
@@ -527,19 +527,19 @@ Skills check this at execution time and warn on mismatch.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  hwp-tools (submodule)                                       │
+│  hwe-tools (submodule)                                       │
 │  Skills · Agents · Commands · Docs · Specs · Contracts       │
 │  Update: git pull                                            │
 └──────────────────────────┬───────────────────────────────────┘
                            │ submodule
 ┌──────────────────────────┼───────────────────────────────────┐
-│  hwp-core (Turborepo)                                        │
-│  @hwp/core-ui · @hwp/config                                  │
+│  hwe-core (Turborepo)                                        │
+│  @hwe/core-ui · @hwe/config                                  │
 │  Update: npm update                                          │
 └──────────────────────────┬───────────────────────────────────┘
                            │ npm install
 ┌──────────────────────────┼───────────────────────────────────┐
-│  hwp-template (GitHub template)                              │
+│  hwe-template (GitHub template)                              │
 │  Empty starter with submodule + deps pre-configured          │
 │  Use: "Use this template" once per client                    │
 └──────────────────────────┬───────────────────────────────────┘

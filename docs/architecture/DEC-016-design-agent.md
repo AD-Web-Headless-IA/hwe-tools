@@ -29,7 +29,7 @@ Today, no one in the system fills this role:
 
 ### Decision
 
-Three additions to the HWP tooling system:
+Three additions to the hwe tooling system:
 
 #### 1. Design language extraction (amplify `/import-figma`)
 

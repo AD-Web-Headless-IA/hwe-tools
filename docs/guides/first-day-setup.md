@@ -12,7 +12,7 @@ Esta guía asume que estás en **Windows** con acceso a internet. Si estás en M
 
 **¿Qué rol tienes?** Hay dos perfiles:
 - **Dev de cliente** — trabajas en `site-{slug}/`, el repo del cliente. Usas `npm`. Este es el caso más común.
-- **Dev de plataforma** — trabajas en `hwp-core/`, los paquetes compartidos. Usas `pnpm`.
+- **Dev de plataforma** — trabajas en `hwe-core/`, los paquetes compartidos. Usas `pnpm`.
 
 Sigue los pasos de tu perfil en el Paso 3.
 
@@ -69,10 +69,10 @@ El editor de código.
 
 ### 1d. pnpm (solo para devs de plataforma)
 
-pnpm es el gestor de dependencias de `hwp-core/`. Los devs de cliente usan npm, que ya viene con Node.js.
+pnpm es el gestor de dependencias de `hwe-core/`. Los devs de cliente usan npm, que ya viene con Node.js.
 
 ```powershell
-# Solo instalar si trabajarás en hwp-core/
+# Solo instalar si trabajarás en hwe-core/
 npm install -g pnpm
 pnpm --version
 # Debe mostrar: 10.x.x (o superior)
@@ -105,7 +105,7 @@ cd "Hospitality Web Platform"
 
 ### Si eres dev de cliente (`site-{slug}/`)
 
-Los repos de cliente incluyen `hwp-tools` como submódulo. Usa `--recurse-submodules` para clonarlo todo de una vez:
+Los repos de cliente incluyen `hwe-tools` como submódulo. Usa `--recurse-submodules` para clonarlo todo de una vez:
 
 ```powershell
 # Reemplaza {slug} con el nombre del cliente (ej: camping-sol, hotel-balneario)
@@ -113,15 +113,15 @@ git clone --recurse-submodules https://github.com/septeo-hospitality/site-{slug}
 cd site-{slug}
 ```
 
-Verás que se descarga el repo principal y después el submódulo `.hwp-tools/`.
+Verás que se descarga el repo principal y después el submódulo `.hwe-tools/`.
 
 > 🔄 **Equivalente WP:** es como hacer "Exportar" en WP e "Importar" en tu Local, pero para el código fuente.
 
-### Si eres dev de plataforma (`hwp-core/`)
+### Si eres dev de plataforma (`hwe-core/`)
 
 ```powershell
-git clone https://github.com/septeo-hospitality/hwp-core.git hwp-core
-cd hwp-core
+git clone https://github.com/septeo-hospitality/hwe-core.git hwe-core
+cd hwe-core
 ```
 
 ---
@@ -135,14 +135,14 @@ cd hwp-core
 npm install
 ```
 
-Esto descarga `@hwp/core-ui`, `@hwp/config`, `next`, `react` y el resto desde el registro npm privado.
+Esto descarga `@hwe/core-ui`, `@hwe/config`, `next`, `react` y el resto desde el registro npm privado.
 
-> ⚠️ Si `npm install` falla con "404 @hwp/core-ui", necesitas configurar el acceso al registro privado. Pide al responsable las credenciales de GitHub Packages.
+> ⚠️ Si `npm install` falla con "404 @hwe/core-ui", necesitas configurar el acceso al registro privado. Pide al responsable las credenciales de GitHub Packages.
 
 ### Dev de plataforma
 
 ```powershell
-# Desde hwp-core/
+# Desde hwe-core/
 pnpm install
 ```
 
@@ -176,7 +176,7 @@ Abre tu browser en **http://localhost:3000**.
 ### Dev de plataforma
 
 ```powershell
-# Desde hwp-core/ — levanta apps/site-demo/
+# Desde hwe-core/ — levanta apps/site-demo/
 pnpm dev
 ```
 
@@ -229,9 +229,9 @@ El código está dividido entre dos repos. Es importante entender esta separaci�
 
 | Qué | Dónde vive | Quién lo toca |
 |---|---|---|
-| **Base-blocks** (bloques de referencia) | `hwp-core/packages/core-ui/src/base-blocks/` | Dev de plataforma |
-| **Schemas Zod compartidos** | `hwp-core/packages/core-ui/src/schemas/` | Dev de plataforma |
-| **Adapters** (booking, map, reviews) | `hwp-core/packages/core-ui/src/adapters/` | Dev de plataforma |
+| **Base-blocks** (bloques de referencia) | `hwe-core/packages/core-ui/src/base-blocks/` | Dev de plataforma |
+| **Schemas Zod compartidos** | `hwe-core/packages/core-ui/src/schemas/` | Dev de plataforma |
+| **Adapters** (booking, map, reviews) | `hwe-core/packages/core-ui/src/adapters/` | Dev de plataforma |
 | **Bloques del cliente** | `src/blocks/` | Dev de cliente |
 | **Registry del cliente** | `src/blocks/registry.ts` | Dev de cliente |
 | **Tokens del cliente** | `src/theme/tokens.json` | Dev de cliente + diseñador |
@@ -244,7 +244,7 @@ El código está dividido entre dos repos. Es importante entender esta separaci�
 ```
 Level 1 — Re-export: usa el base-block tal cual
   src/blocks/HeroBlock/HeroBlock.tsx
-  → export { HeroBlock } from '@hwp/core-ui/base-blocks'
+  → export { HeroBlock } from '@hwe/core-ui/base-blocks'
 
 Level 2 — Slots: rellena zonas predefinidas del base-block
   src/blocks/HeroBlock/HeroBlock.tsx
@@ -252,21 +252,21 @@ Level 2 — Slots: rellena zonas predefinidas del base-block
 
 Level 3 — Custom: componente nuevo completo (DOM propio)
   src/blocks/HeroBlock/HeroBlock.tsx
-  → JSX propio, solo importa tipos de @hwp/core-ui/schemas
+  → JSX propio, solo importa tipos de @hwe/core-ui/schemas
 ```
 
 ---
 
-## Paso 8 — Actualizar el submódulo hwp-tools
+## Paso 8 — Actualizar el submódulo hwe-tools
 
-Si ves mensajes de que `.hwp-tools` está desactualizado:
+Si ves mensajes de que `.hwe-tools` está desactualizado:
 
 ```powershell
-cd .hwp-tools
+cd .hwe-tools
 git pull origin main
 cd ..
-git add .hwp-tools
-git commit -m "chore: update hwp-tools"
+git add .hwe-tools
+git commit -m "chore: update hwe-tools"
 ```
 
 ---
@@ -276,7 +276,7 @@ git commit -m "chore: update hwp-tools"
 Ahora que el proyecto funciona, lee en este orden:
 
 1. **[🗺️ Mapa del proyecto](./project-map.md)** — entiende dónde vive cada cosa
-2. **[🔄 Diccionario WP → HWP](./wordpress-to-hwp.md)** — traduce lo que ya sabes
+2. **[🔄 Diccionario WP → hwe](./wordpress-to-hwe.md)** — traduce lo que ya sabes
 3. **[🗓️ Tu día a día](./daily-workflow.md)** — el flujo de trabajo diario
 
 Cuando tengas dudas sobre términos técnicos, consulta el **[📖 Glosario](./glossary.md)**.
@@ -285,7 +285,7 @@ Cuando tengas dudas sobre términos técnicos, consulta el **[📖 Glosario](./g
 
 ## Si algo va mal
 
-### "404 @hwp/core-ui" o "registry not found"
+### "404 @hwe/core-ui" o "registry not found"
 
 Necesitas acceso al registro npm privado (GitHub Packages). Pide las credenciales a tu responsable.
 
@@ -302,7 +302,7 @@ Stop-Process -Id {ese-PID} -Force
 # Vuelve a ejecutar npm run dev
 ```
 
-### "Submodule '.hwp-tools' not initialized"
+### "Submodule '.hwe-tools' not initialized"
 
 ```powershell
 git submodule update --init --recursive
@@ -312,7 +312,7 @@ git submodule update --init --recursive
 
 ```powershell
 # Eliminar la caché y reinstalar
-npm install --force  # o pnpm install --force en hwp-core
+npm install --force  # o pnpm install --force en hwe-core
 ```
 
 ### Cualquier otra cosa

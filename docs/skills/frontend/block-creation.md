@@ -1,6 +1,6 @@
 # Block creation — walkthrough
 
-> The **how-to** for adding a block to the HWP platform or to a client site. Companion to [`docs/frontend/block-contract.md`](../../contracts/frontend/block-contract.md) (the rules) and to the `/scaffold-block` skill (the file generator). Load this when implementing a block by hand, reviewing a block PR, or fixing a regression in an existing block.
+> The **how-to** for adding a block to the hwe platform or to a client site. Companion to [`docs/frontend/block-contract.md`](../../contracts/frontend/block-contract.md) (the rules) and to the `/scaffold-block` skill (the file generator). Load this when implementing a block by hand, reviewing a block PR, or fixing a regression in an existing block.
 >
 > **DEC-015 — two locations:** platform blocks (base-blocks) go into `packages/core-ui/src/base-blocks/`; client-specific blocks go into `site-{slug}/src/blocks/`. Read "Decide the target" below before scaffolding.
 >
@@ -58,11 +58,11 @@ Do **not** touch `{Name}Block.tsx` yet — the test must fail first.
 ### 4. Implement TDD-first — [`block-creation.md §TDD flow`](#tdd-flow)
 
 ```
-a. pnpm --filter @hwp/core-ui test {Name}Block.test.tsx   → must FAIL (no component yet)
+a. pnpm --filter @hwe/core-ui test {Name}Block.test.tsx   → must FAIL (no component yet)
 b. Write {Name}Block.tsx + fill in variants.ts             → minimum code to pass
-c. pnpm --filter @hwp/core-ui test {Name}Block.test.tsx   → must PASS
-d. pnpm --filter @hwp/core-ui typecheck                   → zero errors
-e. pnpm --filter @hwp/core-ui build                       → no build failures
+c. pnpm --filter @hwe/core-ui test {Name}Block.test.tsx   → must PASS
+d. pnpm --filter @hwe/core-ui typecheck                   → zero errors
+e. pnpm --filter @hwe/core-ui build                       → no build failures
 ```
 
 If the test does not fail at step (a), the test is testing the wrong thing — fix the test before writing the component.
@@ -129,7 +129,7 @@ Before writing a single file, read [`docs/specs/frontend/block-architecture.md`]
 |---|---|---|
 | Always | — | **Layer 1** — Content Schema (`{Name}Block.schema.ts`) |
 | Does the block have behavioral options (autoplay, columns, PMS config, lightbox)? | Yes | **Layer 3** — Config Schema (`{Name}Block.config.schema.ts`) |
-| Does the block connect to an external service (PMS, map, CRM, payment)? | Yes | **Layer 4** — Adapter (`@hwp/{domain}/adapters/{name}/`) |
+| Does the block connect to an external service (PMS, map, CRM, payment)? | Yes | **Layer 4** — Adapter (`@hwe/{domain}/adapters/{name}/`) |
 | Do variants differ only in CSS classes? | Yes | **Layer 2-A** — CVA (default, no extra files) |
 | Do variants need different hooks, DOM trees, or sub-components? | Yes | **Layer 2-B** — Structural variants (`index.ts` resolver) |
 | Do variants need different content fields in Payload? | Yes | **Layer 2-C** — Functional variants (shared schema with `.optional()` fields) |
@@ -148,8 +148,8 @@ Before creating a block, classify the element using [`docs/architecture/domain-m
 |---|---|
 | A self-contained page section reusable across 2+ clients, maintained by the platform team | A **base-block** in `packages/core-ui/src/base-blocks/{Name}/` |
 | A self-contained page section specific to one client, or a client override of a base-block | A **client block** in `site-{slug}/src/blocks/{Name}/` |
-| An atomic UI primitive (button, input, dialog, icon) | A **primitive** in `@hwp/core-ui/src/primitives/{Name}/` |
-| A full data-driven page layout (accommodation detail, article detail) | A **template** in `@hwp/core-ui/src/templates/{Name}/` |
+| An atomic UI primitive (button, input, dialog, icon) | A **primitive** in `@hwe/core-ui/src/primitives/{Name}/` |
+| A full data-driven page layout (accommodation detail, article detail) | A **template** in `@hwe/core-ui/src/templates/{Name}/` |
 | A one-off arrangement of blocks for a single client's page | A **composition** in `apps/site-{slug}/src/compositions/` |
 
 If your candidate has a unique data shape **and** is reused, it is a block. If it only appears in one client's app, it stays in that app's `compositions/` — never in `core-ui`.
@@ -339,7 +339,7 @@ describe('{Name}', () => {
 });
 ```
 
-Run `pnpm --filter @hwp/core-ui test`. Tests **must fail** — there is no component yet.
+Run `pnpm --filter @hwe/core-ui test`. Tests **must fail** — there is no component yet.
 
 For structural variants, add one interaction test per variant where users do something (click a CTA, open a dialog, swipe a carousel).
 
@@ -368,7 +368,7 @@ Tokens defined in `apps/site-{slug}/src/theme/tokens.json` are the design vocabu
 | Background color | `bg-blue-500` | `bg-primary` / `bg-accent` / `bg-surface` |
 | Heading font | `font-serif` | `font-heading` ≡ `tokens.fonts.heading` |
 
-The `createHwpPreset` function maps `tokens.radii`, `tokens.shadows`, etc. onto Tailwind's namespaces, so `rounded-md` and `shadow-card` resolve to the token values automatically. But that only protects you if you **use the named utility**. Never write `rounded` (no value — Tailwind picks a default), `shadow` (same), `border` (same).
+The `createhwePreset` function maps `tokens.radii`, `tokens.shadows`, etc. onto Tailwind's namespaces, so `rounded-md` and `shadow-card` resolve to the token values automatically. But that only protects you if you **use the named utility**. Never write `rounded` (no value — Tailwind picks a default), `shadow` (same), `border` (same).
 
 ### Rule 2 — If the Figma does not apply a class, your block does not either
 
@@ -376,7 +376,7 @@ The base-template (Camping Mer et Camargue) deliberately uses **zero border-radi
 
 Before adding any visual utility (`rounded-*`, `shadow-*`, a `border`, a `transition-*`), check the Figma reference (`figma-makes/{slug}/src/app/components/{Component}.tsx`). If the reference component does not have it, your block does not get it.
 
-This rule was added by [DEC-012](../../architecture/decisions.md#dec-012--tailwind-v3-over-v4-for-the-walking-skeleton) discussion (walking skeleton 2026-05-21). See also the user-memory note `hwp-figma-fidelity-no-tailwind-defaults` if working with Claude Code on this repo.
+This rule was added by [DEC-012](../../architecture/decisions.md#dec-012--tailwind-v3-over-v4-for-the-walking-skeleton) discussion (walking skeleton 2026-05-21). See also the user-memory note `hwe-figma-fidelity-no-tailwind-defaults` if working with Claude Code on this repo.
 
 ### Rule 3 — Map every visual property to a token, never inline
 
@@ -462,16 +462,16 @@ export type {
 Consumers import from the package root only:
 
 ```ts
-import { HeroBlock, type HeroBlockContent } from '@hwp/core-ui';
+import { HeroBlock, type HeroBlockContent } from '@hwe/core-ui';
 ```
 
 Or via subpath when importing specifically from base-blocks:
 
 ```ts
-import { HeroBlock } from '@hwp/core-ui/base-blocks';
+import { HeroBlock } from '@hwe/core-ui/base-blocks';
 ```
 
-Never expose deep paths (`@hwp/core-ui/src/base-blocks/...`). The package's public API is the single line of defense against drift.
+Never expose deep paths (`@hwe/core-ui/src/base-blocks/...`). The package's public API is the single line of defense against drift.
 
 ### Registry — `packages/core-ui/src/renderer/baseBlockRegistry.ts` (base-blocks only)
 

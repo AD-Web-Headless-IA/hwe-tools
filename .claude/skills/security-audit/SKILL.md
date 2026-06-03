@@ -1,13 +1,13 @@
 ---
 name: security-audit
-description: Run all 7 active security audits against a running HWP site and save a consolidated report to docs/audits/{slug}/security/security-audit-{date}.md. Skips the AI content audit (placeholder, N/A until Payload+AI integration). Use before any production deployment, after adding user-input blocks, or when setting up a new client site.
+description: Run all 7 active security audits against a running hwe site and save a consolidated report to docs/audits/{slug}/security/security-audit-{date}.md. Skips the AI content audit (placeholder, N/A until Payload+AI integration). Use before any production deployment, after adding user-input blocks, or when setting up a new client site.
 argument-hint: [site-slug]
 allowed-tools: Read Write Glob Bash(curl *) Bash(node *) Bash(pnpm *) Bash(grep *) Bash(ls *) Bash(test *) Bash(mkdir *) Bash(git *)
 ---
 
 # Security Audit
 
-You are a security audit runner for HWP sites. Your job is to run 7 automated security checks, surface findings by severity (Blocker / Major / Minor), save the consolidated report, and tell the developer what to fix first.
+You are a security audit runner for hwe sites. Your job is to run 7 automated security checks, surface findings by severity (Blocker / Major / Minor), save the consolidated report, and tell the developer what to fix first.
 
 The runner script handles network-based checks (headers, cookies, dependencies). Grep-based code audits (inputs, secrets, Next.js patterns, RGPD) are executed directly from this skill using the steps below.
 
@@ -19,7 +19,7 @@ The runner script handles network-based checks (headers, cookies, dependencies).
 - Never modify source files. This skill writes only the audit report.
 - Report is saved to `docs/audits/security/security-audit-{TODAY}.md`. Overwrite same-day reports (re-audit after fixes).
 - Use Node.js 20+ for the runner script (built-in `fetch`). Verify with `node --version` if uncertain.
-- CWD = client repo root. Runner script is at `.hwp-tools/.claude/skills/security-audit/runner.mjs`.
+- CWD = client repo root. Runner script is at `.hwe-tools/.claude/skills/security-audit/runner.mjs`.
 - All grep commands: `--include="*.ts" --include="*.tsx" --include="*.mjs" --include="*.js"` unless specified.
 
 ## Process
@@ -52,7 +52,7 @@ curl -s -o /dev/null -w "%{http_code}" {BASE_URL}
 ### Step 2 — Run the automated runner (headers, cookies, dependencies)
 
 ```bash
-node .hwp-tools/.claude/skills/security-audit/runner.mjs {BASE_URL} {SLUG}
+node .hwe-tools/.claude/skills/security-audit/runner.mjs {BASE_URL} {SLUG}
 ```
 
 Capture stdout as `RUNNER_OUTPUT`. The runner exits 0 on success (even with findings) and exits 1 only on hard failure (server unreachable). On exit 1, report verbatim stderr and stop.
@@ -63,7 +63,7 @@ Run each grep and collect findings:
 
 **3a — dangerouslySetInnerHTML**
 ```bash
-grep -rn "dangerouslySetInnerHTML" {SRC_DIR} node_modules/@hwp/core-ui/src/base-blocks --include="*.tsx" --include="*.ts" 2>/dev/null
+grep -rn "dangerouslySetInnerHTML" {SRC_DIR} node_modules/@hwe/core-ui/src/base-blocks --include="*.tsx" --include="*.ts" 2>/dev/null
 ```
 For each match, apply this decision tree (read ±5 lines of context around the flagged line):
 
@@ -75,7 +75,7 @@ For each match, apply this decision tree (read ±5 lines of context around the f
 
 **3b — eval and new Function**
 ```bash
-grep -rn "eval(\|new Function(" {SRC_DIR} node_modules/@hwp/core-ui/src/base-blocks --include="*.ts" --include="*.tsx" --include="*.mjs" 2>/dev/null | grep -v "node_modules\|dist"
+grep -rn "eval(\|new Function(" {SRC_DIR} node_modules/@hwe/core-ui/src/base-blocks --include="*.ts" --include="*.tsx" --include="*.mjs" 2>/dev/null | grep -v "node_modules\|dist"
 ```
 Any result → Blocker.
 
@@ -97,7 +97,7 @@ Any `MISSING_ZOD` → Blocker.
 ```bash
 grep -rn --include="*.ts" --include="*.tsx" --include="*.mjs" --include="*.js" \
   -E "sk_live_|sk_test_|pk_live_|pk_test_|sk-ant-[A-Za-z0-9]{10,}|api[_-]?key\s*[:=]\s*['\"][A-Za-z0-9+/._-]{20,}|password\s*[:=]\s*['\"][^'\"\s]{8,}" \
-  {SRC_DIR} node_modules/@hwp/core-ui/src/base-blocks 2>/dev/null | grep -v "node_modules\|dist\|\.env\.example"
+  {SRC_DIR} node_modules/@hwe/core-ui/src/base-blocks 2>/dev/null | grep -v "node_modules\|dist\|\.env\.example"
 ```
 Any result → Blocker (report file+line, not the value).
 
@@ -153,7 +153,7 @@ Any result → Blocker.
 
 **6c — Tenant isolation in packages and base-blocks**
 ```bash
-grep -rn "if.*client\s*===\|slug\s*===\|tenant\s*===" node_modules/@hwp/core-ui/src/base-blocks --include="*.ts" --include="*.tsx" 2>/dev/null | grep -v "node_modules"
+grep -rn "if.*client\s*===\|slug\s*===\|tenant\s*===" node_modules/@hwe/core-ui/src/base-blocks --include="*.ts" --include="*.tsx" 2>/dev/null | grep -v "node_modules"
 ```
 Any result → Blocker.
 

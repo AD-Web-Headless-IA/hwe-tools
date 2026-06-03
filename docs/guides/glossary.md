@@ -8,7 +8,7 @@
 
 ### Base-block
 
-A reference block implementation that lives in `hwp-core/packages/core-ui/src/base-blocks/` and is shipped as part of the `@hwp/core-ui` package (accessible via the `@hwp/core-ui/base-blocks` subpath export). Base-blocks are the canonical, platform-maintained implementations — they are not meant to be edited by client developers. Instead, client sites can re-export them unchanged (Level 1), extend them via slots (Level 2), or replace them with a fully custom component (Level 3) in their own `src/blocks/` folder.
+A reference block implementation that lives in `hwe-core/packages/core-ui/src/base-blocks/` and is shipped as part of the `@hwe/core-ui` package (accessible via the `@hwe/core-ui/base-blocks` subpath export). Base-blocks are the canonical, platform-maintained implementations — they are not meant to be edited by client developers. Instead, client sites can re-export them unchanged (Level 1), extend them via slots (Level 2), or replace them with a fully custom component (Level 3) in their own `src/blocks/` folder.
 
 Before DEC-015, these were called simply "blocks" and lived in `packages/core-ui/src/blocks/`. The rename to `base-blocks` signals their new role as a starting point, not a hard constraint.
 
@@ -17,7 +17,7 @@ Before DEC-015, these were called simply "blocks" and lived in `packages/core-ui
 ---
 
 ### Agent (Agente)
-Un asistente de IA especializado que Claude Code puede invocar para una tarea concreta. Cada agente tiene un rol específico, un modelo de IA asignado, y actúa solo dentro de su dominio. HWP tiene 11 agentes: 4 en el pipeline SPECBOOT y 7 especialistas de dominio.
+Un asistente de IA especializado que Claude Code puede invocar para una tarea concreta. Cada agente tiene un rol específico, un modelo de IA asignado, y actúa solo dentro de su dominio. hwe tiene 11 agentes: 4 en el pipeline SPECBOOT y 7 especialistas de dominio.
 
 🔄 **WP:** como un freelancer especializado que contratas para una tarea puntual. No lo llamas para todo — lo llamas cuando su especialidad es exactamente lo que necesitas.
 
@@ -68,7 +68,7 @@ export const clientBlocks = { HeroBlock };
 
 ---
 
-### Client (Cliente HWP)
+### Client (Cliente hwe)
 Un camping u hotel que tiene su propio site en la plataforma. Cada cliente tiene su `site-{slug}/` — un repo independiente con sus colores, fuentes y configuración. El mismo código de bloques sirve para todos.
 
 🔄 **WP:** como una instalación de WordPress por cliente, pero todos comparten el mismo tema padre y plugins.
@@ -76,36 +76,36 @@ Un camping u hotel que tiene su propio site en la plataforma. Cada cliente tiene
 ---
 
 ### Cookie consent
-La obligación legal (RGPD Art. 6) de obtener el consentimiento explícito del usuario antes de instalar cookies no esenciales. Las cookies necesarias (autenticación, CSRF) están exentas. Las de analítica, marketing o tracking de reservas requieren opt-in previo. En HWP: ninguna cookie no esencial se puede escribir antes de que el usuario haya dado su consentimiento activo — los checkboxes premarcados y los patrones oscuros están prohibidos por ley.
+La obligación legal (RGPD Art. 6) de obtener el consentimiento explícito del usuario antes de instalar cookies no esenciales. Las cookies necesarias (autenticación, CSRF) están exentas. Las de analítica, marketing o tracking de reservas requieren opt-in previo. En hwe: ninguna cookie no esencial se puede escribir antes de que el usuario haya dado su consentimiento activo — los checkboxes premarcados y los patrones oscuros están prohibidos por ley.
 
-🔄 **WP:** como el plugin GDPR Cookie Consent / CookieYes que instalabas en cada sitio WordPress. En HWP la lógica es la misma — la diferencia es que aquí está integrada en el código, no en un plugin.
+🔄 **WP:** como el plugin GDPR Cookie Consent / CookieYes que instalabas en cada sitio WordPress. En hwe la lógica es la misma — la diferencia es que aquí está integrada en el código, no en un plugin.
 
 ---
 
 ### CSP (Content Security Policy)
-Una cabecera HTTP que le dice al browser qué orígenes puede cargar recursos (scripts, estilos, imágenes, iframes). En HWP se configura en `next.config.mjs` y es obligatoria en producción. El objetivo es limitar el impacto de un ataque XSS: aunque un atacante inyecte código, el browser rechazará ejecutar scripts que no vengan de orígenes autorizados.
+Una cabecera HTTP que le dice al browser qué orígenes puede cargar recursos (scripts, estilos, imágenes, iframes). En hwe se configura en `next.config.mjs` y es obligatoria en producción. El objetivo es limitar el impacto de un ataque XSS: aunque un atacante inyecte código, el browser rechazará ejecutar scripts que no vengan de orígenes autorizados.
 
-🔄 **WP:** como la sección de "Security headers" de Wordfence o iThemes Security, pero implementada directamente en la configuración del servidor. En HWP tienes plantilla lista en `docs/specs/security/security-standards.md`.
+🔄 **WP:** como la sección de "Security headers" de Wordfence o iThemes Security, pero implementada directamente en la configuración del servidor. En hwe tienes plantilla lista en `docs/specs/security/security-standards.md`.
 
 ---
 
 ### CLS (Cumulative Layout Shift)
-Métrica de Core Web Vitals que mide cuánto se desplaza visualmente el contenido de la página mientras carga. Objetivo: CLS < 0.1. En HWP: todas las imágenes deben tener atributos `width` y `height` explícitos, y las fuentes deben usar `font-display: swap`.
+Métrica de Core Web Vitals que mide cuánto se desplaza visualmente el contenido de la página mientras carga. Objetivo: CLS < 0.1. En hwe: todas las imágenes deben tener atributos `width` y `height` explícitos, y las fuentes deben usar `font-display: swap`.
 
-🔄 **WP:** en WordPress las imágenes sin dimensiones explícitas hacen "saltar" el texto mientras se cargan. En HWP es una regla no negociable del contrato de bloque — toda imagen lleva `width` y `height`.
+🔄 **WP:** en WordPress las imágenes sin dimensiones explícitas hacen "saltar" el texto mientras se cargan. En hwe es una regla no negociable del contrato de bloque — toda imagen lleva `width` y `height`.
 
 ---
 
 ### Composition Rules
 
-The `composition-rules/` module inside `@hwp/core-ui` that defines the constraints for how blocks can be assembled on a page — ordering rules, co-occurrence rules, and slot compatibility. These rules are validated at composition time (both at build time and in the CMS editor), preventing invalid page structures before they reach the user.
+The `composition-rules/` module inside `@hwe/core-ui` that defines the constraints for how blocks can be assembled on a page — ordering rules, co-occurrence rules, and slot compatibility. These rules are validated at composition time (both at build time and in the CMS editor), preventing invalid page structures before they reach the user.
 
 🔄 **WP:** no hay equivalente directo. Es como tener reglas de Gutenberg para qué bloques pueden ir después de cuáles — pero con tipado TypeScript.
 
 ---
 
 ### Composition (Composición)
-Una página o sección específica de un cliente que ensambla bloques de `@hwp/core-ui`. Vive en `src/compositions/` del repo del cliente (`site-{slug}/`). Es el punto donde se personalizan los bloques para ese cliente concreto.
+Una página o sección específica de un cliente que ensambla bloques de `@hwe/core-ui`. Vive en `src/compositions/` del repo del cliente (`site-{slug}/`). Es el punto donde se personalizan los bloques para ese cliente concreto.
 
 🔄 **WP:** como un tema hijo que sobreescribe templates del tema padre, pero en React.
 
@@ -114,7 +114,7 @@ Una página o sección específica de un cliente que ensambla bloques de `@hwp/c
 ### Core Web Vitals
 Las tres métricas de performance que Google usa como factores de posicionamiento: LCP (Largest Contentful Paint), CLS (Cumulative Layout Shift) e INP (Interaction to Next Paint). Objetivos: LCP < 2.5s, CLS < 0.1, INP < 200ms. Definidas en `docs/specs/seo/performance-seo.md`.
 
-🔄 **WP:** en WordPress se intentaba mejorar con plugins como WP Rocket. En HWP, las reglas de performance están integradas en los contratos de bloque — el Hero, por ejemplo, debe cumplir el requisito de LCP antes de poder pasar a `beta`.
+🔄 **WP:** en WordPress se intentaba mejorar con plugins como WP Rocket. En hwe, las reglas de performance están integradas en los contratos de bloque — el Hero, por ejemplo, debe cumplir el requisito de LCP antes de poder pasar a `beta`.
 
 ---
 
@@ -168,7 +168,7 @@ El servidor de desarrollo local que ejecutas con `pnpm dev`. Sirve el site en `h
 ---
 
 ### Domain Specialist (Especialista de dominio)
-Uno de los 7 agentes de dominio de HWP: `architect`, `senior-developer`, `ux-ui-analyst`, `seo-geo-specialist`, `security-specialist`, `qa-engineer`, `docs-writer`. Son agentes de solo lectura — auditan y reportan, no escriben código de aplicación.
+Uno de los 7 agentes de dominio de hwe: `architect`, `senior-developer`, `ux-ui-analyst`, `seo-geo-specialist`, `security-specialist`, `qa-engineer`, `docs-writer`. Son agentes de solo lectura — auditan y reportan, no escriben código de aplicación.
 
 🔄 **WP:** como el SEO experto externo que contratas para revisar el site antes de publicarlo, o el auditor de seguridad que comprueba que el RGPD está bien.
 
@@ -210,16 +210,16 @@ El modo de Tailwind que genera solo las clases CSS que realmente usas en el cód
 ---
 
 ### JSON-LD
-El formato estándar para incrustar structured data en páginas web. Un bloque `<script type="application/ld+json">` en el `<head>` contiene un objeto JSON con tipos de Schema.org. Se renderiza server-side (SSR) para que los crawlers de Google y los asistentes de IA lo lean sin ejecutar JavaScript. HWP tiene 11 plantillas listas en `docs/specs/seo/schemas/`.
+El formato estándar para incrustar structured data en páginas web. Un bloque `<script type="application/ld+json">` en el `<head>` contiene un objeto JSON con tipos de Schema.org. Se renderiza server-side (SSR) para que los crawlers de Google y los asistentes de IA lo lean sin ejecutar JavaScript. hwe tiene 11 plantillas listas en `docs/specs/seo/schemas/`.
 
-🔄 **WP:** Yoast SEO o RankMath lo generaban automáticamente en background. En HWP lo implementas directamente — las 11 plantillas de `docs/specs/seo/schemas/` te dan el JSON-LD correcto por tipo de página, sin depender de plugins.
+🔄 **WP:** Yoast SEO o RankMath lo generaban automáticamente en background. En hwe lo implementas directamente — las 11 plantillas de `docs/specs/seo/schemas/` te dan el JSON-LD correcto por tipo de página, sin depender de plugins.
 
 ---
 
 ### LCP (Largest Contentful Paint)
-Métrica de Core Web Vitals que mide cuándo termina de renderizar el elemento visible más grande (normalmente la imagen del hero). Objetivo: < 2.5 segundos. En HWP: el `HeroBlock` debe usar `loading="eager"`, `fetchpriority="high"`, y `<link rel="preload">` en el `<head>`. Definido en `docs/specs/seo/performance-seo.md`.
+Métrica de Core Web Vitals que mide cuándo termina de renderizar el elemento visible más grande (normalmente la imagen del hero). Objetivo: < 2.5 segundos. En hwe: el `HeroBlock` debe usar `loading="eager"`, `fetchpriority="high"`, y `<link rel="preload">` en el `<head>`. Definido en `docs/specs/seo/performance-seo.md`.
 
-🔄 **WP:** WP Rocket e Imagify ayudaban con esto. En HWP, el contrato del bloque Hero define directamente los requisitos de LCP — no necesitas plugins, las reglas están en el código.
+🔄 **WP:** WP Rocket e Imagify ayudaban con esto. En hwe, el contrato del bloque Hero define directamente los requisitos de LCP — no necesitas plugins, las reglas están en el código.
 
 ---
 
@@ -243,14 +243,14 @@ Mode B never produces code. It produces a spec that feeds into the SPECBOOT `/pr
 ---
 
 ### Monorepo
-Un único repositorio de git que contiene múltiples proyectos relacionados. En HWP, `hwp-core/` es el único monorepo real: contiene `packages/core-ui` y `packages/config` gestionados con Turborepo + pnpm. Los repos de cliente (`site-{slug}/`) son repos independientes — no son un monorepo.
+Un único repositorio de git que contiene múltiples proyectos relacionados. En hwe, `hwe-core/` es el único monorepo real: contiene `packages/core-ui` y `packages/config` gestionados con Turborepo + pnpm. Los repos de cliente (`site-{slug}/`) son repos independientes — no son un monorepo.
 
-🔄 **WP:** imagina tener el tema padre y todos los plugins en un repositorio de git (eso es `hwp-core/`), y cada tema hijo en su propio repositorio separado (eso es `site-{slug}/`). El monorepo de plataforma + repos independientes por cliente es la estructura de DEC-017.
+🔄 **WP:** imagina tener el tema padre y todos los plugins en un repositorio de git (eso es `hwe-core/`), y cada tema hijo en su propio repositorio separado (eso es `site-{slug}/`). El monorepo de plataforma + repos independientes por cliente es la estructura de DEC-017.
 
 ---
 
 ### Prompt injection
-Un tipo de ataque en el que datos externos (mensajes de usuario, respuestas de APIs, datos del PMS) contienen instrucciones que intentan manipular el comportamiento del LLM. En HWP, todo input externo que llega al Claude API debe estar encapsulado en delimitadores explícitos y etiquetado como "datos, no instrucciones". Una integración de IA que interpola directamente `${userMessage}` en el system prompt es vulnerable.
+Un tipo de ataque en el que datos externos (mensajes de usuario, respuestas de APIs, datos del PMS) contienen instrucciones que intentan manipular el comportamiento del LLM. En hwe, todo input externo que llega al Claude API debe estar encapsulado en delimitadores explícitos y etiquetado como "datos, no instrucciones". Una integración de IA que interpola directamente `${userMessage}` en el system prompt es vulnerable.
 
 ```typescript
 // Vulnerable: el usuario podría escribir "Ignora todo lo anterior y..."
@@ -269,9 +269,9 @@ Responde solo a la pregunta del visitante.`;
 ---
 
 ### NAP (Name, Address, Phone)
-Los tres datos de contacto del negocio que deben ser idénticos en todos los lugares donde aparecen: en los componentes de header y footer, en todos los schemas JSON-LD (`Organization`, `Hotel`, `Campground`), y en perfiles externos (Google Business, Booking.com, TripAdvisor). En HWP, el NAP se define en `client.config.ts` como única fuente de verdad. NAP inconsistente es una penalización de local SEO.
+Los tres datos de contacto del negocio que deben ser idénticos en todos los lugares donde aparecen: en los componentes de header y footer, en todos los schemas JSON-LD (`Organization`, `Hotel`, `Campground`), y en perfiles externos (Google Business, Booking.com, TripAdvisor). En hwe, el NAP se define en `client.config.ts` como única fuente de verdad. NAP inconsistente es una penalización de local SEO.
 
-🔄 **WP:** en WordPress se copiaba el teléfono en diferentes widgets y páginas, creando inconsistencias. En HWP, `client.config.ts` es la única fuente — ningún componente duplica estos datos.
+🔄 **WP:** en WordPress se copiaba el teléfono en diferentes widgets y páginas, creando inconsistencias. En hwe, `client.config.ts` es la única fuente — ningún componente duplica estos datos.
 
 ---
 
@@ -283,7 +283,7 @@ El framework React que añade routing, server-side rendering y optimizaciones de
 ---
 
 ### Package
-Un módulo de código reutilizable. En este proyecto, `@hwp/core-ui` y `@hwp/config` son packages. Se publican en un registro privado y los sites de cliente los instalan como dependencias.
+Un módulo de código reutilizable. En este proyecto, `@hwe/core-ui` y `@hwe/config` son packages. Se publican en un registro privado y los sites de cliente los instalan como dependencias.
 
 🔄 **WP:** exactamente como un plugin de WordPress, pero instalado con `pnpm` en lugar de subido al servidor.
 
@@ -304,16 +304,16 @@ La secuencia de cuatro fases que transforma una user story en código mergeado y
 ---
 
 ### Preset (Tailwind Preset)
-En Tailwind v4, la configuración base de la plataforma se distribuye como `@hwp/config/theme.css` — un fichero CSS que define el `@theme {}` base con los tokens globales y semánticos. El cliente lo importa en `globals.css` con `@import "@hwp/config/theme.css"` y luego sobreescribe solo los tokens que difieren en su propio `@theme {}`.
+En Tailwind v4, la configuración base de la plataforma se distribuye como `@hwe/config/theme.css` — un fichero CSS que define el `@theme {}` base con los tokens globales y semánticos. El cliente lo importa en `globals.css` con `@import "@hwe/config/theme.css"` y luego sobreescribe solo los tokens que difieren en su propio `@theme {}`.
 
-> Nota: en versiones anteriores con Tailwind v3 existía `createHwpPreset(tokens)` en `@hwp/config/tailwind-preset`. Eso es la API v3 — **no se usa en proyectos nuevos**.
+> Nota: en versiones anteriores con Tailwind v3 existía `createhwePreset(tokens)` en `@hwe/config/tailwind-preset`. Eso es la API v3 — **no se usa en proyectos nuevos**.
 
 🔄 **WP:** como tener un `functions.php` en el tema padre que genera automáticamente las variables CSS base, y el tema hijo sobreescribe las que necesita.
 
 ---
 
 ### pnpm
-El gestor de paquetes usado en `hwp-core/` (el monorepo de packages). Más rápido que npm y mejor para monorepos porque no duplica las dependencias entre proyectos. Los repos de cliente (`site-{slug}/`) usan **npm** estándar.
+El gestor de paquetes usado en `hwe-core/` (el monorepo de packages). Más rápido que npm y mejor para monorepos porque no duplica las dependencias entre proyectos. Los repos de cliente (`site-{slug}/`) usan **npm** estándar.
 
 🔄 **WP:** como npm o Composer, pero más eficiente. Instala `react`, `next`, `tailwindcss` y el resto de librerías externas. Si trabajas en el monorepo de plataforma usas pnpm; si trabajas en un repo de cliente usas npm.
 
@@ -322,7 +322,7 @@ El gestor de paquetes usado en `hwp-core/` (el monorepo de packages). Más rápi
 ## R–T
 
 ### RGPD (Reglamento General de Protección de Datos)
-La regulación europea de protección de datos (equivalente al inglés GDPR). Define los derechos de los usuarios sobre sus datos personales y las obligaciones de las empresas que los tratan. HWP opera en España y Francia, por lo que su cumplimiento es una **obligación legal** — toda violación es un blocker de producción, no un warning.
+La regulación europea de protección de datos (equivalente al inglés GDPR). Define los derechos de los usuarios sobre sus datos personales y las obligaciones de las empresas que los tratan. hwe opera en España y Francia, por lo que su cumplimiento es una **obligación legal** — toda violación es un blocker de producción, no un warning.
 
 Impacto directo en el desarrollo:
 - Ninguna cookie no esencial antes de consentimiento explícito.
@@ -330,7 +330,7 @@ Impacto directo en el desarrollo:
 - El usuario puede solicitar la eliminación de sus datos — y el sistema debe hacerlo de forma irreversible.
 - Cada site tiene una página de política de privacidad enlazada desde el footer.
 
-🔄 **WP:** en WordPress lo gestionabas con plugins como GDPR Cookie Consent o WP GDPR Compliance. En HWP, las reglas están codificadas en `docs/specs/security/security-standards.md` y el `security-specialist` las audita antes de cada deploy.
+🔄 **WP:** en WordPress lo gestionabas con plugins como GDPR Cookie Consent o WP GDPR Compliance. En hwe, las reglas están codificadas en `docs/specs/security/security-standards.md` y el `security-specialist` las audita antes de cada deploy.
 
 ---
 
@@ -356,9 +356,9 @@ La definición de los datos que acepta un componente. Escrito con Zod, valida qu
 ---
 
 ### Schema.org
-El vocabulario colaborativo (schema.org) que define tipos y propiedades semánticas para structured data. HWP usa tipos como `Hotel`, `Campground`, `CampingPitch`, `TouristAttraction`, `FAQPage`, `Event`, `BreadcrumbList`, `Organization` y `AggregateRating`. Las 11 plantillas JSON-LD de `docs/specs/seo/schemas/` implementan estos tipos para páginas de hospitality.
+El vocabulario colaborativo (schema.org) que define tipos y propiedades semánticas para structured data. hwe usa tipos como `Hotel`, `Campground`, `CampingPitch`, `TouristAttraction`, `FAQPage`, `Event`, `BreadcrumbList`, `Organization` y `AggregateRating`. Las 11 plantillas JSON-LD de `docs/specs/seo/schemas/` implementan estos tipos para páginas de hospitality.
 
-🔄 **WP:** Yoast SEO aplicaba Schema.org en background, sin que el developer tuviera control. En HWP, cada bloque tiene su schema explícito — ves exactamente qué tipos estás usando y por qué.
+🔄 **WP:** Yoast SEO aplicaba Schema.org en background, sin que el developer tuviera control. En hwe, cada bloque tiene su schema explícito — ves exactamente qué tipos estás usando y por qué.
 
 ---
 
@@ -384,32 +384,32 @@ export function HeroBlock(props) {
 ---
 
 ### SPECBOOT
-La metodología de desarrollo de HWP: cada cambio no trivial pasa por cuatro fases en orden — `/propose` → `/apply` → `/review` → `/verify`. Ninguna fase se salta. SPECBOOT garantiza que siempre haya un diseño antes del código y una revisión independiente antes del merge.
+La metodología de desarrollo de hwe: cada cambio no trivial pasa por cuatro fases en orden — `/propose` → `/apply` → `/review` → `/verify`. Ninguna fase se salta. SPECBOOT garantiza que siempre haya un diseño antes del código y una revisión independiente antes del merge.
 
-🔄 **WP:** como si tu agencia tuviera un proceso formal para cada proyecto: primero el brief técnico, luego el desarrollo, luego la revisión de un segundo developer, luego las pruebas. En WordPress lo hacías informalmente; en HWP está automatizado.
+🔄 **WP:** como si tu agencia tuviera un proceso formal para cada proyecto: primero el brief técnico, luego el desarrollo, luego la revisión de un segundo developer, luego las pruebas. En WordPress lo hacías informalmente; en hwe está automatizado.
 
 ---
 
 ### Structured Data
-Metadatos legibles por máquina incrustados en páginas web para que los motores de búsqueda y asistentes de IA entiendan el tipo de contenido, las relaciones entre entidades y sus propiedades clave, sin parsear lenguaje natural. En HWP: siempre se implementa como JSON-LD (nunca Microdata ni RDFa), renderizado SSR en el `<head>`. Ver `docs/specs/seo/geo-llm-optimization.md` y las 11 plantillas en `docs/specs/seo/schemas/`.
+Metadatos legibles por máquina incrustados en páginas web para que los motores de búsqueda y asistentes de IA entiendan el tipo de contenido, las relaciones entre entidades y sus propiedades clave, sin parsear lenguaje natural. En hwe: siempre se implementa como JSON-LD (nunca Microdata ni RDFa), renderizado SSR en el `<head>`. Ver `docs/specs/seo/geo-llm-optimization.md` y las 11 plantillas en `docs/specs/seo/schemas/`.
 
-🔄 **WP:** Yoast SEO lo gestionaba automáticamente. En HWP, lo implementas con control total — las plantillas de `docs/specs/seo/schemas/` te dan los schemas correctos para cada tipo de página de hospitality.
+🔄 **WP:** Yoast SEO lo gestionaba automáticamente. En hwe, lo implementas con control total — las plantillas de `docs/specs/seo/schemas/` te dan los schemas correctos para cada tipo de página de hospitality.
 
 ---
 
 ### Subpath Export
 
-A named entry point inside an npm package that allows importing a specific subset of that package directly, without going through the main barrel. HWP uses two subpath exports in `@hwp/core-ui`:
+A named entry point inside an npm package that allows importing a specific subset of that package directly, without going through the main barrel. hwe uses two subpath exports in `@hwe/core-ui`:
 
-- `@hwp/core-ui/base-blocks` — imports the base-block components directly (platform use)
-- `@hwp/core-ui/schemas` — imports the shared Zod schemas directly
+- `@hwe/core-ui/base-blocks` — imports the base-block components directly (platform use)
+- `@hwe/core-ui/schemas` — imports the shared Zod schemas directly
 
 ```ts
 // Subpath import (preferred for base-blocks)
-import { HeroBlock } from '@hwp/core-ui/base-blocks';
+import { HeroBlock } from '@hwe/core-ui/base-blocks';
 
 // Root import (preferred for composed re-exports)
-import { HeroBlock, type HeroBlockContent } from '@hwp/core-ui';
+import { HeroBlock, type HeroBlockContent } from '@hwe/core-ui';
 ```
 
 Subpath exports are defined in the `exports` field of `package.json`. They avoid barrel-import overhead and make tree-shaking more predictable.
@@ -426,9 +426,9 @@ Un agente que Claude Code lanza en un contexto propio e independiente. El subage
 ---
 
 ### TDD (Test-Driven Development)
-Metodología donde primero escribes el test que describe el comportamiento esperado, luego escribes el código que lo supera. En HWP, cada bloque nuevo se crea con sus tests antes del código.
+Metodología donde primero escribes el test que describe el comportamiento esperado, luego escribes el código que lo supera. En hwe, cada bloque nuevo se crea con sus tests antes del código.
 
-🔄 **WP:** en WordPress casi no se usaban tests. Aquí es obligatorio — garantiza que cuando cambias algo en `@hwp/core-ui` no rompes los otros 299 clientes.
+🔄 **WP:** en WordPress casi no se usaban tests. Aquí es obligatorio — garantiza que cuando cambias algo en `@hwe/core-ui` no rompes los otros 299 clientes.
 
 ---
 
@@ -454,7 +454,7 @@ The three-tier build-time pipeline that resolves the final CSS custom property v
 global → semantic → brand
 ```
 
-1. **Global tokens** — platform-wide constants (e.g. a palette of raw hex values) in `@hwp/core-ui`.
+1. **Global tokens** — platform-wide constants (e.g. a palette of raw hex values) in `@hwe/core-ui`.
 2. **Semantic tokens** — role-based aliases (e.g. `primary`, `surface`, `foreground`) that reference global tokens.
 3. **Brand tokens** — client-specific overrides declared via `@theme {}` in `src/app/globals.css` (Tailwind v4 CSS-first) that set the final values for their semantic roles.
 
@@ -472,7 +472,7 @@ Un valor de diseño con nombre: un color (`"primary": "#1A4A52"`), una fuente (`
 ---
 
 ### Turborepo
-El orquestador del monorepo `hwp-core/`. Sabe en qué orden compilar los packages (primero `@hwp/config`, luego `@hwp/core-ui`, luego `apps/site-demo/`), cachea los resultados para no recompilar lo que no cambió, y permite ejecutar `pnpm dev` o `pnpm build` para todos los proyectos a la vez. Solo vive en `hwp-core/` — los repos de cliente no lo usan.
+El orquestador del monorepo `hwe-core/`. Sabe en qué orden compilar los packages (primero `@hwe/config`, luego `@hwe/core-ui`, luego `apps/site-demo/`), cachea los resultados para no recompilar lo que no cambió, y permite ejecutar `pnpm dev` o `pnpm build` para todos los proyectos a la vez. Solo vive en `hwe-core/` — los repos de cliente no lo usan.
 
 🔄 **WP:** no tiene equivalente directo en WordPress. Imagina un Makefile inteligente que sabe qué plugins compilar antes de compilar el tema, y que no repite trabajo innecesario.
 
@@ -514,11 +514,11 @@ El hosting donde se despliegan los sites de cliente. Cada `git push` a la rama `
 ---
 
 ### Workspace (pnpm Workspace)
-La configuración que le dice a pnpm que `hwp-core/` contiene múltiples proyectos relacionados (`packages/*` y `apps/*`). Permite instalar dependencias compartidas una sola vez y referenciar packages locales con `@hwp/core-ui` sin publicarlos al registro externo. Vive en `hwp-core/pnpm-workspace.yaml`.
+La configuración que le dice a pnpm que `hwe-core/` contiene múltiples proyectos relacionados (`packages/*` y `apps/*`). Permite instalar dependencias compartidas una sola vez y referenciar packages locales con `@hwe/core-ui` sin publicarlos al registro externo. Vive en `hwe-core/pnpm-workspace.yaml`.
 
-Los repos de cliente (`site-{slug}/`) no son workspaces de pnpm — consumen `@hwp/core-ui` como package publicado en el registro privado.
+Los repos de cliente (`site-{slug}/`) no son workspaces de pnpm — consumen `@hwe/core-ui` como package publicado en el registro privado.
 
-🔄 **WP:** no tiene equivalente directo. En el monorepo de plataforma es la magia que hace que `import { HeroBlock } from '@hwp/core-ui'` funcione durante el desarrollo sin publicar a internet. En el repo de cliente, `@hwp/core-ui` viene del registro privado como cualquier otro package npm.
+🔄 **WP:** no tiene equivalente directo. En el monorepo de plataforma es la magia que hace que `import { HeroBlock } from '@hwe/core-ui'` funcione durante el desarrollo sin publicar a internet. En el repo de cliente, `@hwe/core-ui` viene del registro privado como cualquier otro package npm.
 
 ---
 
@@ -534,7 +534,7 @@ const TokensContract = z.object({
 TokensContract.parse(tokensJson); // falla si primary no es un string
 ```
 
-**Zod at every boundary** — el principio HWP de que todo dato que entra al sistema desde fuera (formulario del usuario, respuesta de API externa, output de LLM, env var, body de un webhook) se valida con `.parse()` antes de ser usado. Dentro de un paquete, confías en tus propios tipos. En los límites del sistema (Route Handlers, adapters), nunca.
+**Zod at every boundary** — el principio hwe de que todo dato que entra al sistema desde fuera (formulario del usuario, respuesta de API externa, output de LLM, env var, body de un webhook) se valida con `.parse()` antes de ser usado. Dentro de un paquete, confías en tus propios tipos. En los límites del sistema (Route Handlers, adapters), nunca.
 
 ```typescript
 // En un Route Handler
@@ -542,7 +542,7 @@ const body = await request.json();
 const parsed = BookingRequestSchema.parse(body); // valida aquí, usa 'parsed' después
 ```
 
-🔄 **WP:** como la validación de campos de ACF + `sanitize_text_field()` en cada handler de formulario. En WordPress lo hacías manualmente y era fácil olvidarlo. En HWP, el type system te recuerda dónde está el boundary.
+🔄 **WP:** como la validación de campos de ACF + `sanitize_text_field()` en cada handler de formulario. En WordPress lo hacías manualmente y era fácil olvidarlo. En hwe, el type system te recuerda dónde está el boundary.
 
 ---
 

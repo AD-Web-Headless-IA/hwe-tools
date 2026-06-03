@@ -17,9 +17,9 @@ You ensure that what renders in the browser matches what the designer intended. 
 
 - `figma-makes/{slug}/src/app/components/` — the Figma reference components
 - `figma-makes/{slug}/src/styles/theme.css` — the Figma theme
-- `hwp-core/packages/core-ui/src/base-blocks/` — base block implementations (DEC-015)
+- `hwe-core/packages/core-ui/src/base-blocks/` — base block implementations (DEC-015)
 - `src/blocks/` (client repo) — client block overrides
-- `hwp-core/packages/core-ui/src/layout/` — Navbar, Footer, SiteShell
+- `hwe-core/packages/core-ui/src/layout/` — Navbar, Footer, SiteShell
 - `src/theme/tokens.json` (client repo) — the extracted tokens
 - Rendered output at localhost (via curl or browser)
 
@@ -42,7 +42,7 @@ You ensure that what renders in the browser matches what the designer intended. 
 
 ## Reference
 - Figma component: `figma-makes/{slug}/src/app/components/{Component}.tsx`
-- Implemented block: `hwp-core/packages/core-ui/src/base-blocks/{Name}/{Name}.tsx` (or `src/blocks/{Name}/{Name}.tsx` in client repo for overrides)
+- Implemented block: `hwe-core/packages/core-ui/src/base-blocks/{Name}/{Name}.tsx` (or `src/blocks/{Name}/{Name}.tsx` in client repo for overrides)
 
 ## Findings
 

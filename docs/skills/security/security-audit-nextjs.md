@@ -1,6 +1,6 @@
 # Security audit — Next.js patterns
 
-> Verifies that HWP-specific Next.js patterns are implemented securely: Server/Client Component data flow, Route Handler validation, and the server-only API proxy rule for credentials.
+> Verifies that hwe-specific Next.js patterns are implemented securely: Server/Client Component data flow, Route Handler validation, and the server-only API proxy rule for credentials.
 
 ---
 
@@ -45,7 +45,7 @@ Run:
 
 ## Steps
 
-All grep commands run from `hwp-platform/`.
+All grep commands run from `hwe-platform/`.
 
 **Step 1 — Find all `'use client'` files that receive sensitive props**
 ```bash

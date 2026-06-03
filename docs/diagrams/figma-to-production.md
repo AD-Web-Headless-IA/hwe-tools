@@ -7,15 +7,15 @@ flowchart LR
   designer["Designer\n(Septeo Hospitality)"]
   figma_repo["figma-makes/{slug}/\ngit repo · tagged import-YYYY-MM-DD\n(DEC-002)"]
 
-  subgraph tools_work["hwp-tools skills"]
+  subgraph tools_work["hwe-tools skills"]
     import_skill["/import-figma {url} {slug}"]
     scaffold_skill["/scaffold-site {slug}"]
     design_skill["/design-block {Name} --client {slug}"]
   end
 
-  subgraph client_repo["site-{slug}/  (created from hwp-template)"]
+  subgraph client_repo["site-{slug}/  (created from hwe-template)"]
     direction TB
-    submodule[".hwp-tools/ (submodule → hwp-tools)"]
+    submodule[".hwe-tools/ (submodule → hwe-tools)"]
     client_docs["docs/\nfigma-analysis.md + figma-notes.md\ndesign-language.md (DRAFT)\ntokens.json (DRAFT)"]
     client_config["client.config.ts\ntenantId · bookingAdapter · blockDefaults · features\n(DEC-009)"]
     theme["src/theme/tokens.json\nsrc/app/globals.css @theme {}\n(Tailwind v4 — DEC-017)"]
@@ -24,7 +24,7 @@ flowchart LR
     routes["src/app/"]
   end
 
-  npm_pkg["@hwp/core-ui · @hwp/config\n(from private npm registry)"]
+  npm_pkg["@hwe/core-ui · @hwe/config\n(from private npm registry)"]
 
   subgraph deploy["Vercel (DEC-007)"]
     preview["Preview deploy per PR"]
@@ -51,7 +51,7 @@ flowchart LR
 ## Key invariants
 
 - **Figma is reference, not codegen.** Classification (block vs template vs composition) is a human-led step driven by [`domain-model.md §7`](../architecture/domain-model.md).
-- **Per-client surface stays small.** Most work for client N+1 is `client.config.ts` + `globals.css @theme {}` + a few compositions. Blocks come from `@hwp/core-ui/base-blocks`.
+- **Per-client surface stays small.** Most work for client N+1 is `client.config.ts` + `globals.css @theme {}` + a few compositions. Blocks come from `@hwe/core-ui/base-blocks`.
 - **Re-imports preserve history.** [`/import-figma`](../../.claude/skills/import-figma/SKILL.md) runs `git pull --ff-only` and adds a new dated tag — old exports stay reachable via `git checkout import-YYYY-MM-DD`.
 - **Preview deploys are the design review surface.** Every PR gets a Vercel preview URL; the designer reviews the rendered site, not a Figma diff.
 - **Design language fills the gap.** When the designer hasn't provided a Figma for a specific block, `/design-block` reads `docs/design-language.md` (extracted by `/import-figma`) to generate a consistent visual spec — no ad-hoc improvisation.

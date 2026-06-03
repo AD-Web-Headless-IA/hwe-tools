@@ -1,6 +1,6 @@
 # Security audit — HTTP headers
 
-> Verifies that every production HWP site sends the required security headers. Missing or misconfigured headers are a blocker for deploy.
+> Verifies that every production hwe site sends the required security headers. Missing or misconfigured headers are a blocker for deploy.
 
 ---
 
@@ -116,7 +116,7 @@ Expected: `permissions-policy: camera=(), microphone=(), geolocation=()`
 
 **Step 8 — Check source config**
 ```bash
-grep -A 50 "headers()" hwp-platform/apps/{slug}/next.config.mjs
+grep -A 50 "headers()" hwe-platform/apps/{slug}/next.config.mjs
 ```
 Verify that all 6 headers are defined in the `headers()` export. A missing header in config won't survive a Vercel deploy — runtime-only headers are not guaranteed.
 
@@ -180,6 +180,6 @@ A site cannot advance from `alpha` to `beta` with any **Blocker** or **Major** h
 
 Como la sección de "Security headers" de Wordfence en WordPress — pero aquí las cabeceras se configuran directamente en `next.config.mjs`.
 
-**WordPress equivalent:** el plugin iThemes Security / Wordfence que añade `X-Frame-Options` y `X-Content-Type-Options` via `.htaccess` o PHP headers. En HWP, las pones tú directamente — no hay plugin que lo haga automáticamente.
+**WordPress equivalent:** el plugin iThemes Security / Wordfence que añade `X-Frame-Options` y `X-Content-Type-Options` via `.htaccess` o PHP headers. En hwe, las pones tú directamente — no hay plugin que lo haga automáticamente.
 
 **Day-to-day impact:** cuando creas un nuevo site, comprueba que `next.config.mjs` tiene la función `headers()` con los 6 headers. Si no, el site no puede ir a producción. El agente `security-specialist` lo verifica automáticamente — pero es más barato comprobarlo tú antes de lanzar el audit.

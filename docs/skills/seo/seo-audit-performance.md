@@ -35,14 +35,14 @@ Assumes the dev server is running at `http://localhost:3000`. For accurate Core 
 
 **Step 1 — Fetch the rendered HTML**
 ```bash
-curl -s http://localhost:3000 -o /tmp/hwp-page.html
+curl -s http://localhost:3000 -o /tmp/hwe-page.html
 ```
 
 **Step 2 — Check hero image preload in `<head>` (LCP signal)**
 ```bash
 python3 -c "
 import re
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 head = html[:html.index('</head>')]
 preloads = re.findall(r'<link[^>]+rel=[\"\'\"']preload[\"\'\"'][^>]+as=[\"\'\"']image[\"\'\"'][^>]*>', head)
 print(f'Image preloads in <head>: {len(preloads)}')
@@ -57,7 +57,7 @@ At least one `<link rel="preload" as="image" fetchpriority="high">` must be in `
 ```bash
 python3 -c "
 import re
-imgs = re.findall(r'<img[^>]+>', open('/tmp/hwp-page.html').read())
+imgs = re.findall(r'<img[^>]+>', open('/tmp/hwe-page.html').read())
 for img in imgs[:5]:
     has_priority = 'fetchpriority' in img
     has_eager = 'loading=\"eager\"' in img or \"loading='eager'\" in img
@@ -70,7 +70,7 @@ The hero `<img>` (largest above-fold image, typically the first one) must have b
 ```bash
 python3 -c "
 import re
-imgs = re.findall(r'<img[^>]+>', open('/tmp/hwp-page.html').read())
+imgs = re.findall(r'<img[^>]+>', open('/tmp/hwe-page.html').read())
 issues = [(i+1, img[:120]) for i, img in enumerate(imgs) if 'width=' not in img or 'height=' not in img]
 print(f'Images missing width or height: {len(issues)}')
 for n, img in issues: print(f'  #{n}:', img)
@@ -88,7 +88,7 @@ Every `@font-face` declaration must include `font-display: swap`. Missing = Majo
 ```bash
 python3 -c "
 import re
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 head = html[:html.index('</head>')]
 font_preloads = re.findall(r'<link[^>]+rel=[\"\'\"']preload[\"\'\"'][^>]+as=[\"\'\"']font[\"\'\"'][^>]*>', head)
 print(f'Font preloads in <head>: {len(font_preloads)}')
@@ -107,7 +107,7 @@ Any `<div onClick>` or `<div onKeyDown>` in the booking widget = Major. Browsers
 ```bash
 python3 -c "
 import re
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 head = html[:html.index('</head>')]
 blocking = re.findall(r'<script(?![^>]*(async|defer|type=[\"\'\"']module[\"\'\"']))[^>]+src=[^>]+>', head)
 print(f'Potentially render-blocking scripts: {len(blocking)}')
@@ -170,7 +170,7 @@ Green / Yellow / Red
 
 Como revisar WP Rocket + Imagify antes de lanzar un site de WordPress, pero con reglas explícitas en el código y verificadas antes del deploy:
 
-| Core Web Vital | Causa más frecuente en hospitality | Regla HWP |
+| Core Web Vital | Causa más frecuente en hospitality | Regla hwe |
 |---|---|---|
 | LCP lento (>2.5s) | Foto del hero sin `preload` ni `fetchpriority` | `<Image priority>` en `HeroBlock` |
 | CLS alto (>0.1) | Imágenes sin `width`/`height`, fuentes sin `swap` | Ambos obligatorios en el contrato de bloque |

@@ -1,4 +1,4 @@
-# HWP architecture audit — block system & variant pattern
+# hwe architecture audit — block system & variant pattern
 
 > Audit of `docs/contracts/frontend/`, `architecture.md`, `domain-model.md`, `scaffold-block/`, and `.claude/` against the polymorphic variant pattern discussed in this session.
 > Date: 2026-05-20. Status: proposal — needs discussion before becoming DECs.
@@ -147,17 +147,17 @@ The `blockDefaults` are optional. Blocks without an entry use their own `default
 ### GAP-4: `BookingBlock` adapter wiring is split across two packages without a clear bridge
 
 **What exists:**
-- `@hwp/booking` owns `BookingAdapter` interface + stock adapters (THR, Masterbooking, Witbooking, Resalys).
-- `architecture.md` shows `BookingBlock` in `@hwp/booking/react/`.
-- `block-contract.md` and `structure.md` show blocks living in `@hwp/core-ui/src/blocks/`.
+- `@hwe/booking` owns `BookingAdapter` interface + stock adapters (THR, Masterbooking, Witbooking, Resalys).
+- `architecture.md` shows `BookingBlock` in `@hwe/booking/react/`.
+- `block-contract.md` and `structure.md` show blocks living in `@hwe/core-ui/src/blocks/`.
 
-**What contradicts:** Is `BookingBlock` in `@hwp/booking/react/` or in `@hwp/core-ui/src/blocks/`? Both are stated in different documents.
+**What contradicts:** Is `BookingBlock` in `@hwe/booking/react/` or in `@hwe/core-ui/src/blocks/`? Both are stated in different documents.
 
-**Proposal:** `BookingBlock` lives in `@hwp/core-ui/src/blocks/BookingBlock/` like every other block. It receives the active adapter via React context (a `BookingProvider` at the app root), never importing a concrete adapter. `@hwp/booking` exports the interface + adapters + the `BookingProvider`. The app's root layout wires them:
+**Proposal:** `BookingBlock` lives in `@hwe/core-ui/src/blocks/BookingBlock/` like every other block. It receives the active adapter via React context (a `BookingProvider` at the app root), never importing a concrete adapter. `@hwe/booking` exports the interface + adapters + the `BookingProvider`. The app's root layout wires them:
 
 ```tsx
 // apps/site-{slug}/src/app/layout.tsx
-import { BookingProvider } from '@hwp/booking';
+import { BookingProvider } from '@hwe/booking';
 import { config } from '@/client.config';
 
 export default function RootLayout({ children }) {
@@ -169,11 +169,11 @@ export default function RootLayout({ children }) {
 }
 ```
 
-The `BookingBlock` in core-ui uses `useBookingAdapter()` from `@hwp/booking` — it depends on the package for the interface but never for a concrete adapter. This is clean DDD: the UI layer depends on the domain interface, not the infrastructure.
+The `BookingBlock` in core-ui uses `useBookingAdapter()` from `@hwe/booking` — it depends on the package for the interface but never for a concrete adapter. This is clean DDD: the UI layer depends on the domain interface, not the infrastructure.
 
-**Remove `@hwp/booking/react/`** — that creates a UI component inside a domain package. UI belongs in `core-ui`.
+**Remove `@hwe/booking/react/`** — that creates a UI component inside a domain package. UI belongs in `core-ui`.
 
-**DEC candidate:** DEC-010 — BookingBlock in core-ui, BookingProvider in @hwp/booking.
+**DEC candidate:** DEC-010 — BookingBlock in core-ui, BookingProvider in @hwe/booking.
 
 ---
 
@@ -184,7 +184,7 @@ The `BookingBlock` in core-ui uses `useBookingAdapter()` from `@hwp/booking` —
 **What's missing:** Several cross-cutting concerns need React context:
 
 - **TenantContext** — the active `client.config` (tenantId, features, locale, type).
-- **BookingContext** — the active PMS adapter (from `@hwp/booking`).
+- **BookingContext** — the active PMS adapter (from `@hwe/booking`).
 - **SeasonContext** — the active season (already mentioned in `theme-tokens.md` as `useActiveSeason()`).
 - **ThemeContext** — possibly, if tokens need runtime access beyond CSS variables.
 
@@ -197,7 +197,7 @@ providers/
 └── index.ts
 ```
 
-`BookingProvider` stays in `@hwp/booking` (it's the domain package's responsibility to provide its own context). `ThemeProvider` is unnecessary if tokens are pure CSS variables (which they are per `theme-tokens.md`).
+`BookingProvider` stays in `@hwe/booking` (it's the domain package's responsibility to provide its own context). `ThemeProvider` is unnecessary if tokens are pure CSS variables (which they are per `theme-tokens.md`).
 
 The app's root layout composes them:
 
@@ -265,7 +265,7 @@ These aspects of the current architecture are correct and should be preserved:
 | Priority | Action | Effort | Output |
 |---|---|---|---|
 | P0 | Formalize structural variants in block-contract.md | 1 session | Updated block-contract.md + DEC-008 |
-| P0 | Resolve BookingBlock location (core-ui, not @hwp/booking/react/) | 30 min | Updated architecture.md + structure.md + DEC-010 |
+| P0 | Resolve BookingBlock location (core-ui, not @hwe/booking/react/) | 30 min | Updated architecture.md + structure.md + DEC-010 |
 | P1 | Add `providers/` to core-ui structure | 30 min | Updated structure.md |
 | P1 | Remove `activeBlocks`, add `blockDefaults` to client.config shape | 30 min | Updated architecture.md + DEC-009 |
 | P1 | Add `variants` key to blockRegistry for Payload schema generation | 30 min | Updated block-contract.md |

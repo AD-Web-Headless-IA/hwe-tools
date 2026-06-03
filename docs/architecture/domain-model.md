@@ -1,25 +1,25 @@
-# HWP — Domain model
+# hwe — Domain model
 
-> Canonical description of HWP's multi-tenant domain: what a "client" is, what pages it has, what features it can opt into, what's reusable across clients.
+> Canonical description of hwe's multi-tenant domain: what a "client" is, what pages it has, what features it can opt into, what's reusable across clients.
 > **Always loaded** by any agent that classifies Figma Make modules, scaffolds blocks/templates, designs schemas, or wires routes. Without this file, the agent classifies on generic intuition; with it, the agent classifies on the actual multi-tenant criteria.
 >
 > **Status:** v0.4 — session 2026-05-18 (Punto 2 closed: catalog of standard pages, hybrid sub-pages model, per-feature structured collections, route customization layers, canonical `client.config.routes` shape). Subsequent sessions extend this file. Open questions tracked at the bottom.
 >
 > All identifiers in this file are illustrative working names. The canonical English naming (block names, template names, adapter classes) is finalized in a later session (Punto 6 of the domain modeling).
 
-## 1. Customer base — what HWP is built for
+## 1. Customer base — what hwe is built for
 
-The agency building HWP currently serves **200+ hospitality clients**, distributed approximately:
+The agency building hwe currently serves **200+ hospitality clients**, distributed approximately:
 
 - **~90% campings**
 - **~10% hotels** (growing)
 - **Edge cases** like `Hotel Balneario Fuente de Cabriel` (hotel + spa + rural cabins) — minority but real and supported.
 
-Balneario is the **first pilot migration** to HWP. The rest follow.
+Balneario is the **first pilot migration** to hwe. The rest follow.
 
 ## 2. Multi-tenant model — type + features (mixed)
 
-Each HWP client has exactly two configuration dimensions:
+Each hwe client has exactly two configuration dimensions:
 
 ### Type (one of)
 
@@ -41,7 +41,7 @@ This is the **mixed model**: type gives you a sensible starting set; features le
 
 ## 3. Mandatory pages
 
-Always present, regardless of `type` or features. Building these correctly is the foundation of every HWP site.
+Always present, regardless of `type` or features. Building these correctly is the foundation of every hwe site.
 
 | Route (default pattern) | Page concept | Layer | Notes |
 |---|---|---|---|
@@ -59,7 +59,7 @@ Always present, regardless of `type` or features. Building these correctly is th
 > 2. **Per-client slug override of the standard structure**: Balneario uses `/casitas-rurales` for the listing, Camping uses `/parcelas`, Hotel uses `/habitaciones` — same template, different slug per client.
 > 3. **Full route-shape override** (`customRoutes` escape hatch): a client can declare a completely non-standard pattern (e.g. `/propiedades/listados/[slug]`) that replaces the standard derivation for that template.
 >
-> The sitemap helper in `@hwp/core-ui` is what materializes the actual URLs by reading `client.config.routes` + active locales + active features + Payload data. See §8 open questions for the sitemap design tracking.
+> The sitemap helper in `@hwe/core-ui` is what materializes the actual URLs by reading `client.config.routes` + active locales + active features + Payload data. See §8 open questions for the sitemap design tracking.
 
 ## 4. Opt-in features
 
@@ -89,9 +89,9 @@ Adding a feature means: a Payload collection (if it stores editable content), a 
 
 ## 5. Booking widget — multi-PMS adapter
 
-HWP supports **4 PMS providers out-of-the-box** today, plus **custom adapters per client** for any non-stock PMS or bespoke integration. No client uses two simultaneously, but the platform is provider-agnostic.
+hwe supports **4 PMS providers out-of-the-box** today, plus **custom adapters per client** for any non-stock PMS or bespoke integration. No client uses two simultaneously, but the platform is provider-agnostic.
 
-### Stock adapters (in `@hwp/booking/adapters/`)
+### Stock adapters (in `@hwe/booking/adapters/`)
 
 | Provider | Notes |
 |---|---|
@@ -104,7 +104,7 @@ HWP supports **4 PMS providers out-of-the-box** today, plus **custom adapters pe
 
 When a client uses a PMS not in the stock set (or has a bespoke API):
 
-- The custom adapter implements the same `BookingAdapter` interface from `@hwp/booking`.
+- The custom adapter implements the same `BookingAdapter` interface from `@hwe/booking`.
 - Lives in `apps/site-{slug}/src/booking/` for client-specific one-offs.
 - OR in `packages/booking-{slug}/` if the same custom integration will be reused across multiple sites of the same chain.
 - The `BookingBlock` (UI shell) does not know whether the active adapter is stock or custom — it talks only to the interface.
@@ -116,10 +116,10 @@ The `BookingBlock` (UI of the widget — date pickers, occupancy selector, "sear
 - adults, children, ages (if needed)
 - accommodation type filter (optional)
 
-Provider-specific differences (auth, endpoint, response shape, error codes) are absorbed by the corresponding adapter in `@hwp/booking`:
+Provider-specific differences (auth, endpoint, response shape, error codes) are absorbed by the corresponding adapter in `@hwe/booking`:
 
 ```
-@hwp/booking
+@hwe/booking
 ├── interface BookingAdapter   ← contract any adapter must implement
 ├── adapters/                  ← stock adapters shipped with the platform
 │   ├── ThrAdapter
@@ -203,7 +203,7 @@ When the classifier (human or agent) reviews a module from `docs/docs/plans/phas
 
 2. **Module appears on a feature-gated page (§4)** → still a `Block` in `core-ui/`, but tagged as "active only when feature X is on". Its inclusion in any client's app is conditional on the feature being declared in `client.config.ts`.
 
-3. **Module wraps a PMS call (search, availability, book button)** → it is the `BookingBlock` (or a sub-component of it). The adapter logic lives in `@hwp/booking`, NEVER in the block. Props are the minimum common denominator across the 4 providers.
+3. **Module wraps a PMS call (search, availability, book button)** → it is the `BookingBlock` (or a sub-component of it). The adapter logic lives in `@hwe/booking`, NEVER in the block. Props are the minimum common denominator across the 4 providers.
 
 4. **Module is a `<XxxSection>` on a client's home (e.g. `BalnearioSection`, `HotelSection`)** → almost always a generic **`FeatureSection`-style block** whose specialness is in its **content** (text, image, CTA target). The block is not per-client; the content is. Naming should be abstract (`FeatureSection`, `HighlightSection`), not domain-specific (`BalnearioSection`).
 
@@ -221,7 +221,7 @@ When the classifier (human or agent) reviews a module from `docs/docs/plans/phas
 
 ## 8. Seasonality / themes
 
-Some HWP clients (notably `residencia-vacacional` and certain `hotel` / `rural`) operate in **multi-season mode**: the same domain serves different visual themes, content variants, photos, and even active routes depending on the current season.
+Some hwe clients (notably `residencia-vacacional` and certain `hotel` / `rural`) operate in **multi-season mode**: the same domain serves different visual themes, content variants, photos, and even active routes depending on the current season.
 
 ### The Season entity
 
@@ -527,7 +527,7 @@ routes: {
 
 ### What the sitemap helper consumes
 
-`generateSitemap()` (in `@hwp/core-ui`, see §8 open questions) reads:
+`generateSitemap()` (in `@hwe/core-ui`, see §8 open questions) reads:
 - `client.config.locales` and `defaultLocale`.
 - The full `client.config.routes` (normalizes shorthand, applies fallbacks).
 - Active features map.
@@ -555,7 +555,7 @@ These remain unresolved after v0.2 and need to be answered in subsequent domain 
 
 ### Technical — separate non-domain sessions
 
-- **Sitemap helper in `@hwp/core-ui`** — shared function `generateSitemap()` that each app's `sitemap.ts` calls. Reads:
+- **Sitemap helper in `@hwe/core-ui`** — shared function `generateSitemap()` that each app's `sitemap.ts` calls. Reads:
   - `client.config.routes` (capa 1 standard slugs per locale + capa 2 `customRoutes` overrides — both in v1).
   - Active locales declared in `client.config.locales`.
   - Active features.

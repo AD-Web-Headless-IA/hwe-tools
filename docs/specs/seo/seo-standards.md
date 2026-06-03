@@ -1,6 +1,6 @@
-# SEO standards — HWP hospitality
+# SEO standards — hwe hospitality
 
-> Rules for every page, block, and site in the HWP platform. Hospitality SEO is local SEO — 80 % of hotel and camping bookings start with a location search. Every rule here optimises for that intent.
+> Rules for every page, block, and site in the hwe platform. Hospitality SEO is local SEO — 80 % of hotel and camping bookings start with a location search. Every rule here optimises for that intent.
 >
 > **Always loaded** when the `seo-geo-specialist` agent audits a block or site.
 
@@ -104,7 +104,7 @@ Réservez dès 39 €/nuit. Piscine, accès plage direct, animations enfants.
 
 Piensa en estas reglas como la lista de comprobación que hace tu cliente de WordPress antes de publicar una página:
 
-| En WordPress (manual)... | En HWP (automatizado por seo-geo-specialist)... |
+| En WordPress (manual)... | En hwe (automatizado por seo-geo-specialist)... |
 |---|---|
 | Escribes el título SEO en Yoast | El title sigue el formato `{Nombre} — {Tipo} en {Localidad}` |
 | Escribes la meta description | Máx 155 chars, keyword + localización + CTA |

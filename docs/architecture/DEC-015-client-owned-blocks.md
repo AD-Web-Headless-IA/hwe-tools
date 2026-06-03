@@ -11,7 +11,7 @@
 
 ### Context
 
-The current architecture places all block implementations (`.tsx` files with JSX, Tailwind classes, and visual structure) in `packages/core-ui/src/blocks/`. Client sites — which per DEC-011 live in **independent git repos** and consume `@hwp/core-ui` as an npm package from a private registry — import these blocks with no ability to change the DOM structure.
+The current architecture places all block implementations (`.tsx` files with JSX, Tailwind classes, and visual structure) in `packages/core-ui/src/blocks/`. Client sites — which per DEC-011 live in **independent git repos** and consume `@hwe/core-ui` as an npm package from a private registry — import these blocks with no ability to change the DOM structure.
 
 This creates a fundamental tension:
 
@@ -88,11 +88,11 @@ packages/core-ui/
 
 #### 2. npm subpath exports in `package.json`
 
-Client repos and `apps/site-demo/` both consume `@hwp/core-ui` via the same import paths. The package exposes three public subpaths:
+Client repos and `apps/site-demo/` both consume `@hwe/core-ui` via the same import paths. The package exposes three public subpaths:
 
 ```json
 {
-  "name": "@hwp/core-ui",
+  "name": "@hwe/core-ui",
   "exports": {
     ".":              "./src/index.ts",
     "./base-blocks":  "./src/base-blocks/index.ts",
@@ -105,24 +105,24 @@ This means:
 
 ```ts
 // Package root — primitives, renderer, providers, theme, types
-import { BlockRenderer, Button, SiteShell } from '@hwp/core-ui';
+import { BlockRenderer, Button, SiteShell } from '@hwe/core-ui';
 
 // Base-blocks subpath — reference block implementations
-import { HeroBlock } from '@hwp/core-ui/base-blocks';
+import { HeroBlock } from '@hwe/core-ui/base-blocks';
 
 // Schemas subpath — Zod schemas and derived types only (no runtime components)
-import { HeroBlockContent } from '@hwp/core-ui/schemas';
-import type { HeroBlockContent as HeroType } from '@hwp/core-ui/schemas';
+import { HeroBlockContent } from '@hwe/core-ui/schemas';
+import type { HeroBlockContent as HeroType } from '@hwe/core-ui/schemas';
 ```
 
-The root export (`@hwp/core-ui`) does NOT re-export base-blocks. This is intentional: client code that imports a block explicitly chooses whether to use the base-block or its own implementation. No accidental coupling.
+The root export (`@hwe/core-ui`) does NOT re-export base-blocks. This is intentional: client code that imports a block explicitly chooses whether to use the base-block or its own implementation. No accidental coupling.
 
 #### 3. Structure of a client repo (independent, per DEC-011)
 
-Client repos are independent git repos that install `@hwp/core-ui` (and other `@hwp/*` packages) from the private npm registry. The structure of a client repo:
+Client repos are independent git repos that install `@hwe/core-ui` (and other `@hwe/*` packages) from the private npm registry. The structure of a client repo:
 
 ```
-site-{slug}/                            ← independent repo, NOT inside hwp-platform/
+site-{slug}/                            ← independent repo, NOT inside hwe-platform/
 ├── src/
 │   ├── app/
 │   │   ├── globals.css                 ← ONE CSS file: fonts, token vars, animations, 3rd-party
@@ -152,7 +152,7 @@ site-{slug}/                            ← independent repo, NOT inside hwp-pla
 ├── client.config.ts
 ├── tailwind.config.ts
 ├── next.config.mjs
-├── package.json                        ← depends on @hwp/core-ui, @hwp/config, @hwp/booking...
+├── package.json                        ← depends on @hwe/core-ui, @hwe/config, @hwe/booking...
 └── tsconfig.json
 ```
 
@@ -160,7 +160,7 @@ The key change vs. the current `apps/site-{slug}/` layout (per `structure.md`) i
 
 #### 4. The same structure in `apps/site-demo/` (monorepo reference)
 
-`apps/site-demo/` inside the monorepo mirrors the client repo structure exactly. It is the canonical "what does a real client project look like?" reference. It consumes `@hwp/core-ui` via pnpm workspace link (not npm install), but the import paths are identical:
+`apps/site-demo/` inside the monorepo mirrors the client repo structure exactly. It is the canonical "what does a real client project look like?" reference. It consumes `@hwe/core-ui` via pnpm workspace link (not npm install), but the import paths are identical:
 
 ```
 apps/site-demo/
@@ -184,7 +184,7 @@ When BlockRenderer needs to render a block, it resolves in this order:
    → Found? Use client implementation.
    → Not found? ↓
 
-2. Base-block (from @hwp/core-ui/base-blocks via baseBlockRegistry)
+2. Base-block (from @hwe/core-ui/base-blocks via baseBlockRegistry)
    → Found? Use default implementation.
    → Not found? Dev warning.
 ```
@@ -208,7 +208,7 @@ The layout wires it:
 
 ```tsx
 // site-{slug}/src/app/layout.tsx
-import { BlockRenderer } from '@hwp/core-ui';
+import { BlockRenderer } from '@hwe/core-ui';
 import { clientBlocks } from '../blocks/registry';
 
 // BlockRenderer merges: clientBlocks over baseBlockRegistry
@@ -230,16 +230,16 @@ Render logic: for each block in `layout[]`, look up `blocks[type]` first (client
 
 ```tsx
 // Level 1 — Re-export (tokens do all the work, ~70% of cases)
-export { HeroBlock } from '@hwp/core-ui/base-blocks';
+export { HeroBlock } from '@hwe/core-ui/base-blocks';
 
 // Level 2 — Slots (customize specific visual pieces, ~20% of cases)
-import { HeroBlock as BaseHero } from '@hwp/core-ui/base-blocks';
+import { HeroBlock as BaseHero } from '@hwe/core-ui/base-blocks';
 export function HeroBlock({ content }) {
   return <BaseHero content={content} slots={{ heading: myCustomHeading }} />;
 }
 
 // Level 3 — Full custom (ignore base-block, use only schema, ~10% of cases)
-import type { HeroBlockContent } from '@hwp/core-ui/schemas';
+import type { HeroBlockContent } from '@hwe/core-ui/schemas';
 export function HeroBlock({ content }: { content: HeroBlockContent }) {
   return <section>/* completely custom JSX */</section>;
 }
@@ -253,7 +253,7 @@ Same three levels apply to primitives. Most clients (~98%) never override primit
 site-{slug}/src/primitives/Button/Button.tsx  ← client's custom Button
 ```
 
-This is NOT automatic resolution. It's an import choice: the client's block imports from `../primitives/Button` if a local override exists, or from `@hwp/core-ui` if using the shared one. The `scaffold-site` template sets up imports from `@hwp/core-ui` by default.
+This is NOT automatic resolution. It's an import choice: the client's block imports from `../primitives/Button` if a local override exists, or from `@hwe/core-ui` if using the shared one. The `scaffold-site` template sets up imports from `@hwe/core-ui` by default.
 
 #### 8. Slot pattern for base-blocks
 
@@ -294,21 +294,21 @@ Slots are optional per block. The planner decides during `/propose` whether a bl
 
 #### 9. Token cascade: global → semantic → brand
 
-Adopted from the DSE reference. **Compatible with Tailwind v3** (DEC-012) and the existing `createHwpPreset(tokens)` pipeline.
+Adopted from the DSE reference. **Compatible with Tailwind v3** (DEC-012) and the existing `createhwePreset(tokens)` pipeline.
 
 Three levels of tokens:
 
 | Level | Location | Purpose | Example |
 |---|---|---|---|
 | Global | `packages/core-ui/src/theme/global.tokens.json` | Platform-wide primitives | `color.teal.600 → #0F6E56` |
-| Semantic | Inline in `createHwpPreset()` | Maps primitives to roles | `primary → color.teal.600` |
+| Semantic | Inline in `createhwePreset()` | Maps primitives to roles | `primary → color.teal.600` |
 | Brand | `site-{slug}/src/theme/tokens.json` | Client overrides (existing) | `primary → #8B6914` |
 
-The cascade is resolved at **build time** inside `createHwpPreset()`, not at runtime. This preserves compatibility with Tailwind v3 and the existing contract:
+The cascade is resolved at **build time** inside `createhwePreset()`, not at runtime. This preserves compatibility with Tailwind v3 and the existing contract:
 
 ```ts
 // packages/config/src/tailwind-preset.ts (updated)
-export function createHwpPreset(
+export function createhwePreset(
   brandTokens: Tokens,
   options?: { globalTokens?: GlobalTokens }
 ): Partial<Config> {
@@ -367,7 +367,7 @@ Used by the planner agent and by a future Payload CMS page builder to validate l
 - New template: `scaffold-site` creates a client repo with base-block re-exports, registry, theme, globals.css.
 - `apps/site-demo/` gains `src/blocks/` + `registry.ts` to mirror the client repo structure.
 - The Phase 1 classification table gains a "Slots?" column.
-- Client repos that consume `@hwp/core-ui@<version>` get base-blocks as part of the package — no extra install needed.
+- Client repos that consume `@hwe/core-ui@<version>` get base-blocks as part of the package — no extra install needed.
 
 ### Alternatives considered
 
@@ -384,7 +384,7 @@ Used by the planner agent and by a future Payload CMS page builder to validate l
 
 > Three phases: **A** (structural changes in the monorepo — explicit, step by step), **B** (systematic sweep of all documentation — grep + conceptual review), **C** (verification).
 >
-> **Scope:** Phase A and B touch only `hwp-platform/`. Client repos don't exist yet — the `scaffold-site` template (Step A5) defines their structure for when they do.
+> **Scope:** Phase A and B touch only `hwe-platform/`. Client repos don't exist yet — the `scaffold-site` template (Step A5) defines their structure for when they do.
 >
 > **Language:** instructions in Spanish (human-AI conversation). All technical artifacts in English (DEC-001).
 > **Rule:** no step deletes existing files without creating their replacement first.
@@ -486,7 +486,7 @@ A4.1. Create `apps/site-demo/src/blocks/`.
 A4.2. For each of the 6 existing blocks, create a Level 1 re-export:
 ```ts
 // apps/site-demo/src/blocks/HeroBlock/HeroBlock.tsx
-export { HeroBlock } from '@hwp/core-ui/base-blocks';
+export { HeroBlock } from '@hwe/core-ui/base-blocks';
 ```
 
 A4.3. Create `apps/site-demo/src/blocks/registry.ts`:
@@ -524,9 +524,9 @@ Defines the template for creating a new client repo. The skill creates:
 - `src/theme/tokens.json` — template from platform defaults
 - `src/app/globals.css` — skeleton with commented sections
 - `src/app/layout.tsx` — wired with BlockRenderer + clientBlocks
-- `tailwind.config.ts` — extends `@hwp/config` preset
+- `tailwind.config.ts` — extends `@hwe/config` preset
 - `client.config.ts` — template with blockDefaults
-- `package.json` — depends on `@hwp/core-ui`, `@hwp/config`, `@hwp/booking`
+- `package.json` — depends on `@hwe/core-ui`, `@hwe/config`, `@hwe/booking`
 
 ---
 
@@ -542,14 +542,14 @@ Run these searches and apply the replacement rules to EVERY match:
 # B1.1 — Old block path in docs and AI config
 grep -rn "core-ui/src/blocks/" docs/ .claude/ CLAUDE.md
 grep -rn "core-ui/blocks" docs/ .claude/ CLAUDE.md
-grep -rn "@hwp/core-ui/blocks" docs/ .claude/
+grep -rn "@hwe/core-ui/blocks" docs/ .claude/
 ```
 
 **Rules per match:**
 - If context describes WHERE reference implementations live → replace with `core-ui/src/base-blocks/`
 - If context describes WHERE a client's blocks live → replace with `site-{slug}/src/blocks/`
 - If context says "all blocks live in packages/core-ui" → rewrite to explain the split: schemas in core-ui, base-blocks as reference, client blocks in client repo
-- If context describes an IMPORT → update to `@hwp/core-ui/base-blocks` or `@hwp/core-ui/schemas` as appropriate
+- If context describes an IMPORT → update to `@hwe/core-ui/base-blocks` or `@hwe/core-ui/schemas` as appropriate
 
 ```bash
 # B1.2 — Schema paths
@@ -611,7 +611,7 @@ Read EVERY file. For each:
 
 | Skill | What to check |
 |---|---|
-| `scaffold-block` | **CRITICAL.** Now supports two targets: `--target base` (scaffolds in `base-blocks/`, schema in `schemas/`) and `--target client` (scaffolds in client's `src/blocks/`, imports schema from `@hwp/core-ui/schemas`). Update templates. |
+| `scaffold-block` | **CRITICAL.** Now supports two targets: `--target base` (scaffolds in `base-blocks/`, schema in `schemas/`) and `--target client` (scaffolds in client's `src/blocks/`, imports schema from `@hwe/core-ui/schemas`). Update templates. |
 | `scaffold-variant` | References `blocks/` → `base-blocks/` |
 | `add-block` | Update paths. Must also update client `registry.ts` when adding to a client |
 | `archive` | Catalog and project-map paths |
@@ -619,7 +619,7 @@ Read EVERY file. For each:
 | `enrich-us` | Architecture context references |
 | `import-figma` | Token extraction — mention cascade (global → semantic → brand) |
 | `plan-to-stories` | Monorepo structure references |
-| `create-page` | Block imports — now from client `registry.ts`, not from `@hwp/core-ui` directly |
+| `create-page` | Block imports — now from client `registry.ts`, not from `@hwe/core-ui` directly |
 | `security-audit` | Scan paths — now includes client `src/blocks/` AND platform `base-blocks/` |
 | `security-fix` | Fix paths — same |
 | `seo-audit` | Scan paths — same |
@@ -638,10 +638,10 @@ Read EVERY file. Check for block path references and update:
 
 | Contract | What to update |
 |---|---|
-| `block-contract.md` | **CRITICAL.** Add "Block ownership model (DEC-015)" section. Explain: schemas shared via `@hwp/core-ui/schemas`, base-blocks via `@hwp/core-ui/base-blocks`, client blocks in client repo, three usage levels, slot pattern, `registry.ts`. Update folder layout examples. The "What a block is" section says "adding a new block means adding one folder under `packages/core-ui/src/blocks/`" — this needs to distinguish platform blocks (base-blocks) from client blocks. |
+| `block-contract.md` | **CRITICAL.** Add "Block ownership model (DEC-015)" section. Explain: schemas shared via `@hwe/core-ui/schemas`, base-blocks via `@hwe/core-ui/base-blocks`, client blocks in client repo, three usage levels, slot pattern, `registry.ts`. Update folder layout examples. The "What a block is" section says "adding a new block means adding one folder under `packages/core-ui/src/blocks/`" — this needs to distinguish platform blocks (base-blocks) from client blocks. |
 | `structure.md` | **CRITICAL.** Update `packages/core-ui/` tree (rename `blocks/` to `base-blocks/`, add `schemas/`, `types/`, `composition-rules/`). Update `apps/site-{slug}/` tree (add `blocks/`, `blocks/registry.ts`, optional `primitives/`). Note that per DEC-011 the `apps/site-{slug}/` tree is also the structure of independent client repos. Update the public API rule to mention subpath exports. Update "What NOT to do" list. |
-| `theme-tokens.md` | Add section on token cascade (global → semantic → brand) and how it integrates with `createHwpPreset()`. Document `globals.css` rule (one per client, zero per block). Keep existing Tailwind v3 pipeline intact (DEC-012). |
-| `template-contract.md` | Templates in base-blocks reference schemas from `@hwp/core-ui/schemas`. Client compositions wrapping templates import blocks from local `src/blocks/`, not from `@hwp/core-ui` directly. Update import examples. |
+| `theme-tokens.md` | Add section on token cascade (global → semantic → brand) and how it integrates with `createhwePreset()`. Document `globals.css` rule (one per client, zero per block). Keep existing Tailwind v3 pipeline intact (DEC-012). |
+| `template-contract.md` | Templates in base-blocks reference schemas from `@hwe/core-ui/schemas`. Client compositions wrapping templates import blocks from local `src/blocks/`, not from `@hwe/core-ui` directly. Update import examples. |
 | `client-composition.md` | **CRITICAL.** The "three layers" table says blocks live in `packages/core-ui/src/blocks/` — update. Compositions now import from `../blocks/` (local registry) and pass `clientBlocks` to BlockRenderer. The table needs a row for "Client Block" (lives in `site-{slug}/src/blocks/`, specific to this client). |
 
 ---
@@ -670,7 +670,7 @@ Read EVERY file. Check for block path references and update:
 | `first-day-setup.md` | **CRITICAL.** Update "where things live". Explain the split: schemas shared, blocks in client, base-blocks as reference. |
 | `daily-workflow.md` | Update "where to work" — platform devs work in `base-blocks/`. Client devs work in `site-{slug}/src/blocks/`. |
 | `glossary.md` | Add: `base-block`, `slot`, `token cascade`, `composition rules`, `client block registry`, `subpath export`. |
-| `wordpress-to-hwp.md` | Update block analogy: base-blocks are like a starter theme you customize, not a shared plugin. |
+| `wordpress-to-hwe.md` | Update block analogy: base-blocks are like a starter theme you customize, not a shared plugin. |
 
 ---
 
@@ -767,8 +767,8 @@ test -f apps/site-demo/src/blocks/registry.ts && echo "✓ registry.ts"
 test ! -d packages/core-ui/src/blocks && echo "✓ old blocks/ removed"
 
 # Subpath exports resolve
-node -e "require.resolve('@hwp/core-ui/base-blocks')" && echo "✓ base-blocks subpath"
-node -e "require.resolve('@hwp/core-ui/schemas')" && echo "✓ schemas subpath"
+node -e "require.resolve('@hwe/core-ui/base-blocks')" && echo "✓ base-blocks subpath"
+node -e "require.resolve('@hwe/core-ui/schemas')" && echo "✓ schemas subpath"
 ```
 
 ### Step C4 — Documentation consistency check

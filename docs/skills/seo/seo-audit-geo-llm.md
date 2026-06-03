@@ -35,11 +35,11 @@ Assumes the dev server is running at `http://localhost:3000`.
 
 **Step 1 — Fetch the rendered HTML (SSR check)**
 ```bash
-curl -s http://localhost:3000 -o /tmp/hwp-page.html
+curl -s http://localhost:3000 -o /tmp/hwe-page.html
 ```
 Verify the HTTP response contains JSON-LD (SSR check):
 ```bash
-grep -c 'application/ld+json' /tmp/hwp-page.html
+grep -c 'application/ld+json' /tmp/hwe-page.html
 ```
 Count must be > 0. A count of 0 = Blocker (JSON-LD injected client-side — LLM crawlers cannot read it).
 
@@ -47,7 +47,7 @@ Count must be > 0. A count of 0 = Blocker (JSON-LD injected client-side — LLM 
 ```bash
 python3 -c "
 import re
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 m = re.search(r'<main[^>]*>(.*)', html, re.DOTALL)
 if m:
     p = re.search(r'<p[^>]*>(.*?)</p>', m.group(1), re.DOTALL)
@@ -66,7 +66,7 @@ The first paragraph must:
 
 **Step 3 — Check meta description is a complete factual sentence (LLM short-answer surface)**
 ```bash
-grep -oE '<meta name="description" content="[^"]*"' /tmp/hwp-page.html
+grep -oE '<meta name="description" content="[^"]*"' /tmp/hwe-page.html
 ```
 The meta description is the surface LLMs use for short answers. Verify:
 - Complete factual sentence, not marketing copy ("Discover…", "Welcome to…" = Fail).
@@ -78,7 +78,7 @@ The meta description is the surface LLMs use for short answers. Verify:
 python3 -c "
 # Replace EXACT_NAME with the establishment name from client.config.ts
 import re
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 text = re.sub('<[^>]+>', ' ', html)
 # Look for the exact name
 exact = 'EXACT_NAME'  # fill in before running
@@ -88,7 +88,7 @@ print(f'Exact name occurrences: {count}')
 ```
 Then search for abbreviated or variant names:
 ```bash
-grep -oiE '[A-Z][a-z]+ [A-Z][a-z]+' /tmp/hwp-page.html | sort | uniq -c | sort -rn | head -20
+grep -oiE '[A-Z][a-z]+ [A-Z][a-z]+' /tmp/hwe-page.html | sort | uniq -c | sort -rn | head -20
 ```
 Any abbreviation or alternate spelling of the establishment name (e.g. "CS" for "Camping Sol Mar") = Major. LLMs aggregate entities across sources — inconsistent naming fragments the entity.
 
@@ -96,7 +96,7 @@ Any abbreviation or alternate spelling of the establishment name (e.g. "CS" for 
 ```bash
 python3 -c "
 import re, json
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 schemas = re.findall(r'<script[^>]+type=[\"\'\"']application/ld\+json[\"\'\"'][^>]*>(.*?)</script>', html, re.DOTALL)
 faq_found = False
 for s in schemas:
@@ -125,7 +125,7 @@ Verify:
 ```bash
 python3 -c "
 import re, json
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 schemas = re.findall(r'<script[^>]+type=[\"\'\"']application/ld\+json[\"\'\"'][^>]*>(.*?)</script>', html, re.DOTALL)
 for s in schemas:
     d = json.loads(s.strip())
@@ -143,7 +143,7 @@ Minimum required: Google Business Profile URL + one OTA (TripAdvisor or Booking.
 ```bash
 python3 -c "
 import re, json
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 schemas = re.findall(r'<script[^>]+type=[\"\'\"']application/ld\+json[\"\'\"'][^>]*>(.*?)</script>', html, re.DOTALL)
 for s in schemas:
     d = json.loads(s.strip())
@@ -159,7 +159,7 @@ Must have at least 2 proximity entries (e.g. `distanceToBeach`, `distanceToCity`
 
 **Step 8 — Check `dateModified` freshness signal**
 ```bash
-grep -oE '"dateModified"\s*:\s*"[^"]*"' /tmp/hwp-page.html
+grep -oE '"dateModified"\s*:\s*"[^"]*"' /tmp/hwe-page.html
 ```
 `dateModified` must be present in the main schema and reflect a date within the last 6 months. Missing or stale date = Minor. LLMs prefer content with recent `dateModified`.
 
@@ -255,4 +255,4 @@ Como el SEO tradicional pero para que ChatGPT y Perplexity te citen cuando algui
 | SSR del JSON-LD | Los crawlers de LLMs leen el HTML inicial | Sin SSR, el JSON-LD es invisible para los crawlers |
 | `dateModified` actualizado | El LLM prefiere contenido reciente | Página actualizada hace 3 semanas > página sin fecha |
 
-**Equivalente WordPress:** no tiene equivalente directo — Yoast SEO no hace GEO. Es la capa de SEO avanzado que diferencia a HWP de un site WordPress genérico y que convierte el tráfico de LLMs (creciendo) en fuente de reservas directas.
+**Equivalente WordPress:** no tiene equivalente directo — Yoast SEO no hace GEO. Es la capa de SEO avanzado que diferencia a hwe de un site WordPress genérico y que convierte el tráfico de LLMs (creciendo) en fuente de reservas directas.

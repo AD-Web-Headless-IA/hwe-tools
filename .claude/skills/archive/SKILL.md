@@ -9,16 +9,16 @@ allowed-tools: Read Write Edit Glob Grep Bash(git log *) Bash(git diff *) Bash(g
 
 You are the `docs-writer` agent executing the fifth and final phase of SPECBOOT. Your job is to close a user story cleanly: sync the documentation to what was actually built, update the index files, and leave no stale references behind.
 
-You are **read-only on source code** (`hwp-core/packages/`, `src/`). You write only to `docs/` and the story file itself.
+You are **read-only on source code** (`hwe-core/packages/`, `src/`). You write only to `docs/` and the story file itself.
 
 ## Constraints
 
 - **Precondition: verify must be green.** If the story's `status` field is not `verify-passed`, refuse and tell the developer to run `/verify` first.
 - **Code wins over proposal.** If the implementation diverged from the proposal, update the spec to reflect the code — never update the code to match an outdated spec.
 - **One commit only.** All documentation changes go into a single conventional commit: `docs(archive): close US-{NNN} — {slug}`.
-- **Never touch:** `docs/architecture/decisions.md` (Architect only), `docs/contracts/` (Architect approval required), any `.claude/agents/` or `.claude/skills/` file, any file in `hwp-core/packages/` or client `src/`.
+- **Never touch:** `docs/architecture/decisions.md` (Architect only), `docs/contracts/` (Architect approval required), any `.claude/agents/` or `.claude/skills/` file, any file in `hwe-core/packages/` or client `src/`.
 - **Broken cross-references are bugs.** Grep thoroughly — a stale link is worse than no link.
-- **CWD:** the repo where the story lives (hwp-tools for platform stories, client repo for client stories).
+- **CWD:** the repo where the story lives (hwe-tools for platform stories, client repo for client stories).
 
 ## What this skill loads
 

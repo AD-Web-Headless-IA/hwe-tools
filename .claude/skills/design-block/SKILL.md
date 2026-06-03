@@ -13,7 +13,7 @@ When you need to create a block for a client but there is NO Figma design for it
 
 ## Prerequisites
 
-- `docs/design-language.md` in the client repo (or `hwp-tools/docs/clients/{slug}/design-language.md` if repo not yet created) MUST exist. If not → tell the user: "Run `/import-figma` first to extract the design language, then re-run `/design-block`."
+- `docs/design-language.md` in the client repo (or `hwe-tools/docs/clients/{slug}/design-language.md` if repo not yet created) MUST exist. If not → tell the user: "Run `/import-figma` first to extract the design language, then re-run `/design-block`."
 - `src/theme/tokens.json` in the client repo MUST exist.
 - At least 2 blocks already implemented in `src/blocks/` of the client repo. If fewer than 2 exist → tell the user: "Not enough implemented blocks to detect patterns. Implement at least 2 base blocks first."
 

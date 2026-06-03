@@ -1,6 +1,6 @@
-# hwp-tools — Contexto para Claude Code
+# hwe-tools — Contexto para Claude Code
 
-> Este repo es **`hwp-tools`** — el submodulo de herramientas que se monta como `.hwp-tools/` en cada repo cliente y en `hwp-core`. No contiene código de producción: solo skills, agentes, documentación y specs.
+> Este repo es **`hwe-tools`** — el submodulo de herramientas que se monta como `.hwe-tools/` en cada repo cliente y en `hwe-core`. No contiene código de producción: solo skills, agentes, documentación y specs.
 >
 > **Antes de empezar cualquier tarea en un repo cliente, lee `docs/README.md`** — mapea cada tipo de tarea al conjunto mínimo de ficheros a cargar.
 
@@ -9,23 +9,23 @@
 ## Arquitectura de 3 repos (DEC-017)
 
 ```
-hwp-tools/          ← ESTE REPO — submodulo git
+hwe-tools/          ← ESTE REPO — submodulo git
   .claude/          ← skills, agents, commands, settings
   docs/             ← arquitectura, contratos, specs, guías
   .claude/templates/ ← plantillas para /design-block e /import-figma
   compatibility.json
 
-hwp-core/           ← repo separado — paquetes npm
+hwe-core/           ← repo separado — paquetes npm
   packages/
-    core-ui/        → @hwp/core-ui (base-blocks, schemas, renderer, theme, adapters)
-    config/         → @hwp/config (tailwind preset, tsconfig base)
+    core-ui/        → @hwe/core-ui (base-blocks, schemas, renderer, theme, adapters)
+    config/         → @hwe/config (tailwind preset, tsconfig base)
 
-hwp-template/       ← repo template de GitHub
-  .hwp-tools/       ← submodulo → hwp-tools
+hwe-template/       ← repo template de GitHub
+  .hwe-tools/       ← submodulo → hwe-tools
   src/              ← estructura vacía lista para clonar por cliente
 
-site-{slug}/        ← repos independientes por cliente (clonados desde hwp-template)
-  .hwp-tools/       ← submodulo → hwp-tools
+site-{slug}/        ← repos independientes por cliente (clonados desde hwe-template)
+  .hwe-tools/       ← submodulo → hwe-tools
   src/
     blocks/         ← implementaciones propias del cliente (Levels 1/2/3)
     compositions/
@@ -44,7 +44,7 @@ site-{slug}/        ← repos independientes por cliente (clonados desde hwp-tem
 |---|---|
 | `docs/specs/general/base-standards.md` | Reglas comunes (TS strict, Zod, TDD, English, naming, commits) |
 | `docs/specs/frontend/frontend-standards.md` | Reglas React/Next/Tailwind/a11y/i18n (extiende base) |
-| `docs/specs/frontend/coding-standards.md` | Reglas de codificación HWP del día a día |
+| `docs/specs/frontend/coding-standards.md` | Reglas de codificación hwe del día a día |
 | `docs/specs/security/security-standards.md` | Seguridad y RGPD — obligación legal |
 | `docs/specs/general/lifecycle.md` | alpha → beta → stable — criterios de promoción |
 
@@ -65,22 +65,22 @@ site-{slug}/        ← repos independientes por cliente (clonados desde hwp-tem
 
 - **Frontend:** Next.js 15 + TypeScript strict + Tailwind v4 (CSS-first `@theme`) + React 19
 - **Testing:** Vitest + @testing-library/react + vitest-axe + Playwright + msw (DEC-006)
-- **Packages:** `@hwp/core-ui` + `@hwp/config` (en `hwp-core/`, consumidos vía npm privado)
+- **Packages:** `@hwe/core-ui` + `@hwe/config` (en `hwe-core/`, consumidos vía npm privado)
 - **Deploy:** Vercel — un proyecto por cliente (DEC-007)
 - **IA:** Claude API siempre via Next.js Route Handler server-side (DEC-007)
 
 ---
 
-## Estructura de paquetes `@hwp/core-ui` (DEC-015 + DEC-017)
+## Estructura de paquetes `@hwe/core-ui` (DEC-015 + DEC-017)
 
 | Subpath export | Contenido |
 |---|---|
-| `@hwp/core-ui` | renderer, providers, layout, theme, primitives |
-| `@hwp/core-ui/base-blocks` | implementaciones de referencia de cada bloque |
-| `@hwp/core-ui/schemas` | Zod schemas compartidos |
-| `@hwp/core-ui/theme` | token contract + CSS variables |
+| `@hwe/core-ui` | renderer, providers, layout, theme, primitives |
+| `@hwe/core-ui/base-blocks` | implementaciones de referencia de cada bloque |
+| `@hwe/core-ui/schemas` | Zod schemas compartidos |
+| `@hwe/core-ui/theme` | token contract + CSS variables |
 
-**Adapters** (booking, map, reviews, form) viven en `@hwp/core-ui/src/adapters/` — no existe `@hwp/booking` como paquete separado (DEC-017 elimina ese paquete).
+**Adapters** (booking, map, reviews, form) viven en `@hwe/core-ui/src/adapters/` — no existe `@hwe/booking` como paquete separado (DEC-017 elimina ese paquete).
 
 ---
 
@@ -88,23 +88,23 @@ site-{slug}/        ← repos independientes por cliente (clonados desde hwp-tem
 
 | Tipo | Directorio | Registry |
 |---|---|---|
-| Base block (platform) | `hwp-core/packages/core-ui/src/base-blocks/{Name}/` | `baseBlockRegistry.ts` |
+| Base block (platform) | `hwe-core/packages/core-ui/src/base-blocks/{Name}/` | `baseBlockRegistry.ts` |
 | Client block (Level 1-3) | `src/blocks/{Name}/` en el repo cliente | `src/blocks/registry.ts` |
 
 ### Los 3 niveles de uso en repos cliente
 
 ```ts
 // Level 1 — re-export (~70%)
-export { HeroBlock } from '@hwp/core-ui/base-blocks';
+export { HeroBlock } from '@hwe/core-ui/base-blocks';
 
 // Level 2 — slots (~20%)
-import { HeroBlock as BaseHero } from '@hwp/core-ui/base-blocks';
+import { HeroBlock as BaseHero } from '@hwe/core-ui/base-blocks';
 export function HeroBlock(props) {
   return <BaseHero {...props} CtaSlot={MyBookingCta} />;
 }
 
 // Level 3 — full custom (~10%)
-import type { HeroBlockContent } from '@hwp/core-ui/schemas';
+import type { HeroBlockContent } from '@hwe/core-ui/schemas';
 export function HeroBlock({ content }) { /* JSX propio */ }
 ```
 
@@ -112,7 +112,7 @@ export function HeroBlock({ content }) { /* JSX propio */ }
 
 ## Reglas no negociables
 
-- Nunca `if (client === 'nombre')` en `@hwp/core-ui` — usar adapter pattern.
+- Nunca `if (client === 'nombre')` en `@hwe/core-ui` — usar adapter pattern.
 - Sin `any` en TypeScript.
 - Validación Zod en cada boundary del sistema.
 - TDD — tests antes que código (DEC-006).
@@ -150,7 +150,7 @@ Referencia completa: `docs/specs/ai/agent-directory.md`. Equipos predefinidos: `
 
 Skills disponibles (registradas en `docs/catalog.md`):
 - `/scaffold-block {Name} [--target base|client] [--site <slug>]` — crea bloque en `base-blocks/` o en el repo cliente.
-- `/scaffold-site <slug>` — configura un repo cliente clonado desde hwp-template.
+- `/scaffold-site <slug>` — configura un repo cliente clonado desde hwe-template.
 - `/import-figma <git-url> [slug]` — importa un Figma Make con tag por importación (DEC-002).
 - `/design-block {BlockName} --client {slug}` — visual spec para bloques sin referencia Figma (DEC-016).
 - `/enrich-us <path>` — enriquece una user story.
@@ -163,16 +163,16 @@ Skills disponibles (registradas en `docs/catalog.md`):
 
 ## Compatibilidad de versiones
 
-Ver `compatibility.json` en la raíz — mapea versión de tools a versiones compatibles de `@hwp/core-ui` y `@hwp/config`.
+Ver `compatibility.json` en la raíz — mapea versión de tools a versiones compatibles de `@hwe/core-ui` y `@hwe/config`.
 
 ---
 
 ## Onboarding de nuevo cliente
 
 ```
-1. Create repo  → GitHub "Use this template" desde hwp-template
+1. Create repo  → GitHub "Use this template" desde hwe-template
 2. Clone        → git clone --recurse-submodules site-{slug}
-3. Install      → npm install (@hwp/core-ui + @hwp/config desde npm privado)
+3. Install      → npm install (@hwe/core-ui + @hwe/config desde npm privado)
 4. Import Figma → /import-figma → tokens.json + design-language.md
 5. Configure    → client.config.ts, globals.css, layout.tsx lang
 6. Customize    → blocks (Level 1/2/3), páginas (/create-page), contenido (/add-block)
@@ -186,10 +186,10 @@ Ver `compatibility.json` en la raíz — mapea versión de tools a versiones com
 
 ```
 C:\laragon\www\Hospitality Web Platform\
-├── hwp-tools\           ← ESTE REPO
-├── hwp-core\            ← packages @hwp/* (Turborepo + pnpm)
-├── hwp-template\        ← repo template vacío
-├── site-{slug}\         ← repos de clientes (submodulo hwp-tools como .hwp-tools/)
+├── hwe-tools\           ← ESTE REPO
+├── hwe-core\            ← packages @hwe/* (Turborepo + pnpm)
+├── hwe-template\        ← repo template vacío
+├── site-{slug}\         ← repos de clientes (submodulo hwe-tools como .hwe-tools/)
 └── figma-makes\         ← repos del diseñador, uno por cliente (DEC-002)
 ```
 
@@ -206,7 +206,7 @@ C:\laragon\www\Hospitality Web Platform\
 ## Cuando estés perdido
 
 1. `docs/README.md` — qué ficheros cargar según la tarea.
-2. `docs/architecture/domain-model.md` — qué es un cliente HWP, cómo se modela el multi-tenant.
+2. `docs/architecture/domain-model.md` — qué es un cliente hwe, cómo se modela el multi-tenant.
 3. `docs/architecture/decisions.md` — qué decisiones ya están tomadas.
 4. `docs/architecture/briefing.md` — por qué existe el proyecto.
 5. `compatibility.json` — versiones compatibles entre tools y core.

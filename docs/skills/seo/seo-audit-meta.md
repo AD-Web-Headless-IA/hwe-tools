@@ -35,23 +35,23 @@ Assumes the dev server is running at `http://localhost:3000`. Run for each page 
 
 **Step 1 — Fetch the page**
 ```bash
-curl -s http://localhost:3000 -o /tmp/hwp-page.html
+curl -s http://localhost:3000 -o /tmp/hwe-page.html
 ```
 
 **Step 2 — Extract and check `<title>`**
 ```bash
-grep -oE '<title>[^<]+</title>' /tmp/hwp-page.html
+grep -oE '<title>[^<]+</title>' /tmp/hwe-page.html
 ```
 Verify:
 - Contains establishment name + type + location.
-- Max 60 characters: count with `grep -oP '(?<=<title>)[^<]+' /tmp/hwp-page.html | wc -m`.
+- Max 60 characters: count with `grep -oP '(?<=<title>)[^<]+' /tmp/hwe-page.html | wc -m`.
 - Not a generic default (e.g. "Next.js App" or the site framework name).
 - Homepage format: `{Name} — {Type} {Stars}★ en {Locality}, {Region}`.
 - Sub-page format: `{Page topic} — {Short name} | {Locality}`.
 
 **Step 3 — Extract and check meta description**
 ```bash
-grep -oE '<meta name="description" content="[^"]*"' /tmp/hwp-page.html
+grep -oE '<meta name="description" content="[^"]*"' /tmp/hwe-page.html
 ```
 Verify:
 - Present and not empty.
@@ -62,13 +62,13 @@ Verify:
 
 **Step 4 — Check canonical URL**
 ```bash
-grep -oE '<link rel="canonical"[^>]+>' /tmp/hwp-page.html
+grep -oE '<link rel="canonical"[^>]+>' /tmp/hwe-page.html
 ```
 Must be present on every page and point to the correct absolute URL. Missing = Major.
 
 **Step 5 — Check Open Graph tags**
 ```bash
-grep -oE '<meta property="og:[^"]*" content="[^"]*"' /tmp/hwp-page.html
+grep -oE '<meta property="og:[^"]*" content="[^"]*"' /tmp/hwe-page.html
 ```
 Required five tags:
 - `og:title`
@@ -81,7 +81,7 @@ Missing any of these = Major. `og:image` with a relative URL = Major.
 
 **Step 6 — Check `lang` attribute on `<html>`**
 ```bash
-grep -oE '<html[^>]*>' /tmp/hwp-page.html
+grep -oE '<html[^>]*>' /tmp/hwe-page.html
 ```
 Must include `lang="{locale}"` (e.g. `lang="fr"`, `lang="es"`, `lang="ca"`). Missing = Blocker. Wrong locale = Major.
 
@@ -146,7 +146,7 @@ Green / Yellow / Red
 
 Como revisar los campos SEO de Yoast antes de publicar en WordPress, pero con formato estandarizado y verificación automática para toda la plataforma:
 
-| Campo | En Yoast (WP) | En HWP |
+| Campo | En Yoast (WP) | En hwe |
 |---|---|---|
 | Título SEO | Campo editable por página en el editor | `generateMetadata()` en Next.js — formato fijado por spec |
 | Meta description | Campo editable con semáforo de longitud | Misma lógica, reglas documentadas en `seo-standards.md` |

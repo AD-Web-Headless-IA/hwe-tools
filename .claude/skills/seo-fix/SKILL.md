@@ -7,7 +7,7 @@ allowed-tools: Read Write Edit Glob Grep Bash(git add *) Bash(git commit *) Bash
 
 # SEO Fix
 
-You apply SEO fixes derived from the latest audit report and commit them in 5 logical groups. Runs from within the client repo (CWD = `site-{slug}/`). You are authorised to modify `src/blocks/` and `src/`. For base-block fixes, they go in `hwp-core/packages/core-ui/src/base-blocks/` (separate repo). Do not modify test files unless a type-check failure forces it.
+You apply SEO fixes derived from the latest audit report and commit them in 5 logical groups. Runs from within the client repo (CWD = `site-{slug}/`). You are authorised to modify `src/blocks/` and `src/`. For base-block fixes, they go in `hwe-core/packages/core-ui/src/base-blocks/` (separate repo). Do not modify test files unless a type-check failure forces it.
 
 ## Constraints
 
@@ -22,13 +22,13 @@ You apply SEO fixes derived from the latest audit report and commit them in 5 lo
 
 Read these specs before starting (they define the exact rules each fix must satisfy):
 
-- `.hwp-tools/docs/specs/seo/seo-standards.md` — title format, meta rules, image rules
-- `.hwp-tools/docs/specs/seo/semantic-html.md` — per-block landmark requirements
-- `.hwp-tools/docs/specs/seo/geo-llm-optimization.md` — citable content, JSON-LD field completeness
-- `.hwp-tools/docs/specs/seo/schemas/README.md` — page→schema mapping
-- `.hwp-tools/docs/specs/seo/schemas/campground-homepage.json` — Campground template
-- `.hwp-tools/docs/specs/seo/schemas/organization.json` — Organization template
-- `.hwp-tools/docs/specs/seo/schemas/faq.json` — FAQPage template
+- `.hwe-tools/docs/specs/seo/seo-standards.md` — title format, meta rules, image rules
+- `.hwe-tools/docs/specs/seo/semantic-html.md` — per-block landmark requirements
+- `.hwe-tools/docs/specs/seo/geo-llm-optimization.md` — citable content, JSON-LD field completeness
+- `.hwe-tools/docs/specs/seo/schemas/README.md` — page→schema mapping
+- `.hwe-tools/docs/specs/seo/schemas/campground-homepage.json` — Campground template
+- `.hwe-tools/docs/specs/seo/schemas/organization.json` — Organization template
+- `.hwe-tools/docs/specs/seo/schemas/faq.json` — FAQPage template
 
 ## Process
 
@@ -43,7 +43,7 @@ Validate:
 Derive:
 - `SLUG` = the slug (or from `package.json` `name` field).
 - `APP_DIR` = `src/`.
-- `BLOCKS_DIR` = `src/blocks/` (client blocks; base-blocks are in `hwp-core`, edited separately).
+- `BLOCKS_DIR` = `src/blocks/` (client blocks; base-blocks are in `hwe-core`, edited separately).
 - `TODAY` = current date `YYYY-MM-DD`.
 
 ### Step 1 — Find the latest audit report

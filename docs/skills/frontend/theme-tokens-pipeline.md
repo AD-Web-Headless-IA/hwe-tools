@@ -2,18 +2,18 @@
 
 > The **how-to** for the design-token pipeline: how a color value in Figma reaches a CSS rule in the rendered page. Companion to [`docs/frontend/theme-tokens.md`](../../contracts/frontend/theme-tokens.md) (the contract). Load this when bootstrapping a new client's theme, debugging a colour discrepancy, or onboarding a new developer.
 >
-> This is the practical walkthrough. The contract document is the source of truth for naming, validation rules, and the seasonized variant. Read the contract first if you are about to change the shape of `TokensContract` or `createHwpPreset`.
+> This is the practical walkthrough. The contract document is the source of truth for naming, validation rules, and the seasonized variant. Read the contract first if you are about to change the shape of `TokensContract` or `createhwePreset`.
 
 ## Token cascade — the three-tier model
 
-Before the five-stage pipeline, understand where each token value comes from. HWP resolves token values in three tiers at build time:
+Before the five-stage pipeline, understand where each token value comes from. hwe resolves token values in three tiers at build time:
 
 ```
 1. Global tokens    → platform-wide constants (raw palette, base spacing scale)
-                      Lives in @hwp/core-ui — shared by all clients.
+                      Lives in @hwe/core-ui — shared by all clients.
 
 2. Semantic tokens  → role-based aliases (primary, surface, foreground...)
-                      Also lives in @hwp/core-ui — what a token MEANS, not its value.
+                      Also lives in @hwe/core-ui — what a token MEANS, not its value.
 
 3. Brand tokens     → client-specific values for each semantic role
                       Lives in apps/site-{slug}/src/theme/tokens.json — the client's palette.
@@ -29,7 +29,7 @@ The cascade resolves **at build time**, not at runtime. When Tailwind compiles, 
 1. Figma          →  theme.css (Flavor A)  or scattered inline values (Flavor B)
 2. Extraction     →  apps/site-{slug}/src/theme/tokens.json   (brand tier)
 3. Validation     →  TokensContract.parse(tokensJson)          (Zod, build-time)
-4. Preset         →  createHwpPreset(tokens)                   (returns Partial<Config>)
+4. Preset         →  createhwePreset(tokens)                   (returns Partial<Config>)
 5. Tailwind       →  emits CSS custom properties + utility classes
 ```
 
@@ -195,15 +195,15 @@ Required fields are non-optional. If a client's `tokens.json` is missing `colors
 
 The contract has known open questions (see [`theme-tokens.md`](../../contracts/frontend/theme-tokens.md) §Open contract questions) about whether to widen the required set (add `foreground`, split `surface` from `secondary`/`muted`). Until a DEC resolves them, the extracted tokens go in as-is and any mismatch is noted in `docs/clients/{slug}/figma-notes.md`.
 
-## Stage 4 — `createHwpPreset(tokens)`
+## Stage 4 — `createhwePreset(tokens)`
 
 The preset lives at `packages/config/src/tailwind-preset.ts`. It takes a parsed `Tokens` object and returns a `Partial<Config>` that Tailwind v3 understands ([DEC-012](../../architecture/decisions.md#dec-012--tailwind-v3-over-v4-for-the-walking-skeleton)).
 
 ```ts
 import type { Config } from 'tailwindcss';
-import type { Tokens } from '@hwp/core-ui';
+import type { Tokens } from '@hwe/core-ui';
 
-export function createHwpPreset(tokens: Tokens): Partial<Config> {
+export function createhwePreset(tokens: Tokens): Partial<Config> {
   const colors: Record<string, string> = {
     background:     tokens.colors.background.value,
     surface:        tokens.colors.surface.value,
@@ -253,8 +253,8 @@ The app's `tailwind.config.ts` ties everything together:
 
 ```ts
 import type { Config } from 'tailwindcss';
-import { createHwpPreset } from '@hwp/config/tailwind-preset';
-import { TokensContract } from '@hwp/core-ui';
+import { createhwePreset } from '@hwe/config/tailwind-preset';
+import { TokensContract } from '@hwe/core-ui';
 import tokensJson from './src/theme/tokens.json';
 
 const tokens = TokensContract.parse(tokensJson);   // ← validates at build time
@@ -264,7 +264,7 @@ const config: Config = {
     './src/**/*.{ts,tsx}',
     '../../packages/core-ui/src/**/*.{ts,tsx}',
   ],
-  presets: [createHwpPreset(tokens) as Config],
+  presets: [createhwePreset(tokens) as Config],
   plugins: [],
 };
 
@@ -275,7 +275,7 @@ Three load-bearing lines:
 
 1. `TokensContract.parse(tokensJson)` — Zod validation; throws and fails the build on missing/wrong fields.
 2. `content: [...]` — the JIT scan paths. **Both** the app's own source AND `packages/core-ui/src/**/*` must be listed, otherwise blocks consumed from `core-ui` emit no CSS for their utility classes (you get unstyled blocks at runtime).
-3. `presets: [createHwpPreset(tokens) as Config]` — applies the token-derived theme.
+3. `presets: [createhwePreset(tokens) as Config]` — applies the token-derived theme.
 
 ### Fonts via `next/font/google`
 

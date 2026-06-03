@@ -1,11 +1,11 @@
 # Block Architecture — 4-Layer Extensible Block System
 
-> The definitive spec for how blocks are structured, extended, and audited in HWP.
+> The definitive spec for how blocks are structured, extended, and audited in hwe.
 > Companion to [`docs/contracts/frontend/block-contract.md`](../../contracts/frontend/block-contract.md) (the what — mandatory files and exports) and to [`docs/skills/frontend/block-creation.md`](../../skills/frontend/block-creation.md) (the walkthrough).
 >
 > **This spec defines the how:** 4 architectural layers, extensibility patterns, adapter contracts, SEO/security gates, and the Payload derivation strategy.
 
-> **Extended by [DEC-015](../../architecture/decisions.md#dec-015--client-owned-blocks-with-shared-schemas-slot-based-composition-and-npm-subpath-exports) (2026-06-01).** Schemas are now shared via `@hwp/core-ui/schemas` (subpath export). Reference implementations live in `hwp-core/packages/core-ui/src/base-blocks/` and are consumed via `@hwp/core-ui/base-blocks`. Client sites own their block implementations in `src/blocks/` (three usage levels). See §2 for updated file structures, §2.5 for the slot pattern, §9 for the updated registry, and §13 for composition rules.
+> **Extended by [DEC-015](../../architecture/decisions.md#dec-015--client-owned-blocks-with-shared-schemas-slot-based-composition-and-npm-subpath-exports) (2026-06-01).** Schemas are now shared via `@hwe/core-ui/schemas` (subpath export). Reference implementations live in `hwe-core/packages/core-ui/src/base-blocks/` and are consumed via `@hwe/core-ui/base-blocks`. Client sites own their block implementations in `src/blocks/` (three usage levels). See §2 for updated file structures, §2.5 for the slot pattern, §9 for the updated registry, and §13 for composition rules.
 
 ---
 
@@ -37,7 +37,7 @@ The content schema defines what the editor (or the AI content pipeline) writes i
 - Compatible with Payload: the Zod schema is the source of truth; Payload field configs are derived from it (see §8).
 
 ```ts
-// hwp-core/packages/core-ui/src/schemas/{Name}Block.schema.ts  (DEC-015: shared, no longer co-located with block)
+// hwe-core/packages/core-ui/src/schemas/{Name}Block.schema.ts  (DEC-015: shared, no longer co-located with block)
 import { z } from 'zod';
 
 const ImageSchema = z.object({
@@ -59,7 +59,7 @@ export type {Name}BlockContent = z.infer<typeof {Name}BlockContent>;
 **Client extension example:**
 ```ts
 // site-camping-x/src/schemas/{Name}BlockContent.extended.ts
-import { {Name}BlockContent } from '@hwp/core-ui/schemas';  // DEC-015: subpath import
+import { {Name}BlockContent } from '@hwe/core-ui/schemas';  // DEC-015: subpath import
 export const ExtendedContent = {Name}BlockContent.extend({
   badge: z.string().optional(),
 });
@@ -177,18 +177,18 @@ See §4 for the adapter creation process and file structure.
 
 ## §2 File Structure by Layer
 
-> **DEC-015 (2026-06-01):** Schemas live in `hwp-core/packages/core-ui/src/schemas/`, types in `hwp-core/packages/core-ui/src/types/`. Block implementations (`.tsx`, `.variants.ts`, `.slots.ts`, `.test.tsx`) live in `hwp-core/packages/core-ui/src/base-blocks/` for platform reference blocks. Client sites place their own implementations in `site-{slug}/src/blocks/`. See §2.5 for the slot pattern and §13 for the three usage levels.
+> **DEC-015 (2026-06-01):** Schemas live in `hwe-core/packages/core-ui/src/schemas/`, types in `hwe-core/packages/core-ui/src/types/`. Block implementations (`.tsx`, `.variants.ts`, `.slots.ts`, `.test.tsx`) live in `hwe-core/packages/core-ui/src/base-blocks/` for platform reference blocks. Client sites place their own implementations in `site-{slug}/src/blocks/`. See §2.5 for the slot pattern and §13 for the three usage levels.
 
 ### Simple block (Layer 1 + CVA variants)
 
 ```
-hwp-core/packages/core-ui/src/schemas/
-└── {Name}Block.schema.ts        ← content schema (Layer 1) — shared via @hwp/core-ui/schemas
+hwe-core/packages/core-ui/src/schemas/
+└── {Name}Block.schema.ts        ← content schema (Layer 1) — shared via @hwe/core-ui/schemas
 
-hwp-core/packages/core-ui/src/types/
+hwe-core/packages/core-ui/src/types/
 └── {Name}Block.types.ts         ← types derived from schema
 
-hwp-core/packages/core-ui/src/base-blocks/{Name}Block/
+hwe-core/packages/core-ui/src/base-blocks/{Name}Block/
 ├── {Name}Block.tsx              ← reference component
 ├── {Name}Block.slots.ts         ← slot type definitions (optional, see §2.5)
 ├── {Name}Block.variants.ts      ← CVA recipe (Layer 2-A)
@@ -198,14 +198,14 @@ hwp-core/packages/core-ui/src/base-blocks/{Name}Block/
 ### Block with config (Layer 1 + Layer 3)
 
 ```
-hwp-core/packages/core-ui/src/schemas/
+hwe-core/packages/core-ui/src/schemas/
 ├── {Name}Block.schema.ts
 └── {Name}Block.config.schema.ts ← behavioral config (Layer 3)
 
-hwp-core/packages/core-ui/src/types/
+hwe-core/packages/core-ui/src/types/
 └── {Name}Block.types.ts
 
-hwp-core/packages/core-ui/src/base-blocks/{Name}Block/
+hwe-core/packages/core-ui/src/base-blocks/{Name}Block/
 ├── {Name}Block.tsx
 ├── {Name}Block.slots.ts
 ├── {Name}Block.variants.ts
@@ -215,14 +215,14 @@ hwp-core/packages/core-ui/src/base-blocks/{Name}Block/
 ### Block with structural variants (Layer 2-B or 2-C)
 
 ```
-hwp-core/packages/core-ui/src/schemas/
+hwe-core/packages/core-ui/src/schemas/
 ├── {Name}Block.schema.ts        ← shared content schema
 └── {Name}Block.config.schema.ts ← shared config schema (if applicable)
 
-hwp-core/packages/core-ui/src/types/
+hwe-core/packages/core-ui/src/types/
 └── {Name}Block.types.ts
 
-hwp-core/packages/core-ui/src/base-blocks/{Name}Block/
+hwe-core/packages/core-ui/src/base-blocks/{Name}Block/
 ├── index.ts                     ← variant resolver
 ├── {Name}Block.slots.ts         ← slot type definitions
 ├── {Name}Block.test.tsx         ← covers all variants
@@ -234,7 +234,7 @@ hwp-core/packages/core-ui/src/base-blocks/{Name}Block/
     └── {Name}{VariantB}.tsx
 ```
 
-### Adapter package (`@hwp/{domain}`)
+### Adapter package (`@hwe/{domain}`)
 
 ```
 packages/{domain}/src/
@@ -257,7 +257,7 @@ Base-blocks define optional render slots for visual customization without requir
 **Slot type definitions file:**
 
 ```ts
-// hwp-core/packages/core-ui/src/base-blocks/HeroBlock/HeroBlock.slots.ts
+// hwe-core/packages/core-ui/src/base-blocks/HeroBlock/HeroBlock.slots.ts
 import type { ImageData, CtaData } from '../../types/HeroBlock.types';
 
 export type HeroBlockSlots = {
@@ -270,7 +270,7 @@ export type HeroBlockSlots = {
 **Base-block consuming slots:**
 
 ```tsx
-// hwp-core/packages/core-ui/src/base-blocks/HeroBlock/HeroBlock.tsx
+// hwe-core/packages/core-ui/src/base-blocks/HeroBlock/HeroBlock.tsx
 export function HeroBlock({ content, slots }: HeroBlockProps) {
   return (
     <section aria-labelledby="hero-heading">
@@ -292,16 +292,16 @@ export function HeroBlock({ content, slots }: HeroBlockProps) {
 
 ```tsx
 // Level 1 — Re-export (tokens do all the work, ~70% of cases)
-export { HeroBlock } from '@hwp/core-ui/base-blocks';
+export { HeroBlock } from '@hwe/core-ui/base-blocks';
 
 // Level 2 — Slots (customize specific visual pieces, ~20% of cases)
-import { HeroBlock as BaseHero } from '@hwp/core-ui/base-blocks';
+import { HeroBlock as BaseHero } from '@hwe/core-ui/base-blocks';
 export function HeroBlock({ content }) {
   return <BaseHero content={content} slots={{ heading: myCustomHeading }} />;
 }
 
 // Level 3 — Full custom (ignore base-block, use only schema, ~10% of cases)
-import type { HeroBlockContent } from '@hwp/core-ui/schemas';
+import type { HeroBlockContent } from '@hwe/core-ui/schemas';
 export function HeroBlock({ content }: { content: HeroBlockContent }) {
   return <section>{ /* completely custom JSX */ }</section>;
 }
@@ -420,7 +420,7 @@ Every block that renders public content must have a documented JSON-LD mapping. 
 | Collects personal data | RGPD legal basis documented; data inventory entry; consent required |
 
 **Blanket rules:**
-- No API keys, credentials, or tokens in `hwp-core/packages/core-ui/` or in any client-side file.
+- No API keys, credentials, or tokens in `hwe-core/packages/core-ui/` or in any client-side file.
 - Claude API and PMS credentials live in Vercel env vars, consumed by server-side Route Handlers only.
 - `/security-audit` is a mandatory gate for any block with user inputs or external service adapters.
 
@@ -469,7 +469,7 @@ Render logic: for each entry in `layout[]`, look up `blocks[type]` first (client
 **Base registry shape (as Payload is integrated):**
 
 ```ts
-// hwp-core/packages/core-ui/src/renderer/baseBlockRegistry.ts
+// hwe-core/packages/core-ui/src/renderer/baseBlockRegistry.ts
 export const baseBlockRegistry = {
   {Name}Block: {
     component:     {Name}Block,          // imported from base-blocks/
@@ -512,14 +512,14 @@ export const clientBlocks = { HeroBlock, GalleryBlock } as const;
 | **STD-AGENT-ARCHITECTURE** | `reviewer` (checklist) | Always — 4-layer structure correctly implemented |
 
 The `reviewer` agent's checklist (Phase 3 of SPECBOOT) includes:
-- [ ] Layer 1 (content schema) present and correct — all fields typed, no `any`, no empty defaults. Schema lives in `hwp-core/packages/core-ui/src/schemas/`, not co-located with the component.
+- [ ] Layer 1 (content schema) present and correct — all fields typed, no `any`, no empty defaults. Schema lives in `hwe-core/packages/core-ui/src/schemas/`, not co-located with the component.
 - [ ] Layer 2 (variants) correctly typed — CVA if styling-only, structural if different DOM.
 - [ ] Layer 3 (config schema) present if and only if the block has behavioral options.
 - [ ] Layer 4 (adapter) present if and only if the block connects to an external service.
 - [ ] Config schema separated from content schema (not merged).
-- [ ] Adapter interface exists in `@hwp/{domain}/` — block imports the hook, not the concrete adapter.
+- [ ] Adapter interface exists in `@hwe/{domain}/` — block imports the hook, not the concrete adapter.
 - [ ] (DEC-015) If the block has slots: `{Name}Block.slots.ts` exists, all slot types are explicit (`React.ReactNode` returns), and base-block defaults preserve accessible semantic markup when no slot is provided.
-- [ ] (DEC-015) Client blocks in `site-{slug}/src/blocks/` import schemas from `@hwp/core-ui/schemas` and components from `@hwp/core-ui/base-blocks` — no deep path imports.
+- [ ] (DEC-015) Client blocks in `site-{slug}/src/blocks/` import schemas from `@hwe/core-ui/schemas` and components from `@hwe/core-ui/base-blocks` — no deep path imports.
 
 ---
 
@@ -543,7 +543,7 @@ The `reviewer` agent's checklist (Phase 3 of SPECBOOT) includes:
 **Key rules for each phase:**
 
 - **Planner:** proposal must state which layers are needed and justify each. A block with only a content schema and no behavioral options does not get a config schema. A block with no external service does not get an adapter. Must state scaffold target: `base-block` (platform reusable) or `client block` (site-specific). For base-blocks, must decide if slots are needed and list slot names.
-- **Implementer:** builds each layer TDD-first. Schema goes to `hwp-core/hwp-core/packages/core-ui/src/schemas/`. Component goes to `hwp-core/hwp-core/packages/core-ui/src/base-blocks/{Name}Block/`. Config schema has its own tests. Adapter tests use mocks — never the real service.
+- **Implementer:** builds each layer TDD-first. Schema goes to `hwe-core/hwe-core/packages/core-ui/src/schemas/`. Component goes to `hwe-core/hwe-core/packages/core-ui/src/base-blocks/{Name}Block/`. Config schema has its own tests. Adapter tests use mocks — never the real service.
 - **Reviewer:** validates the 4-layer boundary — no config fields leaking into content schema, no concrete adapter imported by the block. Also checks slot types are explicit and that base-block defaults are accessible.
 - **Docs-writer:** updates `docs/catalog.md` with the block entry and its layer flags; updates `docs/specs/seo/semantic-html.md §Per-block semantic requirements` if the block is new.
 
@@ -578,7 +578,7 @@ export const CompositionRule = z.object({
 
 **En WordPress:** cuando instalas un bloque de Gutenberg, tiene campos que rellenas, un aspecto que puedes cambiar (estilo del botón, color del fondo), y a veces se conecta a un plugin externo (un mapa, un sistema de reservas). Pero todo eso está mezclado — los campos, la configuración, y la conexión externa no están separados de forma explícita.
 
-**En HWP:** cada bloque tiene hasta 4 capas bien separadas:
+**En hwe:** cada bloque tiene hasta 4 capas bien separadas:
 
 | Capa | Equivalente WordPress | Para qué sirve |
 |---|---|---|

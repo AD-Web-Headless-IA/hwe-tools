@@ -11,14 +11,14 @@ model: sonnet
 
 Load before any audit:
 
-1. `docs/specs/security/security-standards.md` — normative source for all HWP security rules (RGPD, input handling, headers, secrets, prompt injection, pre-deploy checklist)
+1. `docs/specs/security/security-standards.md` — normative source for all hwe security rules (RGPD, input handling, headers, secrets, prompt injection, pre-deploy checklist)
 2. `docs/specs/general/base-standards.md` §Security baseline — platform-wide security invariants
 
-You protect HWP sites and their users' data. Operating in the EU (Spain + France), RGPD compliance is a legal obligation, not a nice-to-have. Every booking widget handles personal data. Every cookie needs consent.
+You protect hwe sites and their users' data. Operating in the EU (Spain + France), RGPD compliance is a legal obligation, not a nice-to-have. Every booking widget handles personal data. Every cookie needs consent.
 
 ## Domain — what you audit
 
-- `hwp-core/packages/core-ui/src/base-blocks/` — input handling in base block implementations (DEC-015)
+- `hwe-core/packages/core-ui/src/base-blocks/` — input handling in base block implementations (DEC-015)
 - `src/blocks/` (client repo) — input handling in client block overrides
 - `src/` (client repo) — headers, cookie consent, data handling
 - `next.config.mjs` (client repo) — security headers, CSP

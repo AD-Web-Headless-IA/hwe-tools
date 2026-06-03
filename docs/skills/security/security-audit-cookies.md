@@ -46,17 +46,17 @@ Run:
 
 **Step 1 — Fetch the root page with a clean cookie jar**
 ```bash
-curl -s -c /tmp/hwp-cookies-initial.txt -D /tmp/hwp-headers-initial.txt {BASE_URL}
+curl -s -c /tmp/hwe-cookies-initial.txt -D /tmp/hwe-headers-initial.txt {BASE_URL}
 ```
 This fetches the home page with no cookies. Captures response headers (including `Set-Cookie`) and any cookies written.
 
 **Step 2 — Check for non-essential cookies set without consent**
 ```bash
-grep -i "set-cookie" /tmp/hwp-headers-initial.txt
+grep -i "set-cookie" /tmp/hwe-headers-initial.txt
 ```
 AND:
 ```bash
-cat /tmp/hwp-cookies-initial.txt
+cat /tmp/hwe-cookies-initial.txt
 ```
 Expected: only strictly necessary cookies may appear before consent:
 - `__session` (session auth cookie) — **Allowed**
@@ -75,7 +75,7 @@ Expected: at least one match indicating a consent element is rendered.
 
 **Step 4 — Verify security flags on all cookies**
 ```bash
-grep -i "set-cookie" /tmp/hwp-headers-initial.txt
+grep -i "set-cookie" /tmp/hwe-headers-initial.txt
 ```
 For every `Set-Cookie` line, verify:
 - Contains `Secure` → absent = **Blocker** (cookie transmitted over HTTP)
@@ -87,7 +87,7 @@ For every `Set-Cookie` line, verify:
 
 Grep the codebase for consent recording logic:
 ```bash
-grep -rn "consent" hwp-platform/apps/{slug}/src --include="*.ts" --include="*.tsx" | grep -i "timestamp\|date\|record\|log\|store"
+grep -rn "consent" hwe-platform/apps/{slug}/src --include="*.ts" --include="*.tsx" | grep -i "timestamp\|date\|record\|log\|store"
 ```
 Expected: at least one hit showing consent is stored with a timestamp.
 - No storage of consent found → **Major** (cannot prove compliance)
@@ -96,7 +96,7 @@ Expected: at least one hit showing consent is stored with a timestamp.
 
 Grep for a mechanism to withdraw consent:
 ```bash
-grep -rn "withdraw\|revoke\|opt.out\|gérer.*cookies\|manage.*cookies" hwp-platform/apps/{slug}/src --include="*.tsx" --include="*.ts" -i
+grep -rn "withdraw\|revoke\|opt.out\|gérer.*cookies\|manage.*cookies" hwe-platform/apps/{slug}/src --include="*.tsx" --include="*.ts" -i
 ```
 Expected: a settings/preferences link or button that re-opens the consent UI.
 - No withdrawal mechanism found → **Major**
@@ -105,7 +105,7 @@ Expected: a settings/preferences link or button that re-opens the consent UI.
 
 Read the consent component source:
 ```bash
-grep -rn "defaultChecked\|checked={true}\|checked=.true" hwp-platform/apps/{slug}/src --include="*.tsx"
+grep -rn "defaultChecked\|checked={true}\|checked=.true" hwe-platform/apps/{slug}/src --include="*.tsx"
 ```
 Expected: no pre-checked checkboxes for non-essential consent categories.
 - Pre-ticked boxes found → **Blocker** (illegal under RGPD)
@@ -175,6 +175,6 @@ A site cannot deploy to production with any **Blocker** cookie finding. The pre-
 
 Como el plugin GDPR Cookie Consent / CookieYes en WordPress — cada cookie que no sea imprescindible para que el site funcione (sesión, CSRF) necesita permiso del usuario antes de escribirse.
 
-**WordPress equivalent:** GDPR Cookie Consent by WebToffee o CookieYes. En HWP no hay plugin — la lógica la implementas tú en código, pero la regla es exactamente la misma.
+**WordPress equivalent:** GDPR Cookie Consent by WebToffee o CookieYes. En hwe no hay plugin — la lógica la implementas tú en código, pero la regla es exactamente la misma.
 
 **Day-to-day impact:** si añades Google Analytics, Facebook Pixel, o el tracking del motor de reservas, ese código no puede ejecutarse cuando el usuario llega por primera vez. Solo se activa cuando hace click en "Aceptar". El agente `security-specialist` verifica que esto sea así antes de cada deploy.

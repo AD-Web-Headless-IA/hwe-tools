@@ -35,18 +35,18 @@ Assumes the dev server is running at `http://localhost:3000`.
 
 **Step 1 — Fetch the page**
 ```bash
-curl -s http://localhost:3000 -o /tmp/hwp-page.html
+curl -s http://localhost:3000 -o /tmp/hwe-page.html
 ```
 
 **Step 2 — Extract all img tags**
 ```bash
-grep -oE '<img[^>]+>' /tmp/hwp-page.html
+grep -oE '<img[^>]+>' /tmp/hwe-page.html
 ```
 Build an inventory of every image — record `src`, `alt`, `width`, `height`, `loading`, and `fetchpriority` for each one.
 
 **Step 3 — Check alt text on every img**
 ```bash
-grep -oE 'alt="[^"]*"' /tmp/hwp-page.html
+grep -oE 'alt="[^"]*"' /tmp/hwe-page.html
 ```
 For each `<img>`:
 - `alt` attribute must be present.
@@ -59,7 +59,7 @@ For each `<img>`:
 ```bash
 python3 -c "
 import re
-imgs = re.findall(r'<img[^>]+>', open('/tmp/hwp-page.html').read())
+imgs = re.findall(r'<img[^>]+>', open('/tmp/hwe-page.html').read())
 for img in imgs:
     has_w = 'width=' in img
     has_h = 'height=' in img
@@ -71,7 +71,7 @@ Both `width` and `height` must be present on every `<img>`. Missing either one =
 
 **Step 5 — Check loading strategy**
 ```bash
-grep -oE 'loading="[^"]*"' /tmp/hwp-page.html
+grep -oE 'loading="[^"]*"' /tmp/hwe-page.html
 ```
 - All images below the fold: `loading="lazy"`.
 - Hero image (first large above-fold image): `loading="eager"`. A lazy hero = Major LCP issue.
@@ -81,7 +81,7 @@ grep -oE 'loading="[^"]*"' /tmp/hwp-page.html
 # Check for preload tag in <head>
 python3 -c "
 import re
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 head = html[:html.index('</head>')]
 preloads = re.findall(r'<link[^>]+rel=[\"\\']preload[\"\\'][^>]+as=[\"\\']image[\"\\'][^>]*>', head)
 print(f'Image preloads in head: {len(preloads)}')
@@ -90,7 +90,7 @@ for p in preloads: print(' ', p)
 ```
 ```bash
 # Check fetchpriority on hero img
-grep -oE '<img[^>]+fetchpriority="high"[^>]*>' /tmp/hwp-page.html
+grep -oE '<img[^>]+fetchpriority="high"[^>]*>' /tmp/hwe-page.html
 ```
 Hero `<img>` must have `fetchpriority="high"`. A `<link rel="preload" as="image">` must exist in `<head>`. Both missing = Major.
 
@@ -98,7 +98,7 @@ Hero `<img>` must have `fetchpriority="high"`. A `<link rel="preload" as="image"
 
 **Step 7 — Check image format**
 ```bash
-grep -oE 'src="[^"]*\.(png|jpg|jpeg|gif|bmp)[^"]*"' /tmp/hwp-page.html
+grep -oE 'src="[^"]*\.(png|jpg|jpeg|gif|bmp)[^"]*"' /tmp/hwe-page.html
 ```
 - JPEG for photos = Minor (should be WebP or AVIF).
 - PNG for photos = Major (much larger file size).
@@ -107,7 +107,7 @@ grep -oE 'src="[^"]*\.(png|jpg|jpeg|gif|bmp)[^"]*"' /tmp/hwp-page.html
 
 **Step 8 — Check filenames are descriptive**
 ```bash
-grep -oE 'src="[^"]*"' /tmp/hwp-page.html | grep -iE 'img_[0-9]+|dsc[0-9]+|photo[0-9]+|image[0-9]+'
+grep -oE 'src="[^"]*"' /tmp/hwe-page.html | grep -iE 'img_[0-9]+|dsc[0-9]+|photo[0-9]+|image[0-9]+'
 ```
 Filenames like `IMG_4521.jpg` or `photo001.webp` = Minor. Must be kebab-case and descriptive: `piscine-camping-sol-mar.webp`.
 
@@ -171,4 +171,4 @@ Como revisar la librería multimedia de WordPress antes de publicar — pero con
 | WebP en lugar de JPEG/PNG | Las mismas imágenes pesan 30–50% menos — el site carga antes y Google lo valora |
 | Filenames descriptivos | `piscine-sol-mar.webp` puede aparecer en Google Images buscando "piscine camping"  |
 
-**Equivalente WordPress:** como tener Imagify + SEO Image Optimizer configurados correctamente. En HWP, las reglas están en los contratos de bloque — el agente verifica que el developer las ha seguido antes de que el bloque llegue a producción.
+**Equivalente WordPress:** como tener Imagify + SEO Image Optimizer configurados correctamente. En hwe, las reglas están en los contratos de bloque — el agente verifica que el developer las ha seguido antes de que el bloque llegue a producción.

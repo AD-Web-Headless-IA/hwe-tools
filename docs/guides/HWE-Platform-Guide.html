@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HWP — Hospitality Web Platform</title>
+    <title>hwe — Hospitality Web Platform</title>
     <style>
         :root {
             --color-bg: #0c1a1d;
@@ -88,7 +88,7 @@
 </head>
 <body>
     <nav class="nav">
-        <div class="nav-logo">🏨 HWP Platform</div>
+        <div class="nav-logo">🏨 hwe Platform</div>
         <div class="section-title">General</div>
         <a href="#overview">Visión general</a>
         <a href="#architecture">Arquitectura</a>
@@ -118,14 +118,14 @@
     <div class="main">
         <div class="hero">
             <span class="badge badge-teal">v1.0 — Hospitality Web Platform</span>
-            <h1>HWP Platform</h1>
+            <h1>hwe Platform</h1>
             <p>Plataforma multi-tenant para webs de camping y hotel. De Figma a producción, con IA, para hasta 300 clientes.</p>
         </div>
 
         <!-- ═══════════════════════════════════════════════════ -->
         <section id="overview">
             <h2>Visión general</h2>
-            <p>HWP es el producto de <strong>Septeo Hospitality</strong> que reemplaza las webs WordPress individuales por una plataforma unificada. Cada web de cliente se construye combinando <strong>bloques reutilizables</strong> con la identidad visual propia del cliente.</p>
+            <p>hwe es el producto de <strong>Septeo Hospitality</strong> que reemplaza las webs WordPress individuales por una plataforma unificada. Cada web de cliente se construye combinando <strong>bloques reutilizables</strong> con la identidad visual propia del cliente.</p>
 
             <div class="card-grid">
                 <div class="card">
@@ -170,11 +170,11 @@
         <!-- ═══════════════════════════════════════════════════ -->
         <section id="architecture">
             <h2>Arquitectura</h2>
-            <p>HWP tiene dos mundos: el <strong>monorepo de plataforma</strong> (donde vive el código compartido) y los <strong>repos de cliente</strong> (donde vive cada web individual). Los clientes consumen los paquetes de la plataforma via npm.</p>
+            <p>hwe tiene dos mundos: el <strong>monorepo de plataforma</strong> (donde vive el código compartido) y los <strong>repos de cliente</strong> (donde vive cada web individual). Los clientes consumen los paquetes de la plataforma via npm.</p>
 
             <div class="flow">
-                <div class="flow-item highlight">📦 hwp-platform/ (monorepo)</div>
-                <div class="flow-arrow">↓ publica @hwp/* via npm</div>
+                <div class="flow-item highlight">📦 hwe-platform/ (monorepo)</div>
+                <div class="flow-arrow">↓ publica @hwe/* via npm</div>
                 <div class="flow-item">📦 site-camping-mer/ (repo independiente)</div>
                 <div class="flow-arrow">↓</div>
                 <div class="flow-item">📦 site-hotel-balneario/ (repo independiente)</div>
@@ -192,9 +192,9 @@
             <table>
                 <thead><tr><th>Paquete</th><th>npm</th><th>Contenido</th></tr></thead>
                 <tbody>
-                    <tr><td><code>packages/core-ui</code></td><td><code>@hwp/core-ui</code></td><td>Schemas, base-blocks, primitives, renderer, providers, theme, composition-rules</td></tr>
-                    <tr><td><code>packages/booking</code></td><td><code>@hwp/booking</code></td><td>BookingAdapter interface + adaptadores PMS (THR, Masterbooking, Witbooking)</td></tr>
-                    <tr><td><code>packages/config</code></td><td><code>@hwp/config</code></td><td>Tailwind preset, tsconfig base, ESLint config</td></tr>
+                    <tr><td><code>packages/core-ui</code></td><td><code>@hwe/core-ui</code></td><td>Schemas, base-blocks, primitives, renderer, providers, theme, composition-rules</td></tr>
+                    <tr><td><code>packages/booking</code></td><td><code>@hwe/booking</code></td><td>BookingAdapter interface + adaptadores PMS (THR, Masterbooking, Witbooking)</td></tr>
+                    <tr><td><code>packages/config</code></td><td><code>@hwe/config</code></td><td>Tailwind preset, tsconfig base, ESLint config</td></tr>
                     <tr><td><code>apps/site-demo</code></td><td>—</td><td>Camping Mer et Camargue: sitio de referencia que valida los packages</td></tr>
                 </tbody>
             </table>
@@ -211,7 +211,7 @@
 │   └── ...
 ├── types/                  ← Types derivados de schemas (z.infer)
 ├── base-blocks/            ← Implementaciones de referencia
-│   ├── index.ts            ← Re-exporta todos → subpath @hwp/core-ui/base-blocks
+│   ├── index.ts            ← Re-exporta todos → subpath @hwe/core-ui/base-blocks
 │   ├── HeroBlock/
 │   │   ├── HeroBlock.tsx
 │   │   ├── HeroBlock.slots.ts
@@ -230,7 +230,7 @@
 ├── composition-rules/      ← Reglas de composición con Zod
 └── index.ts                ← API pública raíz</pre>
 
-            <h3>Subpath exports de @hwp/core-ui</h3>
+            <h3>Subpath exports de @hwe/core-ui</h3>
 <pre data-lang="json">{
   "exports": {
     ".":              "./src/index.ts",
@@ -256,7 +256,7 @@
 │       └── page.tsx
 ├── client.config.ts            ← Config del tenant
 ├── tailwind.config.ts
-└── package.json                ← Depende de @hwp/core-ui, @hwp/config...</pre>
+└── package.json                ← Depende de @hwe/core-ui, @hwe/config...</pre>
         </section>
 
         <!-- ═══════════════════════════════════════════════════ -->
@@ -268,8 +268,8 @@
             <table>
                 <thead><tr><th>Pieza</th><th>Ubicación</th><th>Quién la toca</th></tr></thead>
                 <tbody>
-                    <tr><td>Schema Zod (contrato de datos)</td><td><code>@hwp/core-ui/schemas</code></td><td>Equipo de plataforma</td></tr>
-                    <tr><td>Base-block (implementación de referencia)</td><td><code>@hwp/core-ui/base-blocks</code></td><td>Equipo de plataforma</td></tr>
+                    <tr><td>Schema Zod (contrato de datos)</td><td><code>@hwe/core-ui/schemas</code></td><td>Equipo de plataforma</td></tr>
+                    <tr><td>Base-block (implementación de referencia)</td><td><code>@hwe/core-ui/base-blocks</code></td><td>Equipo de plataforma</td></tr>
                     <tr><td>Bloque del cliente (personalizado)</td><td><code>site-{slug}/src/blocks/</code></td><td>Developer del cliente</td></tr>
                     <tr><td>Composición (montaje de página)</td><td><code>site-{slug}/src/compositions/</code></td><td>Developer del cliente</td></tr>
                 </tbody>
@@ -281,13 +281,13 @@
                     <h4>Level 1 — Re-export (~70%)</h4>
                     <p>El cliente usa el base-block tal cual. Los tokens (colores, fuentes) lo hacen suyo. Cero código custom.</p>
 <pre><code>export { HeroBlock }
-  from '@hwp/core-ui/base-blocks';</code></pre>
+  from '@hwe/core-ui/base-blocks';</code></pre>
                 </div>
                 <div class="card">
                     <h4>Level 2 — Slots (~20%)</h4>
                     <p>El cliente personaliza piezas concretas (cómo se ve el título, el botón) sin reescribir todo el bloque.</p>
 <pre><code>import { HeroBlock as Base }
-  from '@hwp/core-ui/base-blocks';
+  from '@hwe/core-ui/base-blocks';
 export function HeroBlock({ content }) {
   return &lt;Base content={content}
     slots={{ heading: miHeading }} /&gt;;
@@ -297,7 +297,7 @@ export function HeroBlock({ content }) {
                     <h4>Level 3 — Full custom (~10%)</h4>
                     <p>El cliente escribe su propio JSX completo, usando solo el schema compartido para los datos.</p>
 <pre><code>import type { HeroBlockContent }
-  from '@hwp/core-ui/schemas';
+  from '@hwe/core-ui/schemas';
 export function HeroBlock({ content }) {
   return &lt;section&gt;
     {/* JSX totalmente custom */}
@@ -314,7 +314,7 @@ export function HeroBlock({ content }) {
                 <div class="flow-arrow">↓ ¿Encontrado?</div>
                 <div class="flow-item" style="border-color:var(--color-success)">Sí → usa la implementación del cliente</div>
                 <div class="flow-arrow">↓ ¿No encontrado?</div>
-                <div class="flow-item">Fallback → usa base-block de @hwp/core-ui</div>
+                <div class="flow-item">Fallback → usa base-block de @hwe/core-ui</div>
             </div>
         </section>
 
@@ -332,7 +332,7 @@ export function HeroBlock({ content }) {
 
             <div class="card">
                 <h4>Layer 1 — Content Schema (siempre)</h4>
-                <p>Define qué campos tiene el bloque. Es un schema Zod que valida los datos del CMS. Vive en <code>@hwp/core-ui/schemas</code> y es compartido por todos los clientes.</p>
+                <p>Define qué campos tiene el bloque. Es un schema Zod que valida los datos del CMS. Vive en <code>@hwe/core-ui/schemas</code> y es compartido por todos los clientes.</p>
 <pre data-lang="ts">export const HeroBlockContent = z.object({
   title:    z.string().min(1),
   subtitle: z.string().optional(),
@@ -724,7 +724,7 @@ para [beneficio].</pre>
                     <tr><td>007</td><td>Vercel full-stack (reemplaza cdmon + Hetzner + MariaDB)</td></tr>
                     <tr><td>008</td><td>Variantes estructurales para bloques complejos</td></tr>
                     <tr><td>009</td><td>blockDefaults reemplaza activeBlocks en client.config.ts</td></tr>
-                    <tr><td>010</td><td>BookingBlock en core-ui, BookingProvider en @hwp/booking</td></tr>
+                    <tr><td>010</td><td>BookingBlock en core-ui, BookingProvider en @hwe/booking</td></tr>
                     <tr><td>011</td><td>Sitios de cliente en repos independientes, monorepo solo plataforma</td></tr>
                     <tr><td>012</td><td>Tailwind v3 (no v4 hasta estabilidad del ecosistema)</td></tr>
                     <tr><td>013</td><td>Docs unificados bajo docs/ (merge memory-bank + ai-specs + plans)</td></tr>
@@ -764,7 +764,7 @@ para [beneficio].</pre>
             <h4>¿Diferencia entre bloque y composición?</h4>
             <p><strong>Bloque</strong>: pieza visual reutilizable (hero, galería, formulario). <strong>Composición</strong>: montaje de bloques para una página de un cliente. El bloque es la pieza de LEGO; la composición es el modelo.</p>
 
-            <h4>¿Qué pasa cuando se actualiza @hwp/core-ui?</h4>
+            <h4>¿Qué pasa cuando se actualiza @hwe/core-ui?</h4>
             <p>Level 1 (re-export) recibe mejoras automáticamente con <code>npm update</code>. Level 2/3 solo se ven afectados si cambia el schema — eso es un major version bump que se comunica.</p>
 
             <h4>¿Por qué repos separados y no un monorepo con todo?</h4>
@@ -775,7 +775,7 @@ para [beneficio].</pre>
         </section>
 
         <div style="margin-top:64px; padding:24px 0; border-top:1px solid var(--color-border); text-align:center; font-size:13px; color:var(--color-text-secondary);">
-            HWP Platform v1.0 — Septeo Hospitality<br>
+            hwe Platform v1.0 — Septeo Hospitality<br>
             Next.js 14 + Payload CMS v3 + Vercel + TypeScript strict
         </div>
     </div>

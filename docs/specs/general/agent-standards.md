@@ -8,13 +8,13 @@
 
 These gates are checked during the `/review` phase (the reviewer requests specialist reports when applicable) and are enforced by the `docs/specs/general/lifecycle.md` promotion criteria. See DEC-014 for the full agent system rationale.
 
-**STD-AGENT-VISUAL:** Every new block in `@hwp/core-ui` must be validated against its Figma reference by the `ux-ui-analyst` agent before promotion to `beta`. A block without a visual audit is capped at `alpha`.
+**STD-AGENT-VISUAL:** Every new block in `@hwe/core-ui` must be validated against its Figma reference by the `ux-ui-analyst` agent before promotion to `beta`. A block without a visual audit is capped at `alpha`.
 
 **STD-AGENT-SEO:** Any block rendering headings, images, or links (`<h1>`–`<h6>`, `<img>`, `<a>`) must be audited by the `seo-geo-specialist` agent before promotion to `beta`.
 
 **STD-AGENT-SECURITY:** Any block handling user input, cookies, personal data, or external API calls must be audited by the `security-specialist` agent before promotion to `beta`.
 
-**STD-AGENT-ARCHITECTURE:** Every new block in `@hwp/core-ui` must pass the 4-layer architecture check before promotion to `beta`. The `reviewer` verifies this during `/review` using the checklist in `docs/specs/frontend/block-architecture.md §10`: Layer 1 (content schema) always present; Layer 2 (variants) at the correct level (CVA / structural / functional); Layer 3 (config schema) present if and only if the block has behavioral options; Layer 4 (adapter) present if and only if the block connects to an external service.
+**STD-AGENT-ARCHITECTURE:** Every new block in `@hwe/core-ui` must pass the 4-layer architecture check before promotion to `beta`. The `reviewer` verifies this during `/review` using the checklist in `docs/specs/frontend/block-architecture.md §10`: Layer 1 (content schema) always present; Layer 2 (variants) at the correct level (CVA / structural / functional); Layer 3 (config schema) present if and only if the block has behavioral options; Layer 4 (adapter) present if and only if the block connects to an external service.
 
 ---
 

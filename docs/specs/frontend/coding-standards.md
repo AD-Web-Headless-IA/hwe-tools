@@ -1,7 +1,7 @@
 # Coding standards
 
-> Practical coding rules for HWP frontend. Extends [`base-standards.md`](../general/base-standards.md) and [`frontend-standards.md`](frontend-standards.md) — read those first.
-> This file is the day-to-day reference. It does not repeat rules from the parent files; it elaborates them with HWP-specific guidance.
+> Practical coding rules for hwe frontend. Extends [`base-standards.md`](../general/base-standards.md) and [`frontend-standards.md`](frontend-standards.md) — read those first.
+> This file is the day-to-day reference. It does not repeat rules from the parent files; it elaborates them with hwe-specific guidance.
 
 ## Core principles
 
@@ -69,10 +69,10 @@ Three blocks, separated by a blank line, in this order:
 import Image from 'next/image';
 import { cva } from 'class-variance-authority';
 
-// 2. @hwp/* packages — use the correct subpath (DEC-015)
-import type { HeroBlockContent } from '@hwp/core-ui/schemas';   // Zod schemas + derived types
-import { HeroBlock as BaseHero } from '@hwp/core-ui/base-blocks'; // reference implementations
-import { BlockRenderer, cn } from '@hwp/core-ui';                 // root: primitives, renderer, providers
+// 2. @hwe/* packages — use the correct subpath (DEC-015)
+import type { HeroBlockContent } from '@hwe/core-ui/schemas';   // Zod schemas + derived types
+import { HeroBlock as BaseHero } from '@hwe/core-ui/base-blocks'; // reference implementations
+import { BlockRenderer, cn } from '@hwe/core-ui';                 // root: primitives, renderer, providers
 
 // 3. Relative imports (never crossing a package boundary)
 import { heroVariants } from './HeroBlock.variants';
@@ -80,16 +80,16 @@ import type { HeroVariant } from './HeroBlock.types';
 ```
 
 **Subpath export rules (DEC-015):**
-- `@hwp/core-ui` — primitives, `BlockRenderer`, providers, theme utilities, types.
-- `@hwp/core-ui/schemas` — Zod content + config schemas and derived TypeScript types. Use when you only need data shape, not a component.
-- `@hwp/core-ui/base-blocks` — reference block implementations. Use at Level 1 (re-export) or Level 2 (slot override).
-- No deep imports (`@hwp/core-ui/src/...`). If the subpath does not expose it, it is private.
+- `@hwe/core-ui` — primitives, `BlockRenderer`, providers, theme utilities, types.
+- `@hwe/core-ui/schemas` — Zod content + config schemas and derived TypeScript types. Use when you only need data shape, not a component.
+- `@hwe/core-ui/base-blocks` — reference block implementations. Use at Level 1 (re-export) or Level 2 (slot override).
+- No deep imports (`@hwe/core-ui/src/...`). If the subpath does not expose it, it is private.
 
 ---
 
 ## TypeScript strict
 
-`strict: true` is inherited from `tsconfig.base.json`. Below are the HWP-specific corollaries:
+`strict: true` is inherited from `tsconfig.base.json`. Below are the hwe-specific corollaries:
 
 ### Never `any`
 
@@ -320,7 +320,7 @@ const sorted = blocks.slice().sort((a, b) => a.order - b.order);
 
 ## Tests
 
-Rules from `base-standards.md` §Testing apply. HWP-specific elaborations:
+Rules from `base-standards.md` §Testing apply. hwe-specific elaborations:
 
 - **Behavior-named, not implementation-named:**
 
@@ -340,7 +340,7 @@ it('submits the booking form when the guest clicks Reserve', …)
 
 ## Multi-tenant rules
 
-These rules exist because HWP serves up to 300 independent clients from a shared codebase.
+These rules exist because hwe serves up to 300 independent clients from a shared codebase.
 
 - **No `if (client === '...')` anywhere in `packages/`.** Client-specific behavior belongs in the client's independent repo (`site-{slug}/`) or in `client.config.ts`.
 - **Generic names in `packages/`.** `AccommodationGridBlock`, not `BungalowsGrid`. The block renders any accommodation type; the client's composition chooses what to pass in.
@@ -365,7 +365,7 @@ These rules exist because HWP serves up to 300 independent clients from a shared
 | Nested ternaries in JSX | Helper function or early-return | Nested ternaries are unreadable and untestable |
 | Silent `catch {}` | Log + UI error state | Silent errors hide real bugs in production |
 | `if (client === 'camping-x')` in `packages/` | Config or composition in `apps/site-{slug}/` | Hard-codes client names into shared code |
-| Deep import `@hwp/core-ui/src/blocks/Hero` | `import { HeroBlock } from '@hwp/core-ui/base-blocks'` (Level 1) or `@hwp/core-ui/schemas` for types only | Breaks when internal structure changes; violates package encapsulation |
+| Deep import `@hwe/core-ui/src/blocks/Hero` | `import { HeroBlock } from '@hwe/core-ui/base-blocks'` (Level 1) or `@hwe/core-ui/schemas` for types only | Breaks when internal structure changes; violates package encapsulation |
 | CSS file next to a block component (`HeroBlock.css`, `HeroBlock.module.css`) | Tailwind utilities + CVA recipe only | One `globals.css` per client, ZERO CSS per block (DEC-015) |
 | `dangerouslySetInnerHTML` | Sanitized renderer or plain text | Raw HTML from external sources enables XSS |
 | Comment explaining **what** | Rename the function/variable | Comments rot; names are refactored |
@@ -374,7 +374,7 @@ These rules exist because HWP serves up to 300 independent clients from a shared
 
 ## In simple terms
 
-Think of this document as the house rules for a shared codebase. Like a WordPress plugin on WordPress.org must follow strict coding standards so any developer can read and maintain it — HWP has the same requirement, because the platform is shared across up to 300 client sites and an entire team.
+Think of this document as the house rules for a shared codebase. Like a WordPress plugin on WordPress.org must follow strict coding standards so any developer can read and maintain it — hwe has the same requirement, because the platform is shared across up to 300 client sites and an entire team.
 
 **WordPress equivalent:** this is our `WPCS` (WordPress Coding Standards) — but for React/TypeScript/Tailwind instead of PHP.
 

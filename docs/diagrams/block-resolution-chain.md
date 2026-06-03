@@ -6,7 +6,7 @@
 
 ```mermaid
 flowchart TB
-  subgraph hwp_core["hwp-core/ (@hwp/core-ui npm package)"]
+  subgraph hwe_core["hwe-core/ (@hwe/core-ui npm package)"]
     direction TB
 
     subgraph base_blocks["src/base-blocks/  (reference implementations)"]
@@ -28,7 +28,7 @@ flowchart TB
 
     subgraph client_blocks_dir["src/blocks/"]
       direction LR
-      l1["HeroBlock/HeroBlock.tsx\n← Level 1: re-export\nexport { HeroBlock } from '@hwp/core-ui/base-blocks'"]
+      l1["HeroBlock/HeroBlock.tsx\n← Level 1: re-export\nexport { HeroBlock } from '@hwe/core-ui/base-blocks'"]
       l2["MediaTextBlock/MediaTextBlock.tsx\n← Level 2: slots\n<BaseMedia ... heading={myHeading} />"]
       l3["FAQBlock/FAQBlock.tsx\n← Level 3: full custom\n(no base-block yet)"]
     end
@@ -59,13 +59,13 @@ flowchart TB
 
 | Level | Where it lives | Pattern | Typical frequency |
 |---|---|---|---|
-| **Level 1 — re-export** | `src/blocks/{Name}/{Name}.tsx` | `export { HeroBlock } from '@hwp/core-ui/base-blocks'` | ~70% of blocks |
+| **Level 1 — re-export** | `src/blocks/{Name}/{Name}.tsx` | `export { HeroBlock } from '@hwe/core-ui/base-blocks'` | ~70% of blocks |
 | **Level 2 — slots** | `src/blocks/{Name}/{Name}.tsx` | `<BaseName {...props} SlotName={MyComp} />` | ~20% |
-| **Level 3 — full custom** | `src/blocks/{Name}/{Name}.tsx` | Own JSX, imports schema types only from `@hwp/core-ui/schemas` | ~10% |
+| **Level 3 — full custom** | `src/blocks/{Name}/{Name}.tsx` | Own JSX, imports schema types only from `@hwe/core-ui/schemas` | ~10% |
 
 ## Key invariants
 
 - **Client registry always wins** for keys it declares. A Level 1 re-export passes through transparently; a Level 3 full custom completely replaces the base block for that client.
-- **Base-blocks stay in `hwp-core/`**. No per-client logic ever enters `@hwp/core-ui/src/base-blocks/`. Client-specific implementations live in `site-{slug}/src/blocks/` ([DEC-015](../architecture/decisions.md#dec-015--client-owned-blocks-with-shared-schemas-slot-based-composition-and-npm-subpath-exports), [DEC-017](../architecture/DEC-017-Repo-Split.md)).
-- **Schemas are shared.** Even Level 3 blocks import their content type from `@hwp/core-ui/schemas` — content contracts are stable across the platform. Only the rendering is per-client.
+- **Base-blocks stay in `hwe-core/`**. No per-client logic ever enters `@hwe/core-ui/src/base-blocks/`. Client-specific implementations live in `site-{slug}/src/blocks/` ([DEC-015](../architecture/decisions.md#dec-015--client-owned-blocks-with-shared-schemas-slot-based-composition-and-npm-subpath-exports), [DEC-017](../architecture/DEC-017-Repo-Split.md)).
+- **Schemas are shared.** Even Level 3 blocks import their content type from `@hwe/core-ui/schemas` — content contracts are stable across the platform. Only the rendering is per-client.
 - **BlockRenderer receives the final merged map.** The merge is `{ ...baseBlockRegistry, ...clientBlocks }` — one line, no magic. The renderer doesn't know or care which level a block is.

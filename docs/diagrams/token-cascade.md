@@ -6,12 +6,12 @@
 
 ```mermaid
 flowchart TB
-  subgraph layer1["Layer 1 — Global (platform baseline)\n@hwp/config/theme.css  ·  published in @hwp/config npm package"]
+  subgraph layer1["Layer 1 — Global (platform baseline)\n@hwe/config/theme.css  ·  published in @hwe/config npm package"]
     direction LR
     g1["--radius-sm: 4px\n--radius-md: 8px\n--spacing-section-y: 80px\n--width-container: 1280px\n(structural / spacing defaults)"]
   end
 
-  subgraph layer2["Layer 2 — Semantic (neutral palette)\n@hwp/config/theme.css  ·  same file, second @theme block"]
+  subgraph layer2["Layer 2 — Semantic (neutral palette)\n@hwe/config/theme.css  ·  same file, second @theme block"]
     direction LR
     g2["--color-background: #ffffff\n--color-foreground: #1a1a1a\n--color-surface: #f5f5f5\n--color-primary: #374151  (placeholder — must override)\n--color-accent: #6b7280   (placeholder — must override)\n--font-heading: system-ui, sans-serif  (placeholder)\n--font-body: system-ui, sans-serif    (placeholder)"]
   end

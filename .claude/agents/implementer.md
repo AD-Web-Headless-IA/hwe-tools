@@ -34,14 +34,14 @@ Block work is split based on whether you are working on the platform or a client
 
 | Work context | Block implementations | Schemas | Types |
 |---|---|---|---|
-| Platform (base block) | `hwp-core/packages/core-ui/src/base-blocks/{Name}/` | `hwp-core/packages/core-ui/src/schemas/` | `hwp-core/packages/core-ui/src/types/` |
-| Client site override | `src/blocks/{Name}/` (client repo) | import from `@hwp/core-ui/schemas` | import from `@hwp/core-ui/types` |
+| Platform (base block) | `hwe-core/packages/core-ui/src/base-blocks/{Name}/` | `hwe-core/packages/core-ui/src/schemas/` | `hwe-core/packages/core-ui/src/types/` |
+| Client site override | `src/blocks/{Name}/` (client repo) | import from `@hwe/core-ui/schemas` | import from `@hwe/core-ui/types` |
 
 Import paths to use in implementation:
-- Base block components: `@hwp/core-ui/base-blocks`
-- Shared schemas: `@hwp/core-ui/schemas`
+- Base block components: `@hwe/core-ui/base-blocks`
+- Shared schemas: `@hwe/core-ui/schemas`
 
-The platform registry is `hwp-core/packages/core-ui/src/renderer/baseBlockRegistry.ts`. When adding a base block, register it there. When adding a client block, update `src/blocks/registry.ts` in the client repo.
+The platform registry is `hwe-core/packages/core-ui/src/renderer/baseBlockRegistry.ts`. When adding a base block, register it there. When adding a client block, update `src/blocks/registry.ts` in the client repo.
 
 `BlockRenderer` accepts `layout: BlockInstance[]` (not `blocks`) plus optional `blocks?: Record<string, ComponentType>` for client overrides.
 
@@ -86,7 +86,7 @@ It MUST fail with a meaningful message (not a syntax error, not an import error)
 - Follow the file the proposal cites as a pattern. Mirror its naming, layout, and idioms.
 - TypeScript strict. No `any`. Discriminated unions over boolean flag combinations.
 - Zod at every boundary. No re-validation of already-parsed data internally.
-- No `if (client === '...')` in core packages (`hwp-core`). Per-client behavior goes in the client repo `src/` or `client.config.ts`.
+- No `if (client === '...')` in core packages (`hwe-core`). Per-client behavior goes in the client repo `src/` or `client.config.ts`.
 
 ### 4. Run the test — see it pass
 
@@ -140,4 +140,4 @@ The proposal lists doc updates. Do them in the same commit as the code (per `bas
 - The proposal artifact is missing or ambiguous in a way that affects what to build. Stop, name the ambiguity, ask the human to update the proposal.
 - The proposal would require violating a DEC or `base-standards.md`. Stop. Surface the conflict. Do not implement.
 - A test the proposal listed cannot be written because the API surface to test does not exist and the proposal does not say to create it. Surface — do not invent the API.
-- The proposal would introduce a per-client check in `hwp-core/packages/core-ui` or other shared code. Refuse; cite `domain-model.md §7` and `base-standards.md §Architecture`.
+- The proposal would introduce a per-client check in `hwe-core/packages/core-ui` or other shared code. Refuse; cite `domain-model.md §7` and `base-standards.md §Architecture`.

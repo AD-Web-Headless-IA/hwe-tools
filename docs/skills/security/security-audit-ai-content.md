@@ -10,7 +10,7 @@
 
 **Not active yet.** Activate this audit when:
 - Payload CMS is integrated with an AI content generation workflow.
-- Any HWP site allows AI-generated content to be published directly (draft or live).
+- Any hwe site allows AI-generated content to be published directly (draft or live).
 - The Claude API is used to suggest, rewrite, or translate page content that goes through an editorial flow.
 
 Until then: skip this audit in the `/security-audit` runner. The runner marks it as `N/A (pre-integration)`.
@@ -207,7 +207,7 @@ Every AI interaction must be logged for compliance and debugging:
 
 ## In simple terms
 
-En WordPress, cuando usas Yoast o un plugin de redacción con IA, confías en que el proveedor ha implementado las salvaguardas. En HWP, construimos la integración nosotros — así que las salvaguardas también son nuestra responsabilidad.
+En WordPress, cuando usas Yoast o un plugin de redacción con IA, confías en que el proveedor ha implementado las salvaguardas. En hwe, construimos la integración nosotros — así que las salvaguardas también son nuestra responsabilidad.
 
 **WordPress equivalent:** imagine a WordPress editorial flow where AI suggests content changes but a human must click "Publish" to approve them. That's exactly what this audit verifies — with the additional safety rails that a hospitality platform requires (prices, contact data, booking URLs).
 

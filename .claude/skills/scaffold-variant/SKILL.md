@@ -1,6 +1,6 @@
 ---
 name: scaffold-variant
-description: Add a structural variant to an existing @hwp/core-ui block. Creates the variant subfolder and component, and updates the block's index.ts resolver. Use after /scaffold-block when a block needs structural variants per DEC-008.
+description: Add a structural variant to an existing @hwe/core-ui block. Creates the variant subfolder and component, and updates the block's index.ts resolver. Use after /scaffold-block when a block needs structural variants per DEC-008.
 argument-hint: <BlockName> <VariantName>
 allowed-tools: Read Write Glob Grep Bash(test *) Bash(ls *) Bash(mkdir *)
 ---
@@ -55,6 +55,6 @@ Does NOT touch:
 
 Implement this skill when:
 
-1. At least 3 blocks in `@hwp/core-ui` have structural variants, AND
+1. At least 3 blocks in `@hwe/core-ui` have structural variants, AND
 2. The manual variant-addition workflow has been performed at least twice and shown to be stable, AND
 3. The variant resolver pattern in `block-contract.md` is settled (no pending revisions).

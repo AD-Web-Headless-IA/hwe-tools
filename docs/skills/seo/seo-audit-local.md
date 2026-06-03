@@ -35,14 +35,14 @@ Assumes the dev server is running at `http://localhost:3000`.
 
 **Step 1 — Fetch the page**
 ```bash
-curl -s http://localhost:3000 -o /tmp/hwp-page.html
+curl -s http://localhost:3000 -o /tmp/hwe-page.html
 ```
 
 **Step 2 — Extract NAP from the `<header>` area**
 ```bash
 python3 -c "
 import re
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 m = re.search(r'<header[^>]*>(.*?)</header>', html, re.DOTALL)
 if m:
     text = re.sub('<[^>]+>', ' ', m.group(1))
@@ -55,7 +55,7 @@ Record: establishment name spelling, phone number format.
 ```bash
 python3 -c "
 import re
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 m = re.search(r'<footer[^>]*>(.*?)</footer>', html, re.DOTALL)
 if m:
     addr = re.search(r'<address[^>]*>(.*?)</address>', m.group(1), re.DOTALL)
@@ -72,7 +72,7 @@ if m:
 ```bash
 python3 -c "
 import re, json
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 schemas = re.findall(r'<script[^>]+type=[\"\'\"']application/ld\+json[\"\'\"'][^>]*>(.*?)</script>', html, re.DOTALL)
 for s in schemas:
     d = json.loads(s.strip())
@@ -98,7 +98,7 @@ Compare header / footer / JSON-LD side by side:
 ```bash
 python3 -c "
 import re, json
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 schemas = re.findall(r'<script[^>]+type=[\"\'\"']application/ld\+json[\"\'\"'][^>]*>(.*?)</script>', html, re.DOTALL)
 for s in schemas:
     d = json.loads(s.strip())
@@ -117,9 +117,9 @@ Must have at least 4 decimal places. Fewer = Major. Missing geo entirely = Block
 
 **Step 7 — Check location keywords in title, H1, and meta description**
 ```bash
-grep -oE '<title>[^<]+</title>' /tmp/hwp-page.html
-grep -oE '<meta name="description" content="[^"]*"' /tmp/hwp-page.html
-grep -oE '<h1[^>]*>[^<]+</h1>' /tmp/hwp-page.html
+grep -oE '<title>[^<]+</title>' /tmp/hwe-page.html
+grep -oE '<meta name="description" content="[^"]*"' /tmp/hwe-page.html
+grep -oE '<h1[^>]*>[^<]+</h1>' /tmp/hwe-page.html
 ```
 Each of the three must contain the city name and/or region. Missing location in any of these = Major.
 
@@ -127,7 +127,7 @@ Each of the three must contain the city name and/or region. Missing location in 
 ```bash
 python3 -c "
 import re
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 m = re.search(r'<main[^>]*>(.*)', html, re.DOTALL)
 if m:
     p = re.search(r'<p[^>]*>([^<]+)</p>', m.group(1))
@@ -142,7 +142,7 @@ Verify:
 
 **Step 9 — Check hreflang (only if i18n is active)**
 ```bash
-grep -oE '<link[^>]+hreflang[^>]+>' /tmp/hwp-page.html
+grep -oE '<link[^>]+hreflang[^>]+>' /tmp/hwe-page.html
 ```
 If `client.config.ts → i18n.defaultLocale` is set (multilingual site):
 - One `<link rel="alternate" hreflang="{lang}" href="{url}">` per language per page.

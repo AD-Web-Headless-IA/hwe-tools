@@ -7,7 +7,7 @@ allowed-tools: Read Write Edit Glob Grep Bash(pnpm *) Bash(test *)
 
 # Add Block
 
-You are a frontend scaffolder for HWP client sites. Your job is to add a named block (with realistic fake content) to an existing page composition. The block must already exist in `@hwp/core-ui`; you do not create blocks here — that is `/scaffold-block`.
+You are a frontend scaffolder for hwe client sites. Your job is to add a named block (with realistic fake content) to an existing page composition. The block must already exist in `@hwe/core-ui`; you do not create blocks here — that is `/scaffold-block`.
 
 ## Constraints
 
@@ -17,7 +17,7 @@ You are a frontend scaffolder for HWP client sites. Your job is to add a named b
 - `BlockType` is the stem — **without** the `Block` suffix (e.g. `Hero`, `MediaText`, `Amenities`). The full folder name is `{BlockType}Block`.
 - Runs from within the client repo (CWD = `site-{slug}/`). Paths are relative to client repo root.
 - The target composition `src/compositions/{PageName}Composition.tsx` must exist. If not, tell the user to run `/create-page` first.
-- The block schema is in `node_modules/@hwp/core-ui/src/schemas/{BlockType}Block.schema.ts` or `src/blocks/{BlockType}Block/` (client override). If not found, tell the user to run `/scaffold-block` first.
+- The block schema is in `node_modules/@hwe/core-ui/src/schemas/{BlockType}Block.schema.ts` or `src/blocks/{BlockType}Block/` (client override). If not found, tell the user to run `/scaffold-block` first.
 - SEO rules apply to generated content: descriptive alt text, h2/h3 hierarchy (never h1 inside a block), no native `<img>`.
 - Generated fake content is in the **site's language** (read it from the existing `src/data/fake-content.ts` or `src/app/layout.tsx`).
 
@@ -37,13 +37,13 @@ Derive:
 
 Validate in order:
 1. `apps/{SITE}/src/compositions/{PageName}Composition.tsx` exists → if not, stop: "Run /create-page {SITE} {SLUG} first."
-2. `packages/core-ui/src/base-blocks/{BlockName}/` exists → if not, stop: "Block {BlockName} not found in @hwp/core-ui. Run /scaffold-block {BlockName} to create it first."
+2. `packages/core-ui/src/base-blocks/{BlockName}/` exists → if not, stop: "Block {BlockName} not found in @hwe/core-ui. Run /scaffold-block {BlockName} to create it first."
 
 ### Step 1 — Read the block schema
 
-Read `node_modules/@hwp/core-ui/src/schemas/{BlockName}.schema.ts` (canonical schema location).
+Read `node_modules/@hwe/core-ui/src/schemas/{BlockName}.schema.ts` (canonical schema location).
 
-If that file does not exist, fall back to `node_modules/@hwp/core-ui/src/base-blocks/{BlockName}/{BlockName}.schema.ts`.
+If that file does not exist, fall back to `node_modules/@hwe/core-ui/src/base-blocks/{BlockName}/{BlockName}.schema.ts`.
 
 Parse the Zod schema to understand every required field and optional field. Pay attention to:
 - Required vs optional fields.
@@ -51,11 +51,11 @@ Parse the Zod schema to understand every required field and optional field. Pay 
 - Array fields (e.g. `items`, `ctas`, `reviews`) — generate 2–3 realistic items.
 - Enum fields or union literals — use the first valid value as the default variant.
 
-Also read `node_modules/@hwp/core-ui/src/base-blocks/{BlockName}/{BlockName}.types.ts` (if it exists separately) for the `{BlockName}Props` type to confirm the variant prop name and available values.
+Also read `node_modules/@hwe/core-ui/src/base-blocks/{BlockName}/{BlockName}.types.ts` (if it exists separately) for the `{BlockName}Props` type to confirm the variant prop name and available values.
 
 ### Step 2 — Determine the default variant
 
-Read the block's variants file: `node_modules/@hwp/core-ui/src/base-blocks/{BlockName}/{BlockName}.variants.ts` (flat layout) OR `node_modules/@hwp/core-ui/src/base-blocks/{BlockName}/index.ts` (structural variants).
+Read the block's variants file: `node_modules/@hwe/core-ui/src/base-blocks/{BlockName}/{BlockName}.variants.ts` (flat layout) OR `node_modules/@hwe/core-ui/src/base-blocks/{BlockName}/index.ts` (structural variants).
 
 - For CVA (flat): the first key in the `variants` object is the default.
 - For structural variants (`index.ts`): the first key exported from the variants map is the default.
@@ -147,7 +147,7 @@ Determine the target data file:
 
 Add the import at the top:
 ```ts
-import type { {BlockName}Content } from '@hwp/core-ui';
+import type { {BlockName}Content } from '@hwe/core-ui';
 ```
 
 Add the export at the bottom:
@@ -216,7 +216,7 @@ These are non-negotiable:
 - Images: always `alt` with descriptive text in the site's language. Never `"image"` or empty.
 - Block heading level: `h2` for block titles, `h3` for sub-items. Never `h1` inside a block.
 - `<section>` elements in blocks: must have `aria-labelledby` pointing to the block heading id.
-- No native `<img>` in any generated code — all image composition uses `@hwp/core-ui` block components which already use `next/image`.
+- No native `<img>` in any generated code — all image composition uses `@hwe/core-ui` block components which already use `next/image`.
 
 Reference: `docs/specs/seo/semantic-html.md`.
 

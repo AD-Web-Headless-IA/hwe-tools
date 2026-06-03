@@ -1,6 +1,6 @@
 # GEO — LLM optimisation standards
 
-> GEO (Generative Engine Optimisation) makes HWP sites citable by ChatGPT, Perplexity, Gemini, and similar LLMs. When a user asks "best campings in Costa Brava" or "hotel con spa cerca de Cuenca", our clients should appear in the generated answer.
+> GEO (Generative Engine Optimisation) makes hwe sites citable by ChatGPT, Perplexity, Gemini, and similar LLMs. When a user asks "best campings in Costa Brava" or "hotel con spa cerca de Cuenca", our clients should appear in the generated answer.
 >
 > **Load when:** implementing homepage, accommodation pages, or updating structured data.
 
@@ -135,7 +135,7 @@ LLMs prefer recent, updated content:
 
 El GEO es como el SEO pero para ChatGPT y Perplexity en lugar de Google. Cuando alguien pregunta "¿qué campings hay en la Costa Brava con piscina?", queremos que el LLM cite a nuestro cliente.
 
-| Para que el LLM te cite... | Regla HWP |
+| Para que el LLM te cite... | Regla hwe |
 |---|---|
 | El LLM necesita texto fácil de extraer | Primer párrafo = respuesta completa a la búsqueda principal |
 | El LLM cruza fuentes — el nombre debe ser idéntico en todas | Fuente de verdad: `client.config.ts → name` |

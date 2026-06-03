@@ -1,8 +1,8 @@
 ## ONBOARDING DE NUEVO CLIENTE (DEC-017)
 
-1. GitHub "Use this template" desde hwp-template → crea `site-{slug}`
+1. GitHub "Use this template" desde hwe-template → crea `site-{slug}`
 2. git clone --recurse-submodules site-{slug}
-   → Clona repo con .hwp-tools/ submodule ya montado
+   → Clona repo con .hwe-tools/ submodule ya montado
 
 3. /import-figma https://github.com/... {slug}
    → Genera docs/figma-analysis.md + docs/design-language.md + docs/tokens.json
@@ -11,10 +11,10 @@
    → Configura src/blocks/registry.ts, tailwind, tokens, client.config.ts
 
 5. npm install
-   → Instala @hwp/core-ui + @hwp/config desde npm privado
+   → Instala @hwe/core-ui + @hwe/config desde npm privado
 
 6. /scaffold-block FAQBlock --target base
-   → (en hwp-core) Crea base-block + schema en core-ui
+   → (en hwe-core) Crea base-block + schema en core-ui
 
 7. /scaffold-block FAQBlock --target client --site {slug}
    → Crea re-export en src/blocks/ + actualiza registry

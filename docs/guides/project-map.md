@@ -9,22 +9,22 @@
 ```
 C:\laragon\www\Hospitality Web Platform\
 │
-├── 📁 hwp-tools/           ← ESTE REPO — skills, agentes, docs, specs
+├── 📁 hwe-tools/           ← ESTE REPO — skills, agentes, docs, specs
 │   ├── .claude/            ← Skills invocables, agentes, comandos, settings
 │   ├── docs/               ← Toda la documentación (guías, specs, contratos, diagramas)
 │   └── compatibility.json  ← Versiones compatibles entre tools y core
 │
-├── 📁 hwp-core/            ← Paquetes npm (@hwp/core-ui, @hwp/config)
+├── 📁 hwe-core/            ← Paquetes npm (@hwe/core-ui, @hwe/config)
 │   ├── packages/core-ui/   ← base-blocks, schemas, renderer, adapters, primitives, theme
 │   ├── packages/config/    ← tsconfig base, tailwind preset
 │   └── apps/site-demo/     ← Fixture de prueba — valida packages antes de publicar
 │
-├── 📁 hwp-template/        ← Template de GitHub — se clona una vez por cliente
-│   ├── .hwp-tools/         ← Submódulo → hwp-tools
+├── 📁 hwe-template/        ← Template de GitHub — se clona una vez por cliente
+│   ├── .hwe-tools/         ← Submódulo → hwe-tools
 │   └── src/                ← Estructura vacía lista para usar
 │
-├── 📁 site-{slug}/         ← Un repo por cliente (clonado desde hwp-template)
-│   ├── .hwp-tools/         ← Submódulo → hwp-tools (skills y docs disponibles aquí)
+├── 📁 site-{slug}/         ← Un repo por cliente (clonado desde hwe-template)
+│   ├── .hwe-tools/         ← Submódulo → hwe-tools (skills y docs disponibles aquí)
 │   ├── src/                ← Todo el código del cliente
 │   └── docs/               ← Docs propias del cliente (audits, block-specs, stories...)
 │
@@ -37,12 +37,12 @@ C:\laragon\www\Hospitality Web Platform\
 
 ## 📁 site-{slug}/ — El repo de un cliente
 
-Este es el repo donde trabaja el dev de cliente en el día a día. Tiene submontado `hwp-tools` como `.hwp-tools/`.
+Este es el repo donde trabaja el dev de cliente en el día a día. Tiene submontado `hwe-tools` como `.hwe-tools/`.
 
 ```
 site-{slug}/
 │
-├── 🤖 .hwp-tools/                     ← Submódulo git → hwp-tools
+├── 🤖 .hwe-tools/                     ← Submódulo git → hwe-tools
 │   ├── .claude/skills/                ← Skills invocables: /scaffold-block, /seo-audit...
 │   ├── .claude/agents/                ← 11 agentes especializados
 │   └── docs/                          ← Specs, contratos, guías (ESTE fichero está aquí)
@@ -57,7 +57,7 @@ site-{slug}/
 │   │
 │   ├── 📁 blocks/                     ← Bloques propios del cliente (Level 1–3)
 │   │   ├── registry.ts                ← Mapa de bloques → BlockRenderer
-│   │   ├── HeroBlock/HeroBlock.tsx    ← Level 1: re-export de @hwp/core-ui/base-blocks
+│   │   ├── HeroBlock/HeroBlock.tsx    ← Level 1: re-export de @hwe/core-ui/base-blocks
 │   │   ├── MediaTextBlock/            ← Level 2: base-block + slot personalizado
 │   │   └── FAQBlock/                  ← Level 3: componente custom completo
 │   │
@@ -85,7 +85,7 @@ site-{slug}/
 ├── ⚙️  client.config.ts               ← Configuración única del cliente
 ├── ⚙️  next.config.mjs
 ├── ⚙️  postcss.config.mjs
-├── 📄  package.json                   ← @hwp/core-ui + @hwp/config (npm privado)
+├── 📄  package.json                   ← @hwe/core-ui + @hwe/config (npm privado)
 └── 📄  tsconfig.json
 ```
 
@@ -98,29 +98,29 @@ site-{slug}/
 | `client.config.ts` | Configuración del tenant: adapter, features, blockDefaults | `functions.php` | Dev senior |
 | `src/blocks/registry.ts` | Mapa de bloques del cliente para BlockRenderer | `register_block_type()` | Dev |
 
-> 💡 **site-demo** en `hwp-core/apps/site-demo/` es el modelo de referencia del equipo de plataforma. Tiene la misma estructura que un repo de cliente real.
+> 💡 **site-demo** en `hwe-core/apps/site-demo/` es el modelo de referencia del equipo de plataforma. Tiene la misma estructura que un repo de cliente real.
 
 ### Niveles de uso de bloques en cliente
 
 | Level | Descripción | Patrón |
 |---|---|---|
-| **Level 1** | Re-export del base-block sin cambios | `export { HeroBlock } from '@hwp/core-ui/base-blocks'` |
+| **Level 1** | Re-export del base-block sin cambios | `export { HeroBlock } from '@hwe/core-ui/base-blocks'` |
 | **Level 2** | Re-export con slots rellenados | `<BaseHeroBlock {...props} CtaSlot={MyBookingCta} />` |
-| **Level 3** | Componente completamente custom | JSX propio, solo importa tipos de `@hwp/core-ui/schemas` |
+| **Level 3** | Componente completamente custom | JSX propio, solo importa tipos de `@hwe/core-ui/schemas` |
 
 ---
 
-## 📦 hwp-core/ — Los paquetes compartidos
+## 📦 hwe-core/ — Los paquetes compartidos
 
 El dev de plataforma trabaja aquí cuando añade base-blocks, schemas o adapters.
 
 ```
-hwp-core/
-├── 📦 packages/core-ui/               ← @hwp/core-ui (publica base-blocks, schemas, renderer…)
+hwe-core/
+├── 📦 packages/core-ui/               ← @hwe/core-ui (publica base-blocks, schemas, renderer…)
 │   └── src/
 │       ├── index.ts                   ← Public API principal
-│       ├── base-blocks/               ← Bloques de referencia → subpath @hwp/core-ui/base-blocks
-│       ├── schemas/                   ← Zod schemas compartidos → subpath @hwp/core-ui/schemas
+│       ├── base-blocks/               ← Bloques de referencia → subpath @hwe/core-ui/base-blocks
+│       ├── schemas/                   ← Zod schemas compartidos → subpath @hwe/core-ui/schemas
 │       ├── types/                     ← Tipos TypeScript derivados de schemas
 │       ├── adapters/
 │       │   └── booking/               ← BookingAdapter + BookingProvider + stock adapters
@@ -133,9 +133,9 @@ hwp-core/
 │       ├── composition-rules/         ← Reglas de composición de páginas
 │       └── theme/tokens.contract.ts   ← Define la forma correcta de un tokens.json
 │
-├── 📦 packages/config/                ← @hwp/config
+├── 📦 packages/config/                ← @hwe/config
 │   └── src/
-│       ├── tailwind-preset.ts         ← createHwpPreset(tokens) — para uso interno
+│       ├── tailwind-preset.ts         ← createhwePreset(tokens) — para uso interno
 │       └── theme.css                  ← @theme base importado en globals.css del cliente
 │
 └── 📁 apps/site-demo/                 ← Fixture de prueba (espejo de estructura de cliente)
@@ -143,19 +143,19 @@ hwp-core/
 
 | Package | 🎯 Para qué sirve | 🔄 Equivalente WP | 👤 Quién lo toca |
 |---|---|---|---|
-| `@hwp/core-ui` | Los bloques base React, schemas y renderer | Un plugin de bloques Gutenberg | Dev de plataforma |
-| `@hwp/config` | La configuración base de Tailwind + tsconfig | El `functions.php` del tema padre | Dev senior plataforma |
+| `@hwe/core-ui` | Los bloques base React, schemas y renderer | Un plugin de bloques Gutenberg | Dev de plataforma |
+| `@hwe/config` | La configuración base de Tailwind + tsconfig | El `functions.php` del tema padre | Dev senior plataforma |
 
 > 🔑 **Clave:** cuando cambias algo en `packages/core-ui/src/base-blocks/`, el cambio afecta a **todos los clientes** en la próxima release del package. Los clientes pueden sobreescribir los base-blocks en su propia carpeta `src/blocks/`.
 
 ---
 
-## 🤖 hwp-tools/ — Las herramientas de IA
+## 🤖 hwe-tools/ — Las herramientas de IA
 
-Este repo es el submodulo que se monta como `.hwp-tools/` en cada repo de cliente y en `hwp-core`. Contiene las herramientas que usa Claude Code.
+Este repo es el submodulo que se monta como `.hwe-tools/` en cada repo de cliente y en `hwe-core`. Contiene las herramientas que usa Claude Code.
 
 ```
-hwp-tools/
+hwe-tools/
 ├── 📁 .claude/
 │   ├── agents/                        ← Los 11 agentes especializados
 │   │   ├── planner.md                 ← Diseña la propuesta técnica (Opus)
@@ -196,13 +196,13 @@ hwp-tools/
 │   │   ├── first-day-setup.md         ← Onboarding día 1
 │   │   ├── project-map.md             ← Este fichero
 │   │   ├── daily-workflow.md          ← Flujo de trabajo diario
-│   │   ├── wordpress-to-hwp.md        ← Diccionario WP → HWP
+│   │   ├── wordpress-to-hwe.md        ← Diccionario WP → hwe
 │   │   └── glossary.md                ← Glosario de términos técnicos
 │   │
 │   ├── 📁 architecture/               ← Diseño del sistema (para seniors)
 │   │   ├── decisions.md               ← DEC-001 a DEC-017
 │   │   ├── DEC-017-Repo-Split.md      ← Los 3 repos en detalle
-│   │   ├── domain-model.md            ← Qué es un "cliente HWP"
+│   │   ├── domain-model.md            ← Qué es un "cliente hwe"
 │   │   ├── briefing.md                ← Por qué existe el proyecto
 │   │   └── architecture.md            ← La constitución técnica (~4k líneas)
 │   │
@@ -229,12 +229,12 @@ hwp-tools/
 │       ├── block-resolution-chain.md   ← Cómo se fusionan base + client registries
 │       ├── block-variant-resolution.md ← Cómo se resuelve la variante de un bloque
 │       ├── token-cascade.md            ← Flujo de tokens: global → semantic → brand
-│       ├── booking-architecture.md     ← BookingAdapter en @hwp/core-ui
-│       ├── core-ui-internal.md         ← Interno de @hwp/core-ui
+│       ├── booking-architecture.md     ← BookingAdapter en @hwe/core-ui
+│       ├── core-ui-internal.md         ← Interno de @hwe/core-ui
 │       ├── figma-to-production.md      ← Onboarding de cliente completo
 │       └── page-tetris.md             ← Cómo se ensamblan bloques en páginas
 │
-└── 📄 compatibility.json              ← Versiones compatibles tools ↔ @hwp/core-ui
+└── 📄 compatibility.json              ← Versiones compatibles tools ↔ @hwe/core-ui
 ```
 
 ---
@@ -262,14 +262,14 @@ figma-makes/
 |---|---|
 | Ver cómo quedar visualmente | `figma-makes/{slug}/src/app/components/` |
 | Modificar colores del cliente | `src/theme/tokens.json` + `src/app/globals.css @theme {}` |
-| Crear o editar un base-block (plataforma) | `hwp-core/packages/core-ui/src/base-blocks/` |
+| Crear o editar un base-block (plataforma) | `hwe-core/packages/core-ui/src/base-blocks/` |
 | Crear o editar un bloque de cliente | `src/blocks/` |
 | Personalizar una página del cliente | `src/compositions/` |
-| Ver los schemas Zod compartidos | `hwp-core/packages/core-ui/src/schemas/` |
+| Ver los schemas Zod compartidos | `hwe-core/packages/core-ui/src/schemas/` |
 | Entender una decisión técnica | `docs/architecture/decisions.md` |
 | Saber las reglas de código | `docs/specs/general/base-standards.md` |
 | Aprender a hacer algo | `docs/skills/frontend/` |
-| Usar una skill de Claude Code | `.hwp-tools/.claude/skills/` |
+| Usar una skill de Claude Code | `.hwe-tools/.claude/skills/` |
 
 ---
 
@@ -277,8 +277,8 @@ figma-makes/
 
 Imagina WordPress pero separado en 3 repos independientes:
 
-- **hwp-core** (`packages/core-ui`) → el "tema padre" con todos los bloques base.
+- **hwe-core** (`packages/core-ui`) → el "tema padre" con todos los bloques base.
 - **site-{cliente}** (`src/blocks/`, `src/compositions/`) → el "tema hijo" con los colores, fuentes y personalizaciones del cliente.
-- **hwp-tools** (`.hwp-tools/`) → el "kit de herramientas" con skills de IA, specs y documentación.
+- **hwe-tools** (`.hwe-tools/`) → el "kit de herramientas" con skills de IA, specs y documentación.
 
-Los tres repos se usan juntos: el cliente tiene hwp-tools como submódulo, y consume `@hwp/core-ui` como package npm.
+Los tres repos se usan juntos: el cliente tiene hwe-tools como submódulo, y consume `@hwe/core-ui` como package npm.

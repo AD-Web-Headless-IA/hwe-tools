@@ -1,6 +1,6 @@
 # Client compositions
 
-> **How** to assemble pages for a specific client using the building blocks of `@hwp/core-ui`. Companion to [`block-contract.md`](./block-contract.md), [`template-contract.md`](./template-contract.md), and the binding rules in [`ai-specs/specs/frontend-standards.md`](../../specs/frontend-standards.md).
+> **How** to assemble pages for a specific client using the building blocks of `@hwe/core-ui`. Companion to [`block-contract.md`](./block-contract.md), [`template-contract.md`](./template-contract.md), and the binding rules in [`ai-specs/specs/frontend-standards.md`](../../specs/frontend-standards.md).
 > Load this file when scaffolding a new client site, deciding where a piece of UI belongs, or implementing per-client customization.
 >
 > **DEC-015:** Client blocks live in `src/blocks/` of the client repo (or `apps/site-{slug}/src/blocks/`), never in `packages/core-ui/src/base-blocks/`. See [`block-contract.md`](./block-contract.md) §Block ownership model for Level 1/2/3 details.
@@ -32,7 +32,7 @@ A **Client Block** is a block that exists in the client's `src/blocks/` folder. 
 A **composition** is a function component that:
 
 1. Lives in `apps/site-{slug}/src/compositions/`.
-2. Imports primitives, platform blocks, and/or templates from `@hwp/core-ui` and `@hwp/core-ui/base-blocks`.
+2. Imports primitives, platform blocks, and/or templates from `@hwe/core-ui` and `@hwe/core-ui/base-blocks`.
 3. Accepts already-fetched, already-validated `data` as props.
 4. Assembles a specific page for a specific client.
 5. May import client-only content from `apps/site-{slug}/src/content/{locale}.json` or hardcode arrangement that does not need to vary.
@@ -84,7 +84,7 @@ The composition:
 
 ```tsx
 // apps/site-{slug}/src/compositions/HomeComposition.tsx
-import { HeroBlock, GalleryBlock, BookingBlock, AmenitiesBlock } from '@hwp/core-ui/base-blocks';
+import { HeroBlock, GalleryBlock, BookingBlock, AmenitiesBlock } from '@hwe/core-ui/base-blocks';
 import type { HomePageData } from '@/lib/types';
 
 export function HomeComposition({ data }: { data: HomePageData }) {
@@ -112,7 +112,7 @@ When the page layout itself is content-managed in Payload (the editor controls w
 
 ```tsx
 // apps/site-{slug}/src/compositions/HomeComposition.tsx
-import { BlockRenderer, type BlockInstance } from '@hwp/core-ui';
+import { BlockRenderer, type BlockInstance } from '@hwe/core-ui';
 import { clientBlocks } from '@/blocks/registry';
 
 export function HomeComposition({ layout }: { layout: BlockInstance[] }) {
@@ -130,7 +130,7 @@ Key points:
 // apps/site-{slug}/src/blocks/registry.ts
 import { ComponentType } from 'react';
 // Level 1 — re-exports (no subfolder needed)
-export { HeroBlock, GalleryBlock } from '@hwp/core-ui/base-blocks';
+export { HeroBlock, GalleryBlock } from '@hwe/core-ui/base-blocks';
 
 // Level 3 — fully custom block
 import { BookingPlusBlock } from './BookingPlusBlock/BookingPlusBlock';
@@ -146,7 +146,7 @@ When a client extends a template's schema with extra fields, the page route uses
 
 ```tsx
 // apps/site-{slug}/src/compositions/{Slug}AccommodationComposition.tsx
-import { AccommodationDetailTemplate } from '@hwp/core-ui';
+import { AccommodationDetailTemplate } from '@hwe/core-ui';
 import { clientBlocks } from '@/blocks/registry';
 import type { {Slug}AccommodationContent } from '@/payload-types';
 
@@ -191,7 +191,7 @@ The core template is untouched. The client's extras live in the client's repo. O
 
 Allowed:
 
-- JSX assembly of primitives, blocks, and templates from `@hwp/core-ui` and `@hwp/core-ui/base-blocks`.
+- JSX assembly of primitives, blocks, and templates from `@hwe/core-ui` and `@hwe/core-ui/base-blocks`.
 - `<BlockRenderer layout={layout} blocks={clientBlocks} />` for content-managed page sections.
 - Local copy via `next-intl` translations or `src/content/{locale}.json`.
 - Per-client layout decisions (CSS class composition, grid arrangement).

@@ -36,14 +36,14 @@ Assumes the dev server is running at `http://localhost:3000`. Run for each page 
 
 **Step 1 — Fetch the page**
 ```bash
-curl -s http://localhost:3000 -o /tmp/hwp-page.html
+curl -s http://localhost:3000 -o /tmp/hwe-page.html
 ```
 
 **Step 2 — Extract and pretty-print all JSON-LD blocks**
 ```bash
 python3 -c "
 import re, json
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 schemas = re.findall(r'<script[^>]+type=[\"\'"]application/ld\+json[\"\'"][^>]*>(.*?)</script>', html, re.DOTALL)
 print(f'Found {len(schemas)} JSON-LD block(s)')
 for i, s in enumerate(schemas, 1):
@@ -55,7 +55,7 @@ for i, s in enumerate(schemas, 1):
 **Step 3 — Verify all JSON-LD is in `<head>`, not `<body>`**
 ```bash
 python3 -c "
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 head = html[:html.index('</head>')]
 body = html[html.index('<body'):]
 print(f'JSON-LD in head: {head.count(\"application/ld+json\")}')
@@ -73,13 +73,13 @@ Check `docs/specs/seo/schemas/README.md §Page → schema mapping`:
 
 **Step 5 — Verify required schema types are present**
 ```bash
-grep -oE '"@type"\s*:\s*"[^"]*"' /tmp/hwp-page.html | sort | uniq
+grep -oE '"@type"\s*:\s*"[^"]*"' /tmp/hwe-page.html | sort | uniq
 ```
 Cross-check against the required schemas identified in Step 4. Missing required type = Blocker.
 
 **Step 6 — Check for unfilled template placeholders**
 ```bash
-grep -c '{{' /tmp/hwp-page.html
+grep -c '{{' /tmp/hwe-page.html
 ```
 Any count > 0 means a `{{VARIABLE}}` placeholder from a schema template was rendered without being replaced = Blocker (broken structured data in production).
 
@@ -88,7 +88,7 @@ For each schema found, cross-reference its template file in `docs/specs/seo/sche
 ```bash
 python3 -c "
 import re, json
-html = open('/tmp/hwp-page.html').read()
+html = open('/tmp/hwe-page.html').read()
 schemas = re.findall(r'<script[^>]+type=[\"\'"]application/ld\+json[\"\'"][^>]*>(.*?)</script>', html, re.DOTALL)
 for s in schemas:
     d = json.loads(s.strip())
@@ -106,14 +106,14 @@ Required in all `Campground` / `Hotel` / `Organization` schemas: `name`, `url`, 
 
 **Step 8 — Check for empty or null field values**
 ```bash
-grep -oE '"[^"]+"\s*:\s*(""|null|\[\])' /tmp/hwp-page.html
+grep -oE '"[^"]+"\s*:\s*(""|null|\[\])' /tmp/hwe-page.html
 ```
 Any empty string `""`, `null`, or empty array `[]` in a schema field = Major. Per `geo-llm-optimization.md`: omit the field entirely if data is unavailable — an empty field is worse than no field.
 
 **Step 9 — Check `@graph` pattern when multiple schemas are present**
 If Step 2 found more than one JSON-LD block, they should be combined using `@graph`:
 ```bash
-grep -c '"@graph"' /tmp/hwp-page.html
+grep -c '"@graph"' /tmp/hwe-page.html
 ```
 Multiple separate `<script type="application/ld+json">` blocks are functional but `@graph` is preferred — it avoids repeating `"@context"` and lets Google understand entity relationships.
 
@@ -173,7 +173,7 @@ Green / Yellow / Red
 
 Como la auditoría de schema de Yoast SEO Premium, pero con control total sobre qué tipos se usan y qué datos los rellenan:
 
-| En Yoast (WP) | En HWP |
+| En Yoast (WP) | En hwe |
 |---|---|
 | Schema generado automáticamente (Hotel, LocalBusiness) | 11 plantillas explícitas en `docs/specs/seo/schemas/` |
 | Configuras los datos en wp-admin | Los datos vienen de `client.config.ts` y Payload CMS |

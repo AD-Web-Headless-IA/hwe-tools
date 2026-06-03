@@ -60,14 +60,14 @@ If you find yourself wanting to fix the issue you see, **stop**. Your job is to 
 - [ ] `as` casts only at validated boundaries (post-`Schema.parse`, post-`JSON.parse` + parse).
 
 ### Multi-tenant integrity
-- [ ] No `if (client === '...')` or equivalent in core packages (`hwp-core`). Per-client behavior goes in the client repo `src/` or `client.config.ts` (`base-standards.md`, `domain-model.md §7`).
+- [ ] No `if (client === '...')` or equivalent in core packages (`hwe-core`). Per-client behavior goes in the client repo `src/` or `client.config.ts` (`base-standards.md`, `domain-model.md §7`).
 - [ ] Block / template / entity names do not encode a client-specific noun (`BalnearioSection`, `CasitaRusticaPage`, `BungalowsTemplate` are forbidden — see `domain-model.md §7`).
 - [ ] Every DB query is scoped by `tenantId`.
 
 ### Architecture
 - [ ] Adapter pattern at external boundaries — Booking, Content, AI providers. The core does not import a concrete adapter.
-- [ ] Block implementations live in `hwp-core/packages/core-ui/src/base-blocks/` (platform) or `src/blocks/` in client repos (DEC-015 + DEC-017). Never in `packages/core-ui/src/blocks/` (removed in DEC-015).
-- [ ] Schemas live in `hwp-core/packages/core-ui/src/schemas/` and are imported via `@hwp/core-ui/schemas`. Not inlined inside block files for blocks that share schemas across packages.
+- [ ] Block implementations live in `hwe-core/packages/core-ui/src/base-blocks/` (platform) or `src/blocks/` in client repos (DEC-015 + DEC-017). Never in `packages/core-ui/src/blocks/` (removed in DEC-015).
+- [ ] Schemas live in `hwe-core/packages/core-ui/src/schemas/` and are imported via `@hwe/core-ui/schemas`. Not inlined inside block files for blocks that share schemas across packages.
 - [ ] Routing follows the 3-layer rule from `domain-model.md §3`: per-locale slugs, per-client overrides, `customRoutes` escape hatch.
 - [ ] If hosting / API / DB code is involved: per DEC-007, secrets live in Vercel env vars, credentials never reach the browser, queries hit Vercel Postgres.
 
@@ -90,7 +90,7 @@ If you find yourself wanting to fix the issue you see, **stop**. Your job is to 
 - [ ] No `console.log` in production code. Logger only.
 - [ ] No comments that explain *what* the code does (names should do that). Comments explain *why* when non-obvious.
 - [ ] No `enum` — use `as const` + derived union type (`coding-standards.md §TypeScript strict`).
-- [ ] Import grouping: external packages → `@hwp/*` → relative. Three blocks, each separated by a blank line (`coding-standards.md §Import grouping`).
+- [ ] Import grouping: external packages → `@hwe/*` → relative. Three blocks, each separated by a blank line (`coding-standards.md §Import grouping`).
 - [ ] Named exports everywhere; `export default` only for Next.js page files (`coding-standards.md §Named exports always`).
 - [ ] No `dangerouslySetInnerHTML` with unsanitized input — only acceptable after a proven sanitizer (`dompurify` or equivalent) on Payload CMS rich text (`coding-standards.md` + `security-standards.md §XSS prevention`).
 

@@ -7,7 +7,7 @@ allowed-tools: Read Write Glob Bash(curl *) Bash(node *) Bash(pnpm *) Bash(npx *
 
 # SEO Audit
 
-You are an SEO audit runner. Your job is to verify that every URL of a running HWP site passes all 7 SEO audit areas, save the consolidated multi-page report, and surface the top priorities to the developer.
+You are an SEO audit runner. Your job is to verify that every URL of a running hwe site passes all 7 SEO audit areas, save the consolidated multi-page report, and surface the top priorities to the developer.
 
 The runner fetches `{baseUrl}/sitemap.xml`, extracts every `<loc>`, audits each page (up to 20), and groups findings by URL with a global score summary at the end. If `sitemap.xml` is missing or empty it falls back to auditing `/` only and adds a BLOCKER.
 
@@ -21,7 +21,7 @@ The executable audit runner is `.claude/skills/seo-audit/runner.mjs`. This skill
 - Never modify source files. This skill is read-only with respect to production code. It only writes the audit report.
 - The report is saved to `docs/audits/seo/seo-audit-{TODAY}.md`. If a report for the same day exists, overwrite it — it is a re-audit after fixes, not a separate run.
 - The audit runner requires Node.js 20+ (built-in `fetch`). Verify with `node --version` if uncertain.
-- CWD = client repo root. Runner script is at `.hwp-tools/.claude/skills/seo-audit/runner.mjs`.
+- CWD = client repo root. Runner script is at `.hwe-tools/.claude/skills/seo-audit/runner.mjs`.
 
 ## Process
 
@@ -61,7 +61,7 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:{PORT}
 Execute the Node.js audit runner and capture its output:
 
 ```bash
-node .hwp-tools/.claude/skills/seo-audit/runner.mjs {BASE_URL} {SLUG}
+node .hwe-tools/.claude/skills/seo-audit/runner.mjs {BASE_URL} {SLUG}
 ```
 
 - The runner first tries `{BASE_URL}/sitemap.xml`. If found, it extracts every `<loc>` URL (up to 20), maps them to the local dev server using their paths, and audits each page independently.

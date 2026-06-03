@@ -1,6 +1,6 @@
 # Block contract
 
-> **How** to build a reusable block in `@hwp/core-ui`. Companion to the binding rules in [`ai-specs/specs/frontend-standards.md`](../../specs/frontend-standards.md).
+> **How** to build a reusable block in `@hwe/core-ui`. Companion to the binding rules in [`ai-specs/specs/frontend-standards.md`](../../specs/frontend-standards.md).
 > Load this file when scaffolding a new block, modifying an existing one, or wiring a block into the BlockRenderer.
 >
 > **Block names below** (`HeroBlock`, `GalleryBlock`, `BookingBlock`) **are illustrative.** The canonical catalog of blocks comes out of a separate domain-modeling session.
@@ -307,8 +307,8 @@ The BlockRenderer maps Payload's `type` string to a component. Adding a platform
 
 ```ts
 // packages/core-ui/src/renderer/baseBlockRegistry.ts
-import { {Name} } from '@hwp/core-ui/base-blocks/{Name}/{Name}';
-import { {Name}Content } from '@hwp/core-ui/schemas/{Name}.schema';
+import { {Name} } from '@hwe/core-ui/base-blocks/{Name}/{Name}';
+import { {Name}Content } from '@hwe/core-ui/schemas/{Name}.schema';
 // ...other blocks
 
 export const baseBlockRegistry = {
@@ -388,15 +388,15 @@ The renderer is where validation happens — at the boundary between Payload dat
 
 ## Public API exposure
 
-Blocks are **not** exported from the `@hwp/core-ui` root. Use the `@hwp/core-ui/base-blocks` subpath export instead:
+Blocks are **not** exported from the `@hwe/core-ui` root. Use the `@hwe/core-ui/base-blocks` subpath export instead:
 
 ```ts
 // Correct — use the subpath
-import { {Name} } from '@hwp/core-ui/base-blocks';
-import type { {Name}Content } from '@hwp/core-ui/schemas';
+import { {Name} } from '@hwe/core-ui/base-blocks';
+import type { {Name}Content } from '@hwe/core-ui/schemas';
 ```
 
-Schemas are separately available via the `@hwp/core-ui/schemas` subpath, which is useful for Payload schema definitions that need the Zod schema without the component runtime.
+Schemas are separately available via the `@hwe/core-ui/schemas` subpath, which is useful for Payload schema definitions that need the Zod schema without the component runtime.
 
 ```ts
 // packages/core-ui package.json (subpath exports)
@@ -419,7 +419,7 @@ The root `src/index.ts` exports only the renderer, providers, primitives, and la
 
 | Level | Lives in | Owner | Registry |
 |---|---|---|---|
-| **Platform block** | `packages/core-ui/src/base-blocks/{Name}/` | HWP platform team | `baseBlockRegistry.ts` in core-ui |
+| **Platform block** | `packages/core-ui/src/base-blocks/{Name}/` | hwe platform team | `baseBlockRegistry.ts` in core-ui |
 | **Client block** | `apps/site-{slug}/src/blocks/{Name}/` (or client repo `src/blocks/{Name}/`) | Client project | `src/blocks/registry.ts` in the client repo |
 
 Platform blocks are the **reference implementations**: reusable, theme-neutral, fully tested. Client blocks are project-specific implementations that live in the client's own repo and are never added to core-ui.
@@ -428,18 +428,18 @@ Platform blocks are the **reference implementations**: reusable, theme-neutral, 
 
 When a client needs a block, choose the appropriate level:
 
-**Level 1 — Re-export (default).** The client uses the platform block unchanged. The client's `registry.ts` simply re-exports from `@hwp/core-ui/base-blocks`:
+**Level 1 — Re-export (default).** The client uses the platform block unchanged. The client's `registry.ts` simply re-exports from `@hwe/core-ui/base-blocks`:
 
 ```ts
 // apps/site-{slug}/src/blocks/registry.ts
-export { HeroBlock } from '@hwp/core-ui/base-blocks';
-export { GalleryBlock } from '@hwp/core-ui/base-blocks';
+export { HeroBlock } from '@hwe/core-ui/base-blocks';
+export { GalleryBlock } from '@hwe/core-ui/base-blocks';
 // ...
 ```
 
 **Level 2 — Slot extension.** The client wraps a platform block and injects content into its named slots (see "Slot pattern" below), without forking the block implementation.
 
-**Level 3 — Full custom block.** The client implements the block from scratch in `src/blocks/{Name}/`, following the same 5-file layout as platform blocks. The block schema can optionally import and extend a platform schema from `@hwp/core-ui/schemas`.
+**Level 3 — Full custom block.** The client implements the block from scratch in `src/blocks/{Name}/`, following the same 5-file layout as platform blocks. The block schema can optionally import and extend a platform schema from `@hwe/core-ui/schemas`.
 
 ### Client registry wiring
 
@@ -448,7 +448,7 @@ The client site wires its blocks into `BlockRenderer` via the `blocks` prop:
 ```ts
 // apps/site-{slug}/src/blocks/registry.ts
 import { ComponentType } from 'react';
-export { HeroBlock } from '@hwp/core-ui/base-blocks';    // Level 1
+export { HeroBlock } from '@hwe/core-ui/base-blocks';    // Level 1
 import { CustomHeroBlock } from './CustomHeroBlock/CustomHeroBlock'; // Level 3
 
 export const clientBlocks: Record<string, ComponentType<any>> = {
@@ -458,7 +458,7 @@ export const clientBlocks: Record<string, ComponentType<any>> = {
 
 ```tsx
 // apps/site-{slug}/src/compositions/HomeComposition.tsx
-import { BlockRenderer } from '@hwp/core-ui';
+import { BlockRenderer } from '@hwe/core-ui';
 import { clientBlocks } from '@/blocks/registry';
 
 export function HomeComposition({ layout }: { layout: BlockInstance[] }) {
@@ -507,7 +507,7 @@ A Level-2 client block re-exports the platform block with its slots filled:
 
 ```tsx
 // apps/site-{slug}/src/blocks/HeroBlock/HeroBlock.tsx  (Level 2)
-import { HeroBlock as BaseHeroBlock } from '@hwp/core-ui/base-blocks';
+import { HeroBlock as BaseHeroBlock } from '@hwe/core-ui/base-blocks';
 import { BookingCta } from '@/primitives/BookingCta';
 
 export function HeroBlock(props: Parameters<typeof BaseHeroBlock>[0]) {

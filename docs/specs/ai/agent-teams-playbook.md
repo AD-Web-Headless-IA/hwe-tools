@@ -1,6 +1,6 @@
 # Agent Teams Playbook
 
-> Predefined team compositions for the most common HWP tasks. Pick the team for your task, invoke the lead first, then the teammates in parallel or sequence as indicated.
+> Predefined team compositions for the most common hwe tasks. Pick the team for your task, invoke the lead first, then the teammates in parallel or sequence as indicated.
 
 ---
 
@@ -19,7 +19,7 @@
 
 ### 1. Create a block
 
-**Task:** Implement a new `@hwp/core-ui` block from a Figma reference.
+**Task:** Implement a new `@hwe/core-ui` block from a Figma reference.
 
 **Team:** `senior-developer` (lead) + `ux-ui-analyst` + `seo-geo-specialist`
 
@@ -172,7 +172,7 @@
 
 **En WordPress:** cuando instalas un plugin nuevo, tú solo decides si es seguro, si afecta el SEO, si el diseño es correcto, si funciona en móvil. Dependes de tu propio criterio en todo.
 
-**En HWP:** para cada tipo de tarea hay un equipo predefinido. No tienes que recordar qué revisar — el playbook te dice qué especialistas convocar y en qué orden. Máximo 3 por equipo para no perder tiempo coordinando.
+**En hwe:** para cada tipo de tarea hay un equipo predefinido. No tienes que recordar qué revisar — el playbook te dice qué especialistas convocar y en qué orden. Máximo 3 por equipo para no perder tiempo coordinando.
 
 | Tipo de tarea | Equipo |
 |---|---|

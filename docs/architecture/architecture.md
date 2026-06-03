@@ -1,7 +1,7 @@
-# HWP — Arquitectura definitiva
+# hwe — Arquitectura definitiva
 ## Hospitality Web Platform
 
-> Documento exhaustivo de todas las decisiones de arquitectura tomadas para la plataforma HWP. Fuente de verdad del sistema. Última actualización: Mayo 2026.
+> Documento exhaustivo de todas las decisiones de arquitectura tomadas para la plataforma hwe. Fuente de verdad del sistema. Última actualización: Mayo 2026.
 
 > ⚠️ **HOSTING / DEPLOY / DB / API-PROXY: secciones parcialmente superseded por DEC-007** (2026-05-20). El plan original (cdmon estático + Hetzner Payload + MariaDB + PHP proxy) ha sido reemplazado por **Vercel full-stack** (Vercel proyectos + Vercel Functions para Payload + Vercel Postgres + Vercel Blob Storage; PMS y Claude API se proxean via Next.js Route Handlers). Las secciones de alto nivel (Visión, Fases, Stack, Deploy) están actualizadas a Vercel. Las secciones profundas (`PHP PROXY EN CDMON`, schemas MariaDB con paths cdmon, snippets `cdmon /web/...`) conservan el contenido original como registro histórico — para el approach actual ver [`../memory-bank/decisions.md`](./decisions.md#dec-007). Per DEC-003 la constitución no se reescribe de golpe; se anota.
 
@@ -16,7 +16,7 @@ Cada web se construye en tres capas:
 **1. DISEÑO — desde Figma**
 El diseñador crea el site en Figma con el branding del cliente.
 Figma Make genera código de referencia visual.
-Claude Code construye el site con bloques de @hwp/core-ui.
+Claude Code construye el site con bloques de @hwe/core-ui.
 
 **2. CONTENIDO — desde Payload CMS**
 Payload gestiona todo el contenido editorial del site.
@@ -76,13 +76,13 @@ ORM:              Prisma (sobre Postgres)
 Base de datos:    Vercel Postgres — una DB por cliente + platform DB compartida (DEC-007)
 Media storage:    Vercel Blob Storage — buckets por cliente (DEC-007)
 Monorepo:         Turborepo + pnpm workspaces
-Registry npm:     GitHub Packages (privado @hwp/*)
+Registry npm:     GitHub Packages (privado @hwe/*)
 Deploy frontend:  Vercel project por cliente — Vercel Git integration (DEC-007)
 Deploy CMS:       Vercel Functions por tipo — Vercel Git integration (DEC-007)
 API proxy:        Next.js Route Handlers (PMS, Claude API) — credenciales en Vercel env vars (DEC-007)
 Cron / jobs:      Vercel Cron — backups, warm-up de Functions, tareas programadas
 i18n:             next-intl
-Analytics:        GTM + DataLayer tipado (@hwp/analytics)
+Analytics:        GTM + DataLayer tipado (@hwe/analytics)
 Testing:          Vitest + @testing-library/react (unit/integration) + Playwright (E2E) — DEC-006
 CI/CD:            GitHub Actions (verificación) + Vercel Git integration (deploy)
 Documentación:    OpenAPI generado automáticamente (zod-openapi)
@@ -105,7 +105,7 @@ DESARROLLO LOCAL (Fase 1)
 
 PRODUCCIÓN (Fase 2 — DEC-007)
   GitHub
-    hwp-platform/  ← monorepo único
+    hwe-platform/  ← monorepo único
     ↓ push / PR
       GitHub Actions: lint + test + build verification
     ↓ on merge
@@ -145,7 +145,7 @@ PRODUCCIÓN (Fase 2 — DEC-007)
     warm-cms-functions         ← keep-warm para Payload Functions
 
   GitHub Packages
-    @hwp/*                     ← registry npm privado
+    @hwe/*                     ← registry npm privado
 ```
 
 ---
@@ -153,7 +153,7 @@ PRODUCCIÓN (Fase 2 — DEC-007)
 ## ESTRUCTURA DEL MONOREPO
 
 ```
-hwp-platform/                      ← repositorio GitHub único
+hwe-platform/                      ← repositorio GitHub único
 ├── apps/
 │   ├── site-template/             ← plantilla base Next.js estático
 │   ├── site-camping-sol/          ← cliente 1 (copia de template)
@@ -164,12 +164,12 @@ hwp-platform/                      ← repositorio GitHub único
 │   └── admin/                     ← panel agencia (vista global)
 │
 ├── packages/
-│   ├── @hwp/core-ui/              ← bloques base sin estilos visuales
-│   ├── @hwp/booking/              ← BookingAdapter interface + adaptadores PMS
-│   ├── @hwp/content/              ← ContentRepository interface + PayloadAdapter
-│   ├── @hwp/analytics/            ← GTM hooks tipados + DataLayer
-│   ├── @hwp/i18n/                 ← next-intl config + traducciones base
-│   └── @hwp/config/               ← tsconfig, eslint, tailwind base compartido
+│   ├── @hwe/core-ui/              ← bloques base sin estilos visuales
+│   ├── @hwe/booking/              ← BookingAdapter interface + adaptadores PMS
+│   ├── @hwe/content/              ← ContentRepository interface + PayloadAdapter
+│   ├── @hwe/analytics/            ← GTM hooks tipados + DataLayer
+│   ├── @hwe/i18n/                 ← next-intl config + traducciones base
+│   └── @hwe/config/               ← tsconfig, eslint, tailwind base compartido
 │
 ├── docs/architecture/
 │   ├── briefing.md            ← este documento
@@ -190,7 +190,7 @@ hwp-platform/                      ← repositorio GitHub único
 
 ### Detalle de estructura React y convenciones de frontend
 
-Este documento define la estructura **a nivel monorepo**. Los detalles del frontend (layout interno de `@hwp/core-ui`, contratos de bloques y templates, theming, compositions por cliente) viven separados para no engordar esta constitución y para que los agentes IA carguen solo lo que necesitan (ver DEC-003 sobre amortización de tokens):
+Este documento define la estructura **a nivel monorepo**. Los detalles del frontend (layout interno de `@hwe/core-ui`, contratos de bloques y templates, theming, compositions por cliente) viven separados para no engordar esta constitución y para que los agentes IA carguen solo lo que necesitan (ver DEC-003 sobre amortización de tokens):
 
 - **Reglas** (siempre cargadas por cualquier agente frontend): `docs/specs/general/base-standards.md`, `docs/specs/frontend/frontend-standards.md`, `docs/specs/general/lifecycle.md`.
 - **Cómo** (cargar por tarea): `docs/contracts/frontend/structure.md`, `docs/contracts/frontend/block-contract.md`, `docs/contracts/frontend/template-contract.md`, `docs/contracts/frontend/theme-tokens.md`, `docs/contracts/frontend/client-composition.md`.
@@ -202,7 +202,7 @@ Este documento define la estructura **a nivel monorepo**. Los detalles del front
 
 > **Partially superseded by [DEC-009](./decisions.md#dec-009--remove-activeblocks-add-blockdefaults-to-clientconfigts) (2026-05-21).** The `activeBlocks` field (flat string array) has been removed from `client.config.ts` — it was redundant: no contract consumed it (BlockRenderer, scaffold-block, compositions), Payload `layout[]` already declares which blocks appear on each page, and `features` already gates which blocks are available per client. It is replaced by an optional `blockDefaults` record that configures per-block variant preferences (e.g. `BookingBlock: { defaultVariant: 'inline' }`). The snippet below is preserved as historical record; new `client.config.ts` files must follow DEC-009.
 >
-> **Additionally,** this section mentions `BookingBlock` as one of the active blocks. The component's location is updated by [DEC-010](./decisions.md#dec-010--bookingblock-in-hwpcore-ui-bookingprovider-in-hwpbooking): `BookingBlock` lives in `@hwp/core-ui` like any other block; `BookingProvider` and `useBookingAdapter()` live in `@hwp/booking`. Per [DEC-015](./decisions.md#dec-015--client-owned-blocks-with-shared-schemas-slot-based-composition-and-npm-subpath-exports) (2026-06-01), the path is `@hwp/core-ui/src/base-blocks/BookingBlock/` (renamed from `src/blocks/`).
+> **Additionally,** this section mentions `BookingBlock` as one of the active blocks. The component's location is updated by [DEC-010](./decisions.md#dec-010--bookingblock-in-hwecore-ui-bookingprovider-in-hwebooking): `BookingBlock` lives in `@hwe/core-ui` like any other block; `BookingProvider` and `useBookingAdapter()` live in `@hwe/booking`. Per [DEC-015](./decisions.md#dec-015--client-owned-blocks-with-shared-schemas-slot-based-composition-and-npm-subpath-exports) (2026-06-01), the path is `@hwe/core-ui/src/base-blocks/BookingBlock/` (renamed from `src/blocks/`).
 
 Toda la personalización de un cliente vive en un solo fichero:
 
@@ -307,7 +307,7 @@ Los schemas se definen en TypeScript — nunca desde la UI de Payload.
 
 ```typescript
 // Schema BASE compartido por todos los clientes
-// packages/@hwp/content/schemas/base/accommodation.ts
+// packages/@hwe/content/schemas/base/accommodation.ts
 export const baseAccommodation = {
   fields: [
     { name: 'title',       type: 'text'    },
@@ -399,7 +399,7 @@ const data = await res.json()
 
 ## BOOKING ENGINE
 
-**Component location updated by [DEC-010](./decisions.md#dec-010--bookingblock-in-hwpcore-ui-bookingprovider-in-hwpbooking) (2026-05-21).** `BookingBlock` and `BookingWidget` live in `@hwp/core-ui` (not in `@hwp/booking/react/`). `@hwp/booking` exports the `BookingAdapter` interface, stock adapters, `BookingProvider`, and `useBookingAdapter()` — no UI components. The PHP proxy references are superseded by [DEC-007](./decisions.md#dec-007) (Next.js Route Handlers). Per [DEC-015](./decisions.md#dec-015--client-owned-blocks-with-shared-schemas-slot-based-composition-and-npm-subpath-exports) (2026-06-01), the path inside the package is `src/base-blocks/BookingBlock/` (renamed from `src/blocks/`).
+**Component location updated by [DEC-010](./decisions.md#dec-010--bookingblock-in-hwecore-ui-bookingprovider-in-hwebooking) (2026-05-21).** `BookingBlock` and `BookingWidget` live in `@hwe/core-ui` (not in `@hwe/booking/react/`). `@hwe/booking` exports the `BookingAdapter` interface, stock adapters, `BookingProvider`, and `useBookingAdapter()` — no UI components. The PHP proxy references are superseded by [DEC-007](./decisions.md#dec-007) (Next.js Route Handlers). Per [DEC-015](./decisions.md#dec-015--client-owned-blocks-with-shared-schemas-slot-based-composition-and-npm-subpath-exports) (2026-06-01), the path inside the package is `src/base-blocks/BookingBlock/` (renamed from `src/blocks/`).
 
 ### Interface común para todos los PMS
 
@@ -484,12 +484,12 @@ Razón: formato universal, cualquier CMS lo lee, la IA lo entiende mejor.
 
 **Extended by [DEC-008](./decisions.md#dec-008--structural-variants-for-complex-blocks) (2026-05-21).** The block variant system now supports structural variants (different components per variant, not just CVA styling). See `docs/contracts/frontend/block-contract.md` §Structural variants. `activeBlocks` is replaced by `blockDefaults` per [DEC-009](./decisions.md#dec-009--remove-activeblocks-add-blockdefaults-to-clientconfigts).
 
-> **⚠ Superseded/Extended by [DEC-015](decisions.md#dec-015--client-owned-blocks-with-shared-schemas-slot-based-composition-and-npm-subpath-exports) (2026-06-01).** See decisions.md for the current model. Key changes: `packages/core-ui/src/blocks/` → `base-blocks/`; schemas → `schemas/`; types → `types/`; client sites own their block implementations in `src/blocks/`; `BlockRenderer` accepts `layout: BlockInstance[]` + optional `blocks` client map; `blockRegistry.ts` → `baseBlockRegistry.ts`; three usage levels (re-export / slots / full custom); slot pattern via `{Name}Block.slots.ts`; token cascade global → semantic → brand in `createHwpPreset()`; one `globals.css` per client, zero CSS per block; new `composition-rules/` module.
+> **⚠ Superseded/Extended by [DEC-015](decisions.md#dec-015--client-owned-blocks-with-shared-schemas-slot-based-composition-and-npm-subpath-exports) (2026-06-01).** See decisions.md for the current model. Key changes: `packages/core-ui/src/blocks/` → `base-blocks/`; schemas → `schemas/`; types → `types/`; client sites own their block implementations in `src/blocks/`; `BlockRenderer` accepts `layout: BlockInstance[]` + optional `blocks` client map; `blockRegistry.ts` → `baseBlockRegistry.ts`; three usage levels (re-export / slots / full custom); slot pattern via `{Name}Block.slots.ts`; token cascade global → semantic → brand in `createhwePreset()`; one `globals.css` per client, zero CSS per block; new `composition-rules/` module.
 
 ### Tres capas
 
 ```
-Capa 1 — @hwp/core-ui (bloques base)
+Capa 1 — @hwe/core-ui (bloques base)
   Estructura y lógica — sin estilos visuales
   HeroBlock, GalleryBlock, BookingBlock,
   ServicesBlock, MapBlock, ReviewsBlock,
@@ -507,7 +507,7 @@ Capa 2 — Tokens por cliente (desde Figma)
 Capa 3 — Composición con Figma Make como referencia
   Diseñador crea el site en Figma
   Figma Make genera código completo como referencia visual
-  Dev analiza el código generado y mapea a bloques @hwp/core-ui
+  Dev analiza el código generado y mapea a bloques @hwe/core-ui
   Dev construye con los bloques correctos y sus variantes
   Resultado: código limpio, semántico, que sigue las convenciones
 ```
@@ -528,12 +528,12 @@ Capa 3 — Composición con Figma Make como referencia
    ↓
 5. Claude Code recibe:
    - Código generado por Figma Make
-   - Catálogo de bloques @hwp/core-ui (del memory-bank)
+   - Catálogo de bloques @hwe/core-ui (del memory-bank)
    - tailwind.config.ts del cliente
    - docs/frontend-standards.md
    ↓
 6. Claude analiza el código de Figma Make y construye
-   el site equivalente usando bloques de @hwp/core-ui:
+   el site equivalente usando bloques de @hwe/core-ui:
    "<div class='hero full-width'>" → <HeroBlock variant="full" />
    "<div class='gallery slider'>" → <GalleryBlock variant="slider" />
    "<div class='booking inline'>" → <BookingBlock variant="inline" />
@@ -549,7 +549,7 @@ Capa 3 — Composición con Figma Make como referencia
 ### Por qué Figma Make es referencia y no producción
 
 ```
-Figma Make genera           Claude con @hwp/core-ui genera
+Figma Make genera           Claude con @hwe/core-ui genera
 ────────────────────        ──────────────────────────────
 HTML/CSS genérico           TypeScript tipado
 Sin accesibilidad           ARIA labels correctos
@@ -557,7 +557,7 @@ Sin semántica HTML          Semántica correcta
 Sin convenciones propias    Sigue DDD, SOLID, ai-specs
 Sin conexión a Payload      Conectado al CMS via ContentRepo
 Sin i18n                    next-intl integrado
-Sin GTM hooks               @hwp/analytics integrado
+Sin GTM hooks               @hwe/analytics integrado
 No escalable                Reutiliza bloques del core
 ```
 
@@ -588,7 +588,7 @@ Escribir componentes      Validar accesibilidad y SEO
 ### Figma Master de la agencia
 
 ```
-HWP Master Figma (referencia para todos los diseñadores)
+hwe Master Figma (referencia para todos los diseñadores)
 ├── Catálogo de bloques documentado
 │   ├── HeroBlock — variantes: full, split, minimal
 │   ├── GalleryBlock — variantes: grid, slider, masonry
@@ -747,7 +747,7 @@ npm run content:bulk-update camping-sol \
 ```
 
 ```typescript
-// packages/@hwp/content/bulk-operations.ts
+// packages/@hwe/content/bulk-operations.ts
 export async function bulkUpdate(
   tenantId: string,
   collection: string,
@@ -905,7 +905,7 @@ npm run deploy:client camping-sol
 # 3. Si pasan → sube via SSH a /web/camping-sol/ en cdmon
 # 4. Si fallan → para y notifica al dev
 
-# Deploy del core (packages @hwp/*)
+# Deploy del core (packages @hwe/*)
 # Se lanza automáticamente en push a main
 # Publica nueva versión en Verdaccio
 # Cada cliente actualiza cuando el dev lo decide
@@ -934,8 +934,8 @@ Camping Sol puede estar en v1.2.0 y Hotel Mar en v1.5.0 sin problema.
 
 ```
 GitHub Organization: tuagencia
-  ├── hwp-platform/           ← core + packages + templates (privado)
-  │     packages/@hwp/*
+  ├── hwe-platform/           ← core + packages + templates (privado)
+  │     packages/@hwe/*
   │     apps/site-template/
   │     apps/portal-template/
   │
@@ -950,14 +950,14 @@ GitHub Organization: tuagencia
 ```
 GitHub Teams:
   core-devs
-    → hwp-platform (lectura/escritura)
+    → hwe-platform (lectura/escritura)
 
   camping-sol-devs
-    → hwp-platform (solo lectura)
+    → hwe-platform (solo lectura)
     → site-camping-sol (lectura/escritura)
 
   hotel-mar-devs
-    → hwp-platform (solo lectura)
+    → hwe-platform (solo lectura)
     → site-hotel-mar (lectura/escritura)
 
   admin-agencia
@@ -971,7 +971,7 @@ Un dev externo de un cliente no ve el código de otros clientes.
 
 ```bash
 # Dev trabajando en camping-sol
-git clone https://github.com/tuagencia/hwp-platform   # una vez
+git clone https://github.com/tuagencia/hwe-platform   # una vez
 git clone https://github.com/tuagencia/site-camping-sol # una vez
 
 # Desarrollo
@@ -984,13 +984,13 @@ git push  # GitHub Actions despliega a cdmon
 
 ## VERSIONADO DEL CORE
 
-### Un solo repo — hwp-platform
+### Un solo repo — hwe-platform
 
 ```
-github.com/tuagencia/hwp-platform    ← un solo repo siempre
+github.com/tuagencia/hwe-platform    ← un solo repo siempre
   main branch                        ← desarrollo activo
 
-No hay hwp-platform-v2/ ni repos separados por versión.
+No hay hwe-platform-v2/ ni repos separados por versión.
 Las versiones son packages publicados en GitHub Packages.
 ```
 
@@ -1000,10 +1000,10 @@ Herramienta estándar para monorepos TypeScript con Turborepo.
 Automatiza versionado semántico, CHANGELOG y publicación en GitHub Packages.
 
 ```bash
-# 1. Dev implementa el cambio en hwp-platform
+# 1. Dev implementa el cambio en hwe-platform
 # 2. Dev describe el cambio con Changesets
 npx changeset
-# → selecciona qué packages cambió (@hwp/booking)
+# → selecciona qué packages cambió (@hwe/booking)
 # → selecciona el tipo (major/minor/patch)
 # → describe el cambio ("Add Mews PMS adapter")
 # → crea fichero en .changeset/ automáticamente
@@ -1020,10 +1020,10 @@ npx changeset
 ### Versiones independientes por package
 
 ```
-@hwp/core-ui    v1.3.0  ← nueva feature de bloques
-@hwp/booking    v1.1.2  ← bug fix en adapter
-@hwp/content    v1.2.0  ← nueva feature de export
-@hwp/ai         v1.0.0  ← sin cambios este ciclo
+@hwe/core-ui    v1.3.0  ← nueva feature de bloques
+@hwe/booking    v1.1.2  ← bug fix en adapter
+@hwe/content    v1.2.0  ← nueva feature de export
+@hwe/ai         v1.0.0  ← sin cambios este ciclo
 ```
 
 Cada package tiene su propia versión — no se actualizan todos a la vez.
@@ -1032,9 +1032,9 @@ Cada package tiene su propia versión — no se actualizan todos a la vez.
 
 ```
 github.com/tuagencia/packages
-  @hwp/core-ui
+  @hwe/core-ui
     1.0.0, 1.1.0, 1.2.0, 1.3.0    ← historial completo
-  @hwp/booking
+  @hwe/booking
     1.0.0, 1.1.0, 1.1.1, 1.2.0    ← cada release publicado
 ```
 
@@ -1050,18 +1050,18 @@ MAJOR  2.0.0  ← breaking change — revisar antes, guía de migración
 
 ```
 site-camping-sol/package.json
-  "@hwp/core-ui": "1.1.0"   ← usa esta versión
-  "@hwp/booking": "1.2.0"   ← no se actualiza solo
+  "@hwe/core-ui": "1.1.0"   ← usa esta versión
+  "@hwe/booking": "1.2.0"   ← no se actualiza solo
 
 site-hotel-mar/package.json
-  "@hwp/core-ui": "1.3.0"   ← versión distinta, sin problema
+  "@hwe/core-ui": "1.3.0"   ← versión distinta, sin problema
 ```
 
 ### Actualizar un cliente
 
 ```bash
 cd site-camping-sol
-npm update @hwp/booking        # actualiza a última versión
+npm update @hwe/booking        # actualiza a última versión
 npm run build                  # verifica que todo funciona
 git push                       # deploy automático a cdmon
 ```
@@ -1077,7 +1077,7 @@ npm run update:all-clients          # actualizar todos (solo patches)
 ### Documentación por versión
 
 ```
-hwp-platform/
+hwe-platform/
   docs/
     architecture.md   ← siempre versión actual
     architecture-all-options.md
@@ -1313,7 +1313,7 @@ Geo-redirect
 ## ANALYTICS
 
 ```typescript
-// packages/@hwp/analytics/hooks.ts
+// packages/@hwe/analytics/hooks.ts
 useTrackEvent('booking_start', {
   property_id: 'camping-sol',
   check_in: '2025-08-01',
@@ -1378,12 +1378,12 @@ Los prompts viven en ficheros Markdown en el repo — versionados en Git,
 editables sin deploy, compartidos entre todos los clientes.
 
 ```
-packages/@hwp/ai/
+packages/@hwe/ai/
   prompts/
     content-generation.md    ← generación inicial de contenido
     content-edit.md          ← cambios simples via portal
     bulk-operations.md       ← operaciones masivas
-    code-generation.md       ← Figma Make → @hwp/core-ui
+    code-generation.md       ← Figma Make → @hwe/core-ui
     block-reorder.md         ← reordenación de bloques
 ```
 
@@ -1392,7 +1392,7 @@ packages/@hwp/ai/
 Cada llamada a Claude incluye el contexto específico del cliente:
 
 ```typescript
-// packages/@hwp/ai/prompt-builder.ts
+// packages/@hwe/ai/prompt-builder.ts
 
 export function buildSystemPrompt(tenant: TenantConfig): string {
   return `
@@ -1421,7 +1421,7 @@ Todo output de Claude se valida antes de tocar Payload.
 Claude puede equivocarse — Zod es la red de seguridad.
 
 ```typescript
-// packages/@hwp/ai/validators.ts
+// packages/@hwe/ai/validators.ts
 
 const AccommodationAIOutput = z.object({
   title: z.record(z.string()),
@@ -1438,7 +1438,7 @@ const validated = AccommodationAIOutput.parse(claudeOutput)
 ### Observabilidad — log de cada llamada
 
 ```typescript
-// packages/@hwp/ai/logger.ts
+// packages/@hwe/ai/logger.ts
 
 // Cada llamada a Claude queda registrada
 await aiLogger.log({
@@ -1498,7 +1498,7 @@ AGENTE 3 — Bulk Operator
 
 AGENTE 4 — Code Builder
   Contexto:   claude-code (dev)
-  Tareas:     Figma Make → @hwp/core-ui
+  Tareas:     Figma Make → @hwe/core-ui
   Modelo:     claude-sonnet-4-6
   Autónomo:   no — dev revisa siempre
   Backup:     no — código en Git
@@ -1519,7 +1519,7 @@ Se gestionan desde el panel de administración de la agencia
 sin necesidad de deploy.
 
 ```typescript
-// packages/@hwp/ai/agent-rules.ts
+// packages/@hwe/ai/agent-rules.ts
 
 export const agentRules: AgentRule[] = [
   {
@@ -1583,7 +1583,7 @@ export const agentRules: AgentRule[] = [
 ### Router — decide qué agente usar
 
 ```typescript
-// packages/@hwp/ai/router.ts
+// packages/@hwe/ai/router.ts
 
 export async function routeRequest(
   request: AIRequest,
@@ -1610,7 +1610,7 @@ export async function routeRequest(
 ### Control de tokens y costes por cliente
 
 ```typescript
-// packages/@hwp/ai/token-tracker.ts
+// packages/@hwe/ai/token-tracker.ts
 
 // Cada llamada registra su coste
 await tokenTracker.log({
@@ -1641,10 +1641,10 @@ await tokenTracker.log({
 ✓ Recibir alertas si se supera umbral de coste
 ```
 
-### Estructura del package @hwp/ai
+### Estructura del package @hwe/ai
 
 ```
-packages/@hwp/ai/
+packages/@hwe/ai/
   agent-rules.ts         ← reglas configurables
   router.ts              ← decide qué agente usar
   prompt-builder.ts      ← construye prompts con contexto tenant
@@ -1701,7 +1701,7 @@ Fase 2 — Producción
  Figma Master de la agencia
 
 ```
-HWP Master Figma
+hwe Master Figma
 ├── Catálogo de bloques (referencia para diseñadores)
 │   ├── HeroBlock — variantes: full, split, minimal
 │   ├── GalleryBlock — variantes: grid, slider, masonry
@@ -1854,7 +1854,7 @@ GitHub Actions recompila
 ### Estructura de prompts
 
 ```
-packages/@hwp/ai/prompts/
+packages/@hwe/ai/prompts/
   content-generation.md
   content-edit.md
   bulk-operations.md
@@ -1914,7 +1914,7 @@ await aiLogger.log({
 Content Editor    Haiku    portal-cliente   cambios simples texto/foto/precio
 Content Generator Sonnet   panel-agencia    generación inicial completa
 Bulk Operator     Sonnet   panel-agencia    operaciones masivas N documentos
-Code Builder      Sonnet   claude-code      Figma Make → @hwp/core-ui
+Code Builder      Sonnet   claude-code      Figma Make → @hwe/core-ui
 Planner           Opus     panel-agencia    arquitectura y schemas complejos
 ```
 
@@ -2028,13 +2028,13 @@ on:
 jobs:
   deploy:
     steps:
-      - npm ci                          # instala @hwp/* de GitHub Packages
+      - npm ci                          # instala @hwe/* de GitHub Packages
       - npm run build                   # genera HTML estático
       - rsync a cdmon via SSH           # sube a /staging/ o /web/
 ```
 
 ```bash
-# Desde hwp-platform — actualizar versión core de un cliente
+# Desde hwe-platform — actualizar versión core de un cliente
 npm run update:client camping-sol --version=1.3.0
 # Abre PR automático en site-camping-sol con la actualización
 ```
@@ -2209,7 +2209,7 @@ Si cdmon confirma Node.js persistente:
 
 ## METODOLOGÍA DE DESARROLLO — SPECBOOT
 
-HWP adopta el ciclo **SPECBOOT by LIDR** como metodología oficial de desarrollo.
+hwe adopta el ciclo **SPECBOOT by LIDR** como metodología oficial de desarrollo.
 Spec-Driven Development — la documentación es la fuente de verdad, el código viene después.
 
 ### El ciclo completo
@@ -2264,7 +2264,7 @@ Feature Ready → Feature for PR → Feature Published
 ### Estructura de artefactos en el repo
 
 ```
-hwp-platform/
+hwe-platform/
   docs/architecture/
     user-stories/          ← US refinadas por feature
       feat-booking-widget.md
@@ -2280,14 +2280,14 @@ hwp-platform/
   docs/
     specboot/
       commands.md          ← definición de cada comando
-      enrich-us.md         ← cómo refinar una US con contexto HWP
-      propose.md           ← qué artifacts genera /propose en HWP
-      apply.md             ← cómo implementa Claude en HWP
-      verify.md            ← checklist de /verify para HWP
-      archive.md           ← qué actualiza /archive en HWP
+      enrich-us.md         ← cómo refinar una US con contexto hwe
+      propose.md           ← qué artifacts genera /propose en hwe
+      apply.md             ← cómo implementa Claude en hwe
+      verify.md            ← checklist de /verify para hwe
+      archive.md           ← qué actualiza /archive en hwe
 ```
 
-### Reglas de SPECBOOT en HWP
+### Reglas de SPECBOOT en hwe
 
 ```
 1. Documentación antes que código
@@ -2307,10 +2307,10 @@ hwp-platform/
    Testing Report generado y archivado antes de merge a main
 ```
 
-### Cómo encaja con la arquitectura HWP existente
+### Cómo encaja con la arquitectura hwe existente
 
 ```
-SPECBOOT                    HWP
+SPECBOOT                    hwe
 ────────────────────        ──────────────────────────
 User Story                  Ticket en Linear
 Refined User Story          docs/architecture/user-stories/
@@ -2318,7 +2318,7 @@ Proposal Artifacts          docs/architecture/proposals/
 Branch                      git branch en repo del cliente
 Tests                       Jest + Playwright
 Documentation               OpenAPI + DataModel.md
-Code                        Next.js + Payload + @hwp/*
+Code                        Next.js + Payload + @hwe/*
 Testing Report              docs/architecture/testing-reports/
 Proposal Update             Actualización de docs/ y docs/architecture/
 Feature for PR              Pull Request en GitHub
@@ -2364,7 +2364,7 @@ Por repo de cliente:
 
 GitHub Organization secrets (compartidos):
   HETZNER_API_KEY        ← para crear/gestionar VPS
-  GITHUB_PACKAGES_TOKEN  ← para instalar @hwp/*
+  GITHUB_PACKAGES_TOKEN  ← para instalar @hwe/*
 
 Entorno local (Laragon):
   .env.local             ← nunca en Git
@@ -2493,7 +2493,7 @@ Integración en Next.js estático:
     Generada en onboarding, gestionada por el cliente
 
 ✓ Derecho al olvido:
-    Script en @hwp/content para borrar datos de usuario
+    Script en @hwe/content para borrar datos de usuario
     por tenant cuando se solicite
 
 ✓ Datos personales identificados:
@@ -2603,7 +2603,7 @@ Camping familiar en la Costa Brava, España.
 ### Schema.org personalizado por tipo
 
 ```typescript
-// packages/@hwp/core-ui/seo/schemas.ts
+// packages/@hwe/core-ui/seo/schemas.ts
 
 // Camping → Campground + CampingPitch por alojamiento
 // Hotel   → Hotel + HotelRoom por alojamiento
@@ -2673,7 +2673,7 @@ Si alguna métrica baja del umbral → el deploy falla.
 ### Performance — imágenes
 
 ```
-Reglas obligatorias en @hwp/core-ui:
+Reglas obligatorias en @hwe/core-ui:
   ✓ Formato webp por defecto — PHP convierte uploads automáticamente
   ✓ Dimensiones width/height obligatorias en todo <img> — evita CLS
   ✓ loading="lazy" en imágenes fuera del viewport
@@ -2697,7 +2697,7 @@ apps/site-[cliente]/app/not-found.tsx
 
 ```
 Cuándo se crean:
-  ✓ Migración WordPress → HWP (URLs cambian)
+  ✓ Migración WordPress → hwe (URLs cambian)
   ✓ Cambio de estructura de URLs en cliente existente
   ✓ Página eliminada con tráfico SEO acumulado
   ✓ Cambio de dominio
@@ -2776,10 +2776,10 @@ on:
 
 ### Análisis de contenido SEO — agente IA
 
-Nuevo agente en @hwp/ai — modelo Haiku:
+Nuevo agente en @hwe/ai — modelo Haiku:
 
 ```typescript
-// packages/@hwp/ai/agents/seo-auditor.ts
+// packages/@hwe/ai/agents/seo-auditor.ts
 // Analiza estructura SEO del contenido de cada página:
 //   H1 único con keyword principal
 //   H2/H3 con estructura lógica
@@ -2798,17 +2798,17 @@ bajo demanda desde el panel de agencia.
 
 ## BOOKING ENGINE — ARQUITECTURA COMPLETA
 
-**Component location updated by [DEC-010](./decisions.md#dec-010--bookingblock-in-hwpcore-ui-bookingprovider-in-hwpbooking) (2026-05-21).** `BookingBlock` and `BookingWidget` live in `@hwp/core-ui` (not in `@hwp/booking/react/`). `@hwp/booking` exports the `BookingAdapter` interface, stock adapters, `BookingProvider`, and `useBookingAdapter()` — no UI components. The PHP proxy references are superseded by [DEC-007](./decisions.md#dec-007) (Next.js Route Handlers). Per [DEC-015](./decisions.md#dec-015--client-owned-blocks-with-shared-schemas-slot-based-composition-and-npm-subpath-exports) (2026-06-01), the path inside the package is `src/base-blocks/BookingBlock/` (renamed from `src/blocks/`).
+**Component location updated by [DEC-010](./decisions.md#dec-010--bookingblock-in-hwecore-ui-bookingprovider-in-hwebooking) (2026-05-21).** `BookingBlock` and `BookingWidget` live in `@hwe/core-ui` (not in `@hwe/booking/react/`). `@hwe/booking` exports the `BookingAdapter` interface, stock adapters, `BookingProvider`, and `useBookingAdapter()` — no UI components. The PHP proxy references are superseded by [DEC-007](./decisions.md#dec-007) (Next.js Route Handlers). Per [DEC-015](./decisions.md#dec-015--client-owned-blocks-with-shared-schemas-slot-based-composition-and-npm-subpath-exports) (2026-06-01), the path inside the package is `src/base-blocks/BookingBlock/` (renamed from `src/blocks/`).
 
 ### Alcance del sistema
 
 ```
-HWP gestiona:
+hwe gestiona:
   ✓ UI de búsqueda de disponibilidad
   ✓ Muestra de disponibilidades y precios (via PMS)
   ✓ Salto al motor de reservas del PMS
 
-HWP NO gestiona:
+hwe NO gestiona:
   ✗ Proceso de reserva completo
   ✗ Pagos
   ✗ Confirmaciones
@@ -2838,7 +2838,7 @@ Modo iframe — descartado como estándar
 ### BookingAdapter interface
 
 ```typescript
-// packages/@hwp/booking/types.ts
+// packages/@hwe/booking/types.ts
 
 export type BookingMode = 'api' | 'external-widget'
 export type AvailabilityMode = 'realtime' | 'polling'
@@ -2868,7 +2868,7 @@ export interface BookingAdapter {
 ### BookingWidget — se adapta automáticamente
 
 ```typescript
-// packages/@hwp/core-ui/BookingWidget.tsx
+// packages/@hwe/core-ui/BookingWidget.tsx
 
 export function BookingWidget({ adapter }) {
   const capabilities = adapter.getCapabilities()
@@ -2922,7 +2922,7 @@ se definen cuando arranca ese cliente — no en la arquitectura base.
 
 Cada adaptador implementado vive en:
 ```
-hwp-platform/packages/@hwp/booking/adapters/
+hwe-platform/packages/@hwe/booking/adapters/
   cloudbeds.adapter.ts
   mews.adapter.ts
   siteminder.adapter.ts
@@ -3036,11 +3036,11 @@ Formato: type(scope): descripción en inglés
 
 Types: feat | fix | docs | style | refactor | test | chore | perf | ci | revert
 
-Ejemplos HWP:
+Ejemplos hwe:
   feat(booking): add Mews adapter
   fix(core-ui): hero block CLS on mobile
   docs(memory-bank): update system patterns
-  chore(deps): update @hwp/core-ui to 1.3.0
+  chore(deps): update @hwe/core-ui to 1.3.0
   perf(images): add webp conversion to upload proxy
 
 Reglas:
@@ -3092,7 +3092,7 @@ Automatizado:
 ### ESLint + Prettier + TypeScript strict
 
 ```typescript
-// packages/@hwp/config/tsconfig.base.json
+// packages/@hwe/config/tsconfig.base.json
 {
   "compilerOptions": {
     "strict": true,           // obligatorio
@@ -3105,7 +3105,7 @@ Automatizado:
 ```
 
 ```javascript
-// packages/@hwp/config/eslint.base.js
+// packages/@hwe/config/eslint.base.js
 {
   rules: {
     '@typescript-eslint/no-explicit-any': 'error',  // any prohibido
@@ -3145,7 +3145,7 @@ Imágenes:
 ### Implementación en CI/CD
 
 ```javascript
-// bundlewatch.config.js en hwp-platform
+// bundlewatch.config.js en hwe-platform
 module.exports = {
   files: [
     { path: '.next/static/chunks/*.js', maxSize: '100kb' },
@@ -3224,7 +3224,7 @@ Nivel dinámico (DB)        → activa/desactiva contenido existente
 
 ---
 
-## MIGRACIÓN WORDPRESS → HWP
+## MIGRACIÓN WORDPRESS → hwe
 
 ### Escenario A — Migración completa
 
@@ -3248,7 +3248,7 @@ Nivel dinámico (DB)        → activa/desactiva contenido existente
 4. Redirect map
    npm run generate:redirects camping-sol \
      --old-sitemap=wordpress-sitemap.xml \
-     --new-sitemap=hwp-sitemap.xml
+     --new-sitemap=hwe-sitemap.xml
    → genera .htaccess con 301s necesarios
 
 5. Validación en staging
@@ -3266,19 +3266,19 @@ Nivel dinámico (DB)        → activa/desactiva contenido existente
 ### Escenario B — Convivencia temporal
 
 ```
-Durante el desarrollo de HWP:
+Durante el desarrollo de hwe:
   campingsol.com      → WordPress (producción actual)
-  new.campingsol.com  → HWP (staging del nuevo site)
+  new.campingsol.com  → hwe (staging del nuevo site)
 
-Cuando HWP está listo:
-  DNS cutover → campingsol.com → HWP
+Cuando hwe está listo:
+  DNS cutover → campingsol.com → hwe
   old.campingsol.com → WordPress standby 30 días
 ```
 
 ### Script de migración
 
 ```typescript
-// packages/@hwp/content/migration/wordpress.ts
+// packages/@hwe/content/migration/wordpress.ts
 
 export async function migrateFromWordPress(
   wpApiUrl: string,
@@ -3426,7 +3426,7 @@ Claude KO  → mensaje al usuario + reintento manual
 
 Estándar mínimo obligatorio: **WCAG 2.1 nivel AA**
 
-### Obligatorio en @hwp/core-ui
+### Obligatorio en @hwe/core-ui
 
 ```
 ✓ Alt text en todas las imágenes — campo required en Payload schema
@@ -3490,7 +3490,7 @@ stagingDomain: 'staging.campingsol.com' // → cdmon
 ```
 
 ```bash
-# hwp-platform/scripts/verify-dns.sh
+# hwe-platform/scripts/verify-dns.sh
 # Verifica que todos los registros DNS son correctos
 # antes de hacer el DNS cutover
 dig campingsol.com A
@@ -3625,7 +3625,7 @@ site-camping-sol/
    → docs/architecture/brand-guidelines.md (tono y marca)
    → docs/architecture/figma-notes.md (notas del diseño)
    → código de Figma Make (referencia visual)
-   → catálogo @hwp/core-ui (bloques disponibles)
+   → catálogo @hwe/core-ui (bloques disponibles)
    ↓
 9. Claude construye el site con contexto completo
    ↓
@@ -3642,8 +3642,8 @@ al tono, marca y necesidades específicas del cliente.
 
 ```
 Claude lee antes de cualquier tarea en site-[cliente]:
-  hwp-platform/docs/architecture/          ← arquitectura global
-  hwp-platform/docs/             ← reglas de desarrollo
+  hwe-platform/docs/architecture/          ← arquitectura global
+  hwe-platform/docs/             ← reglas de desarrollo
   site-[cliente]/docs/architecture/        ← contexto del cliente
   site-[cliente]/client.config.ts    ← config técnica
 ```
@@ -3663,7 +3663,7 @@ Nunca dejar documentación desincronizada con el código.
 
 ```
 Nivel 1 — Documentos maestros de arquitectura
-  HWP-architecture.md
+  hwe-architecture.md
   architecture-all-options.md
   → Se actualizan en revisiones periódicas de arquitectura
   → No se tocan en el desarrollo diario
@@ -3706,7 +3706,7 @@ frontend-standards.md ← si hay reglas nuevas de UI
 ### Qué actualiza solo el dev (nunca automático)
 
 ```
-HWP-architecture.md  ← documento maestro
+hwe-architecture.md  ← documento maestro
 architecture-all-options.md    ← alternativas evaluadas
 → Solo en revisiones periódicas de arquitectura
 → Nunca en el desarrollo diario de features
@@ -3778,15 +3778,15 @@ Claude Code lo lee automáticamente en cada sesión.
 Máximo ~500 tokens — conciso y directo.
 
 ```markdown
-# CLAUDE.md — hwp-platform
+# CLAUDE.md — hwe-platform
 
 ## Qué es este proyecto
-HWP — Hospitality Web Platform. Plataforma multi-cliente
+hwe — Hospitality Web Platform. Plataforma multi-cliente
 para webs de campings y hoteles. Hasta 300 clientes.
 
 ## Stack
 Next.js 14 static export · Payload CMS · Prisma · MariaDB
-TypeScript strict · @hwp/* packages via GitHub Packages
+TypeScript strict · @hwe/* packages via GitHub Packages
 
 ## Reglas no negociables
 - Sin `any` en TypeScript — error de ESLint
@@ -3809,8 +3809,8 @@ Lee docs/architecture/briefing.md si no lo has leído ya.
 # CLAUDE.md — site-camping-sol
 
 ## Qué es este proyecto
-Site de Camping Sol — cliente de HWP.
-Arquitectura global en hwp-platform/docs/architecture/
+Site de Camping Sol — cliente de hwe.
+Arquitectura global en hwe-platform/docs/architecture/
 
 ## Cliente
 Tipo: camping · Locales: es, en, fr · PMS: Cloudbeds (api)
@@ -3838,7 +3838,7 @@ Explícito, controlado, sin magia.
 # Qué contexto cargar según el tipo de tarea
 
 ## Booking engine
-Lee: systemPatterns.md + @hwp/booking/types.ts
+Lee: systemPatterns.md + @hwe/booking/types.ts
 
 ## Nuevo componente de cliente
 Lee: briefing.md + client.config.ts + figma-notes.md
@@ -3847,7 +3847,7 @@ Lee: briefing.md + client.config.ts + figma-notes.md
 Lee: dataModel.md + payload/schemas/base/
 
 ## Agente de IA
-Lee: systemPatterns.md + @hwp/ai/agent-rules.ts
+Lee: systemPatterns.md + @hwe/ai/agent-rules.ts
 
 ## SEO / sitemap
 Lee: systemPatterns.md sección SEO + app/sitemap.ts
@@ -3931,7 +3931,7 @@ La evolución es gradual:
 
 ## BOUNDED CONTEXTS — DDD
 
-El sistema HWP tiene cuatro contextos delimitados.
+El sistema hwe tiene cuatro contextos delimitados.
 Cada contexto tiene su propio lenguaje — nunca se mezclan términos entre contextos.
 Nunca importar tipos de un contexto en otro directamente.
 
@@ -3968,7 +3968,7 @@ Lenguaje obligatorio en código:
   availability          (no "disponibilidad")
   unit                  (no "alojamiento")
 
-Package: @hwp/booking
+Package: @hwe/booking
 Fuera del contexto: reservas completas, pagos, confirmaciones
 ```
 
@@ -3995,7 +3995,7 @@ Lenguaje obligatorio en código:
   variant          (no "tipo" o "estilo")
   media            (no "imagen" o "foto")
 
-Package: @hwp/content
+Package: @hwe/content
 Fuera del contexto: disponibilidad, config del tenant, prompts IA
 ```
 
@@ -4019,7 +4019,7 @@ Lenguaje obligatorio en código:
   theme           (no "diseño" o "estilo")
   active/inactive (no "activado" / "desactivado")
 
-Package: @hwp/config
+Package: @hwe/config
 Fuera del contexto: contenido, reservas, agentes IA
 ```
 
@@ -4046,7 +4046,7 @@ Lenguaje obligatorio en código:
   rule        (no "configuración")
   validation  (no "verificación")
 
-Package: @hwp/ai
+Package: @hwe/ai
 Fuera del contexto: contenido generado, config tenant, disponibilidad
 ```
 
@@ -4067,13 +4067,13 @@ interfaces y eventos — nunca acoplamiento directo.
 
 ```
 packages/
-  @hwp/booking/    ← Booking Context
+  @hwe/booking/    ← Booking Context
     types.ts       ← Unit, Availability, Rate, SearchQuery
-  @hwp/content/    ← Content Context
+  @hwe/content/    ← Content Context
     types.ts       ← Page, Block, Section, Media, Locale
-  @hwp/config/     ← Tenant Context
+  @hwe/config/     ← Tenant Context
     types.ts       ← Tenant, Config, Theme, Feature
-  @hwp/ai/         ← AI Context
+  @hwe/ai/         ← AI Context
     types.ts       ← Agent, Prompt, Rule, Completion, Token
 ```
 

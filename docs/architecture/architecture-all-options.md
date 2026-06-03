@@ -1,4 +1,4 @@
-# HWP — Todas las opciones de arquitectura contempladas
+# hwe — Todas las opciones de arquitectura contempladas
 
 > Documento exhaustivo de todas las opciones evaluadas. Para cada decisión se documentan todas las alternativas, sus pros, contras y por qué se descartaron o eligieron.
 >
@@ -75,8 +75,8 @@ innecesario con modelo DB-por-cliente (RLS no necesario)
 
 ## 5. ESTRUCTURA DE REPOS GIT
 
-**hwp-platform (core) + repos separados por cliente** ✓ ELEGIDO
-- hwp-platform: packages @hwp/*, templates, scripts — un solo repo
+**hwe-platform (core) + repos separados por cliente** ✓ ELEGIDO
+- hwe-platform: packages @hwe/*, templates, scripts — un solo repo
 - Un repo independiente por cliente — privacidad y permisos granulares
 - Dev solo clona lo que necesita — eficiente para 300 clientes
 - GitHub Organizations + Teams para gestión de permisos
@@ -106,11 +106,11 @@ GitHub Packages:
 Changesets para gestión de versiones:
 - Estándar actual para monorepos TypeScript con Turborepo
 - Automatiza versionado semántico, CHANGELOG y publicación
-- Versiones independientes por package (@hwp/booking puede ser v1.1.2
-  mientras @hwp/core-ui es v1.3.0)
+- Versiones independientes por package (@hwe/booking puede ser v1.1.2
+  mientras @hwe/core-ui es v1.3.0)
 - PR automático "Version Packages" — tech lead decide cuándo publicar
 - Usado por Radix UI, shadcn/ui, Remix, tRPC — ecosistema de referencia
-- Un solo repo hwp-platform — no hay repos separados por versión
+- Un solo repo hwe-platform — no hay repos separados por versión
 
 **Verdaccio self-hosted en Hetzner**
 - Descartado: punto único de fallo, servidor extra a gestionar,
@@ -182,10 +182,10 @@ Changesets para gestión de versiones:
 
 ## 9. SISTEMA DE BLOQUES Y FLUJO FIGMA
 
-**Figma Make referencia + Claude Code construye con @hwp/core-ui** ✓ ELEGIDO
+**Figma Make referencia + Claude Code construye con @hwe/core-ui** ✓ ELEGIDO
 - Tokens exportados de Figma Variables → tailwind.config.ts (convención obligatoria)
 - Figma Make genera código completo como referencia visual
-- Claude Code recibe código Figma Make + catálogo @hwp/core-ui + ai-specs
+- Claude Code recibe código Figma Make + catálogo @hwe/core-ui + ai-specs
 - Claude construye site con bloques y variantes correctos
 - Dev revisa y aprueba
 - Payload almacena: type, variant, order — nunca layout
@@ -217,7 +217,7 @@ Changesets para gestión de versiones:
 ## 11. PAYLOAD — SCHEMAS POR CLIENTE
 
 **Campos condicionales por tenant en schema TypeScript** ✓ ELEGIDO
-- Schema definido en hwp-platform/packages — código, no UI
+- Schema definido en hwe-platform/packages — código, no UI
 - Campos opcionales visibles según activeFields en client.config.ts
 - UI limpia por cliente — solo ve sus campos
 - Sin deploy para activar/desactivar campos existentes
@@ -306,7 +306,7 @@ Changesets para gestión de versiones:
 ## 19. HARNESS ENGINEERING
 
 **Prompts en Markdown versionados en Git + Zod + logging** ✓ ELEGIDO
-- Prompts en packages/@hwp/ai/prompts/ — versionados, editables sin deploy
+- Prompts en packages/@hwe/ai/prompts/ — versionados, editables sin deploy
 - System prompt construido dinámicamente con contexto del tenant
 - Validación Zod de todos los outputs de Claude
 - Log completo: prompt, respuesta, validación, tokens, coste, acción
@@ -319,7 +319,7 @@ Changesets para gestión de versiones:
 - Content Editor (Haiku): cambios simples portal cliente
 - Content Generator (Sonnet): generación inicial completa
 - Bulk Operator (Sonnet): operaciones masivas con backup obligatorio
-- Code Builder (Sonnet): Figma Make → @hwp/core-ui
+- Code Builder (Sonnet): Figma Make → @hwe/core-ui
 - Planner (Opus): arquitectura y decisiones complejas
 - Reglas configurables desde panel admin sin deploy
 - Token tracking por cliente con alertas de coste
@@ -377,7 +377,7 @@ Changesets para gestión de versiones:
 
 ## 26. ANALYTICS
 
-**@hwp/analytics — GTM + DataLayer tipado** ✓ ELEGIDO
+**@hwe/analytics — GTM + DataLayer tipado** ✓ ELEGIDO
 - Hooks TypeScript tipados — sin strings mágicos
 - Eventos: page_view, booking_start, booking_complete...
 
@@ -499,7 +499,7 @@ Indexación:
 Auditorías:
 - Mensual automática via GitHub Actions cron
 - Trimestral manual con Semrush o Ahrefs
-- Análisis contenido SEO via agente Haiku en @hwp/ai
+- Análisis contenido SEO via agente Haiku en @hwe/ai
 
 
 ---
@@ -524,7 +524,7 @@ Modo iframe:
 
 Especificaciones técnicas de cada PMS concreto:
 - Fuera de la arquitectura — se define en onboarding de cada cliente
-- Cada adaptador implementado en packages/@hwp/booking/adapters/
+- Cada adaptador implementado en packages/@hwe/booking/adapters/
 
 ---
 
@@ -602,7 +602,7 @@ Servicio externo de feature flags (LaunchDarkly, Unleash):
 
 ---
 
-## 35. MIGRACIÓN WORDPRESS → HWP
+## 35. MIGRACIÓN WORDPRESS → hwe
 
 **Script de migración + Claude estructura contenido + redirect map automático + DNS cutover** ✓ ELEGIDO
 
@@ -613,9 +613,9 @@ Escenario A — Migración completa:
 - DNS cutover + WordPress standby 30 días
 
 Escenario B — Convivencia temporal:
-- WordPress en producción mientras HWP se desarrolla
-- HWP en new.cliente.com para validación
-- DNS cutover cuando HWP está listo
+- WordPress en producción mientras hwe se desarrolla
+- hwe en new.cliente.com para validación
+- DNS cutover cuando hwe está listo
 
 Migración manual sin script:
 - Descartado: con 300 clientes potenciales la migración debe ser automatizable
@@ -706,7 +706,7 @@ Sin memory-bank por cliente:
 **Tres niveles: maestro (manual) + memory-bank (Claude propone) + artefactos técnicos (automático)** ✓ ELEGIDO
 
 Nivel 1 — Documentos maestros:
-- HWP-arquitectura-definitiva.md y HWP-opciones-arquitectura.md
+- hwe-arquitectura-definitiva.md y hwe-opciones-arquitectura.md
 - Solo en revisiones periódicas de arquitectura — nunca en desarrollo diario
 - Solo el tech lead tras consenso del equipo
 
@@ -765,7 +765,7 @@ Sin sistema de contexto formal:
 - Cada contexto tiene su propio lenguaje obligatorio en código
 - Nunca importar tipos de un contexto en otro directamente
 - Mismo concepto = nombre distinto por contexto (Unit vs Accommodation)
-- Reflejo directo en estructura de packages @hwp/*
+- Reflejo directo en estructura de packages @hwe/*
 - Comunicación entre contextos via interfaces y eventos
 
 Un solo contexto global sin delimitación:
