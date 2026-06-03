@@ -7,7 +7,7 @@ allowed-tools: Read Write Edit Glob Grep Bash(git add *) Bash(git commit *) Bash
 
 # SEO Fix
 
-You apply SEO fixes derived from the latest audit report and commit them in 5 logical groups. You are authorised to modify source files in `packages/core-ui/src/base-blocks/`, `packages/core-ui/src/`, `apps/{slug}/src/blocks/` and `apps/{slug}/src/`. Do not modify test files (`*.test.tsx`, `*.test.ts`) unless a type-check failure forces it.
+You apply SEO fixes derived from the latest audit report and commit them in 5 logical groups. Runs from within the client repo (CWD = `site-{slug}/`). You are authorised to modify `src/blocks/` and `src/`. For base-block fixes, they go in `hwp-core/packages/core-ui/src/base-blocks/` (separate repo). Do not modify test files unless a type-check failure forces it.
 
 ## Constraints
 
@@ -16,19 +16,19 @@ You apply SEO fixes derived from the latest audit report and commit them in 5 lo
 - **Never skip hooks** (`--no-verify`).
 - **Idempotency:** before applying a fix, verify the issue still exists. If already fixed, log "already fixed — skipping" and move on.
 - **Design token rules:** never hard-code a colour, spacing, or font value that has a token equivalent — follow `docs/skills/frontend/block-creation.md §Design Token Rules`.
-- **Workspace root** for this skill: the directory that contains `hwp-platform/`. All relative paths below are from the workspace root unless noted.
+- **CWD** for this skill: the client repo root (`site-{slug}/`). All relative paths below are from the client repo root.
 
 ## What this skill loads
 
 Read these specs before starting (they define the exact rules each fix must satisfy):
 
-- `hwp-platform/docs/specs/seo/seo-standards.md` — title format, meta rules, image rules
-- `hwp-platform/docs/specs/seo/semantic-html.md` — per-block landmark requirements
-- `hwp-platform/docs/specs/seo/geo-llm-optimization.md` — citable content, JSON-LD field completeness
-- `hwp-platform/docs/specs/seo/schemas/README.md` — page→schema mapping
-- `hwp-platform/docs/specs/seo/schemas/campground-homepage.json` — Campground template
-- `hwp-platform/docs/specs/seo/schemas/organization.json` — Organization template
-- `hwp-platform/docs/specs/seo/schemas/faq.json` — FAQPage template
+- `.hwp-tools/docs/specs/seo/seo-standards.md` — title format, meta rules, image rules
+- `.hwp-tools/docs/specs/seo/semantic-html.md` — per-block landmark requirements
+- `.hwp-tools/docs/specs/seo/geo-llm-optimization.md` — citable content, JSON-LD field completeness
+- `.hwp-tools/docs/specs/seo/schemas/README.md` — page→schema mapping
+- `.hwp-tools/docs/specs/seo/schemas/campground-homepage.json` — Campground template
+- `.hwp-tools/docs/specs/seo/schemas/organization.json` — Organization template
+- `.hwp-tools/docs/specs/seo/schemas/faq.json` — FAQPage template
 
 ## Process
 
@@ -37,18 +37,18 @@ Read these specs before starting (they define the exact rules each fix must sati
 Slug = `$0` if provided, otherwise `site-demo`.
 
 Validate:
-- Matches `^site-[a-z0-9-]+$`. If not, stop: `Error: slug must match ^site-[a-z0-9-]+$. Got: {slug}.`
-- Directory `hwp-platform/apps/{slug}/` exists. If not, stop: `Error: hwp-platform/apps/{slug}/ not found — bootstrap the site first.`
+- Matches `^[a-z0-9-]+$`. If not, stop: `Error: slug must match ^[a-z0-9-]+$. Got: {slug}.`
+- CWD contains `package.json` and `src/` — if not, stop: must be run from client repo root.
 
 Derive:
-- `SLUG` = the slug.
-- `APP_DIR` = `hwp-platform/apps/{slug}/src/`.
-- `BLOCKS_DIR` = `hwp-platform/packages/core-ui/src/base-blocks/` (DEC-015).
+- `SLUG` = the slug (or from `package.json` `name` field).
+- `APP_DIR` = `src/`.
+- `BLOCKS_DIR` = `src/blocks/` (client blocks; base-blocks are in `hwp-core`, edited separately).
 - `TODAY` = current date `YYYY-MM-DD`.
 
 ### Step 1 — Find the latest audit report
 
-Glob `hwp-platform/docs/audits/{slug}/seo-audit-*.md`. Sort lexicographically (ISO dates sort correctly). Take the last entry.
+Glob `docs/audits/seo/seo-audit-*.md`. Sort lexicographically (ISO dates sort correctly). Take the last entry.
 
 If no report found, stop with:
 ```
@@ -93,7 +93,7 @@ Skip this group if `blockers` and `majors` contain no `Images` entries.
 #### 3a — Find native `<img>` tags in blocks
 
 ```bash
-grep -rn "<img" hwp-platform/packages/core-ui/src/base-blocks/ hwp-platform/apps/{slug}/src/blocks/ hwp-platform/apps/{slug}/src/
+grep -rn "<img" src/blocks/ src/
 ```
 
 For each file that contains `<img`:
@@ -120,7 +120,7 @@ Rules:
 **3c — Commit**
 
 ```bash
-git add hwp-platform/packages/core-ui/src/base-blocks/ hwp-platform/apps/{slug}/src/blocks/ hwp-platform/apps/{slug}/src/
+git add src/blocks/ src/
 git commit -m "fix(seo/images): replace <img> with Next.js <Image> across all blocks"
 ```
 
@@ -191,7 +191,7 @@ Do **not** use `next/script` — the JSON-LD must be in the initial SSR HTML in 
 #### 4c — Commit
 
 ```bash
-git add hwp-platform/apps/{slug}/src/app/layout.tsx
+git add src/app/layout.tsx
 git commit -m "fix(seo/structured-data): add Campground + FAQPage + Organization JSON-LD in <head>"
 ```
 
@@ -247,7 +247,7 @@ twitter: { card: 'summary_large_image' },
 #### 5b — Commit
 
 ```bash
-git add hwp-platform/apps/{slug}/src/app/layout.tsx
+git add src/app/layout.tsx
 git commit -m "fix(seo/meta): fix title format, add canonical and og:* tags"
 ```
 
@@ -272,7 +272,7 @@ If the block has no heading (e.g. BookingBlock), add `aria-label="..."` to the s
 
 Find the SiteShell or Footer component that renders footer links:
 ```bash
-grep -rn "footer" hwp-platform/packages/core-ui/src/base-blocks/ hwp-platform/packages/core-ui/src/layout/ -l 2>/dev/null || grep -rn "footer" hwp-platform/packages/core-ui/src/ -l
+grep -rn "footer" src/blocks/ src/app/ -l 2>/dev/null
 ```
 
 In the footer, wrap the link columns in `<nav aria-label="Footer navigation">` if not already wrapped.
@@ -292,7 +292,7 @@ If the title is rendered from a content prop rather than hardcoded in the block 
 #### 6d — Commit
 
 ```bash
-git add hwp-platform/packages/core-ui/src/base-blocks/ hwp-platform/packages/core-ui/src/layout/ hwp-platform/apps/{slug}/src/blocks/ hwp-platform/apps/{slug}/src/
+git add src/blocks/ src/
 git commit -m "fix(seo/semantic): add aria-labelledby to sections, wrap footer nav, keyword-first H1"
 ```
 
@@ -323,7 +323,7 @@ Per `geo-llm-optimization.md §Citable content`: the first `<p>` in `<main>` mus
 #### 7b — Commit
 
 ```bash
-git add hwp-platform/apps/{slug}/src/
+git add src/
 git commit -m "fix(seo/geo): keyword-first citable first paragraph with establishment name and location"
 ```
 
@@ -375,7 +375,7 @@ If any commit was skipped, replace its `✓` line with `— {category}: no findi
 ## Refusal cases
 
 - Refuse slugs that do not match `^site-[a-z0-9-]+$`.
-- Refuse to run if `hwp-platform/apps/{slug}/` does not exist.
+- Refuse to run if CWD does not contain `package.json` and `src/`.
 - Refuse to proceed to Step 8 if any commit fails its pre-commit hook — fix the issue first.
 - Refuse to auto-fix TypeScript errors in Step 8 — report them and stop.
 - Refuse to fill JSON-LD fields with placeholder values (`{{VARIABLE}}`, `"TODO"`, empty string, `null`) — omit the field instead.

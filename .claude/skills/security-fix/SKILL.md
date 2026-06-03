@@ -22,16 +22,16 @@ Do not edit test files unless a type-check failure forces it. Do not edit `.env.
 - **One commit per fix group.** Stage only the files changed in that group.
 - **Never `--no-verify`.**
 - **Idempotency:** before applying a fix, verify the issue still exists. If already fixed, log "already fixed — skipping" and move on.
-- **Workspace root:** the directory containing `hwp-platform/`. All relative paths are from there.
+- **CWD:** the client repo root (`site-{slug}/`). All relative paths are from the client repo root.
 - **Never add HSTS on localhost** — `Strict-Transport-Security` is not meaningful on `localhost`. Vercel injects it in production automatically. Omit it from `next.config.mjs`.
 - **Secrets require human action** — if the report flags a real credential in source, report it and stop. Never auto-delete or auto-rotate secrets.
 
 ## What this skill loads
 
 Before starting, read:
-- `hwp-platform/docs/specs/security/security-standards.md` — CSP template, cookie rules, RGPD obligations, input validation pipeline
-- `hwp-platform/docs/skills/security/security-audit-headers.md` — exact header values and CSP directives for hospitality sites
-- `hwp-platform/docs/skills/security/security-audit-rgpd.md` — privacy policy content requirements and data inventory template
+- `.hwp-tools/docs/specs/security/security-standards.md` — CSP template, cookie rules, RGPD obligations, input validation pipeline
+- `.hwp-tools/docs/skills/security/security-audit-headers.md` — exact header values and CSP directives for hospitality sites
+- `.hwp-tools/docs/skills/security/security-audit-rgpd.md` — privacy policy content requirements and data inventory template
 
 ## Process
 
@@ -40,18 +40,18 @@ Before starting, read:
 Slug = `$0` if provided, otherwise `site-demo`.
 
 Validate:
-- Matches `^site-[a-z0-9-]+$`. If not → `Error: slug must match ^site-[a-z0-9-]+$. Got: {slug}.`
-- Directory `hwp-platform/apps/{slug}/` exists. If not → `Error: hwp-platform/apps/{slug}/ not found — bootstrap the site first.`
+- Matches `^[a-z0-9-]+$`. If not → `Error: slug must match ^[a-z0-9-]+$. Got: {slug}.`
+- CWD contains `package.json` and `src/` — if not, stop: must be run from client repo root.
 
 Derive:
-- `SLUG` = the slug.
-- `APP_DIR` = `hwp-platform/apps/{SLUG}`.
-- `SRC_DIR` = `hwp-platform/apps/{SLUG}/src`.
+- `SLUG` = the slug (or from `package.json` `name` field).
+- `APP_DIR` = `.` (CWD = client repo root).
+- `SRC_DIR` = `src/`.
 - `TODAY` = current date `YYYY-MM-DD`.
 
 ### Step 1 — Find the latest audit report
 
-Glob `hwp-platform/docs/audits/{SLUG}/security/security-audit-*.md`. Sort lexicographically. Take the last entry.
+Glob `docs/audits/security/security-audit-*.md`. Sort lexicographically. Take the last entry.
 
 If no report found, stop with:
 ```
@@ -230,7 +230,7 @@ Find the footer component. It is typically in:
 
 Search:
 ```bash
-grep -rln "footer\|Footer" hwp-platform/packages/core-ui/src/ --include="*.tsx"
+grep -rln "footer\|Footer" src/ --include="*.tsx"
 ```
 
 In the footer, add a link to the privacy policy page inside the existing link group. Example (adapt to the footer's structure):
@@ -303,8 +303,8 @@ If the report flagged a `.env` or `.env.local` tracked in git:
 
 ```bash
 git rm --cached {path-to-.env-file}
-echo "{path-to-.env-file}" >> hwp-platform/.gitignore
-git add -- hwp-platform/.gitignore
+echo "{path-to-.env-file}" >> .gitignore
+git add -- .gitignore
 git commit -m "fix(security/secrets): untrack .env from git history"
 ```
 
@@ -321,7 +321,7 @@ pnpm update {package-name} --filter {affected-workspace}
 
 After all updates:
 ```bash
-git add -- hwp-platform/pnpm-lock.yaml hwp-platform/apps/{SLUG}/package.json hwp-platform/packages/*/package.json
+git add -- package-lock.json package.json
 git commit -m "fix(security/deps): update {package-name} to resolve CVE"
 ```
 

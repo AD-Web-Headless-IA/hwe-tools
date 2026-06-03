@@ -5,30 +5,44 @@
 >
 > **Naming examples in this document** (`HeroBlock`, `AccommodationDetailTemplate`, `apps/site-hotel-balneario-fuente-de-cabriel`) **are illustrative.** The canonical block / template / route catalog is defined in a separate domain-modeling session — do not treat the names below as the final catalog.
 
-## Monorepo top level
+## Repo structure (DEC-017)
 
 ```
-hwp-platform/
-├── apps/
-│   ├── site-{slug}/         ← one per client site
-│   ├── portal-{slug}/       ← one per client portal (AI content editing)
-│   └── admin/               ← agency-wide admin
-│
+hwp-tools/                   ← tools submodule (skills, agents, docs, specs)
+hwp-core/                    ← npm packages (@hwp/core-ui, @hwp/config)
+hwp-template/                ← GitHub template for new client repos
+site-{slug}/                 ← independent client repo (one per client)
+figma-makes/{slug}/          ← designer repos (DEC-002)
+```
+
+### hwp-core packages
+
+```
+hwp-core/
 ├── packages/
-│   ├── core-ui/             ← @hwp/core-ui — base-blocks, schemas, types, templates, primitives, renderer
-│   ├── booking/             ← @hwp/booking — BookingAdapter + PMS adapters
-│   ├── content/             ← @hwp/content — ContentRepository + PayloadAdapter
-│   ├── analytics/           ← @hwp/analytics — GTM hooks
-│   ├── i18n/                ← @hwp/i18n — next-intl config + base translations
-│   ├── ai/                  ← @hwp/ai — PHP-proxy client + prompt/agent registry
-│   └── config/              ← @hwp/config — tsconfig, eslint, tailwind preset
-│
-├── docs/architecture/             ← project context (briefing, decisions, user stories...)
-├── docs/                ← rules and catalog for AI agents
-├── docs/                    ← architecture and how-to docs (this file)
-├── docs/plans/                   ← SPECBOOT plans and stories per epic
-├── .claude/                 ← Claude Code skills
-└── turbo.json, package.json, pnpm-workspace.yaml
+│   ├── core-ui/             ← @hwp/core-ui — base-blocks, schemas, types, primitives, renderer, adapters
+│   └── config/              ← @hwp/config — tsconfig, tailwind preset
+└── apps/
+    └── site-demo/           ← test fixture, validates packages before publish
+```
+
+**No `@hwp/booking` package.** Booking adapter lives in `@hwp/core-ui/src/adapters/booking/`.
+
+### Client repo structure
+
+```
+site-{slug}/
+├── .hwp-tools/              ← git submodule → hwp-tools
+├── src/
+│   ├── app/                 ← Next.js 15 App Router
+│   ├── blocks/              ← client block implementations (Level 1/2/3)
+│   ├── compositions/
+│   ├── theme/               ← tokens.json
+│   └── data/
+├── docs/                    ← per-client docs (audits, block-specs, stories)
+├── public/
+├── client.config.ts
+└── package.json             ← @hwp/core-ui + @hwp/config from npm registry
 ```
 
 ## Naming summary
@@ -45,14 +59,14 @@ hwp-platform/
 | E2E test | `<feature>.spec.ts` in `tests/e2e/` | `booking.spec.ts` |
 | Route slug | `kebab-case` | `casas-rurales/` |
 | Dynamic param | always `[slug]` | `[slug]/page.tsx` |
-| Token file | `tokens.json` | `apps/site-{slug}/src/theme/tokens.json` |
+| Token file | `tokens.json` | `src/theme/tokens.json` (in client repo) |
 | Package alias | `@hwp/{name}` | `@hwp/core-ui` |
 | Intra-package alias | `@/*` → `src/*` | `import { tokens } from '@/theme/tokens'` |
 
-## `packages/core-ui/` layout
+## `@hwp/core-ui` layout (in `hwp-core/packages/core-ui/`)
 
 ```
-packages/core-ui/
+hwp-core/packages/core-ui/
 ├── src/
 │   ├── primitives/                        ← shadcn/Radix atomic UI (Button, Input, Dialog, ...)
 │   │   └── {Name}/
@@ -145,12 +159,14 @@ The `package.json` subpath exports map:
 
 This keeps the surface auditable (one file lists everything we promise per subpath) and lets us reorganize internal folders without breaking consumers.
 
-## `apps/site-{slug}/` layout
+## Client repo layout (`site-{slug}/`)
 
-> **Note (DEC-011):** The `apps/site-{slug}/` structure below is also the canonical structure for **independent client repos**. When a client project lives outside the monorepo, its `src/` structure mirrors this exactly. The only difference is that cross-package imports use published npm versions of `@hwp/*` rather than workspace references.
+> **DEC-017:** Client repos are independent git repos (not in a monorepo). They consume `@hwp/*` via the private npm registry. The `.hwp-tools/` submodule provides skills, agents, and docs.
 
 ```
-apps/site-{slug}/
+site-{slug}/
+├── .hwp-tools/                            ← git submodule → hwp-tools
+├── .gitmodules
 ├── src/
 │   ├── app/                               ← Next.js App Router
 │   │   ├── layout.tsx                     ← root layout (html/body only)
@@ -208,16 +224,16 @@ apps/site-{slug}/
 └── tsconfig.json
 ```
 
-### Why `src/` in apps too
+### Why `src/` in client repos
 
-Uniform with `packages/*/src/`. A monorepo-wide find/codemod uses one pattern (`{apps,packages}/*/src/**`), not two. Config files (`next.config.mjs`, `tsconfig.json`, `tailwind.config.ts`) sit at the app root, visually separate from source.
+Uniform with `hwp-core/packages/*/src/`. Config files (`next.config.mjs`, `tsconfig.json`) sit at the repo root, visually separate from source.
 
 ### Pages are thin
 
 `app/[locale]/page.tsx` does data fetching only, then delegates to a composition:
 
 ```tsx
-// apps/site-{slug}/src/app/[locale]/page.tsx
+// site-{slug}/src/app/[locale]/page.tsx
 import { HomeComposition } from '@/compositions/HomeComposition';
 import { contentRepository } from '@/lib/repositories';
 
@@ -253,7 +269,7 @@ Each package has a `README.md` describing: purpose, public API, key types, usage
 - Cross-package (schemas only): `import { HeroContent } from '@hwp/core-ui/schemas'`.
 - Intra-package: `import { x } from '@/utils/x'` (alias `@/*` → `src/*`).
 - Never: `import { x } from '@hwp/core-ui/src/base-blocks/HeroBlock/HeroBlock'` (deep imports forbidden).
-- Never: `import { x } from '../../../../packages/core-ui/...'` (relative paths across packages forbidden).
+- Never: `import { x } from '../../../node_modules/@hwp/...'` (use package imports, not relative node_modules paths).
 
 ## Workspace and tooling
 
@@ -268,6 +284,6 @@ Each package has a `README.md` describing: purpose, public API, key types, usage
 - Don't add an `index.ts` to every folder inside a package. Only the package root (and the subpath export roots `base-blocks/index.ts`, `schemas/index.ts`) have one. **One controlled exception:** a block with structural variants ([DEC-008](../../architecture/decisions.md#dec-008--structural-variants-for-complex-blocks)) MUST have an `index.ts` at the block's root because that file is the **variant resolver**, not a barrel re-export. See [`block-contract.md`](./block-contract.md) §Structural variants. The public API rule is unchanged — consumers still import from `@hwp/core-ui/base-blocks`.
 - Don't put two component categories (primitives + base-blocks, base-blocks + templates) in the same folder.
 - Don't put compositions inside `app/`. They live in `src/compositions/`.
-- Don't add per-client logic inside `packages/core-ui/`. That belongs in `apps/site-{slug}/src/compositions/` or in `client.config.ts`.
+- Don't add per-client logic inside `hwp-core/packages/core-ui/`. That belongs in `src/compositions/` or in `client.config.ts` of the client repo.
 - Don't import block components from `@hwp/core-ui` root — use the `@hwp/core-ui/base-blocks` subpath. The root no longer exports blocks as of DEC-015.
 - Don't add a `globals.css` per block. There is exactly ONE `globals.css` per client, located at `src/app/globals.css`.

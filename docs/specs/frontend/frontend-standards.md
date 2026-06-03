@@ -6,8 +6,8 @@
 
 ## Stack (non-negotiable)
 
-- **Next.js 14 App Router** with `output: 'export'` (static export). No SSR at runtime.
-- **React 18** function components only. No class components.
+- **Next.js 15 App Router** with `output: 'export'` (static export). No SSR at runtime.
+- **React 19** function components only. No class components.
 - **TypeScript strict** (inherited from base-standards).
 - **Tailwind v4** with `@theme` directives. No CSS-in-JS, no styled-components, no inline `style={{}}` except for runtime-dynamic values that cannot be expressed as classes.
 - **next-intl** for i18n. Every route is wrapped in `[locale]/`.
@@ -20,8 +20,8 @@
 
 See `docs/contracts/frontend/structure.md` for the full layout. Summary of the binding rules:
 
-- **Monorepo + independent client repos**: `apps/site-demo/` in the monorepo mirrors `site-{slug}/` (independent repos per DEC-011). Both use `src/`.
-- **Three component categories in `packages/core-ui/`** (cannot be mixed in the same folder):
+- **Three independent repos (DEC-017)**: `hwp-core/` (packages), `hwp-template/` (starter), `site-{slug}/` (client repos). Client repos consume `@hwp/*` via npm. All use `src/`.
+- **Three component categories in `hwp-core/packages/core-ui/`** (cannot be mixed in the same folder):
   - `primitives/` — shadcn/Radix atomic UI (Button, Input, Dialog).
   - `base-blocks/` — reference block implementations (DEC-015: renamed from `blocks/`). Each `{Name}Block/` folder holds `{Name}Block.tsx`, `{Name}Block.slots.ts` (if slots needed), `{Name}Block.variants.ts`, `{Name}Block.test.tsx`.
   - `schemas/` — Zod content + config schemas for all blocks (DEC-015: moved out of block folders).
@@ -37,10 +37,10 @@ See `docs/contracts/frontend/structure.md` for the full layout. Summary of the b
 Detail in `docs/contracts/frontend/block-contract.md`. The rules:
 
 - A block is a function component that accepts `content: ContentType` and optionally `variant: VariantName`.
-- The block's `.schema.ts` lives in `packages/core-ui/src/schemas/` and exports a Zod schema for `content`. The block's `.types.ts` (in `types/`) derives the TS type from it (`z.infer`).
+- The block's `.schema.ts` lives in `hwp-core/packages/core-ui/src/schemas/` and exports a Zod schema for `content`. The block's `.types.ts` (in `types/`) derives the TS type from it (`z.infer`).
 - The block's `.variants.ts` exports a CVA recipe. Variants are a fixed set, declared at design time.
 - Payload stores `{ type, variant, order, content }` per block instance. **Never layout, colors, or spacing.**
-- The `BlockRenderer` (in `packages/core-ui/src/renderer/`) maps `type` to component via `baseBlockRegistry` with an optional client override map (`blocks` prop). Adding a platform block = one row in `baseBlockRegistry` + a base-block implementation in `base-blocks/`. Adding a client block = one entry in the client's `registry.ts` + the implementation in `site-{slug}/src/blocks/`.
+- The `BlockRenderer` (in `hwp-core/packages/core-ui/src/renderer/`) maps `type` to component via `baseBlockRegistry` with an optional client override map (`blocks` prop). Adding a platform block = one row in `baseBlockRegistry` + a base-block implementation in `base-blocks/`. Adding a client block = one entry in the client's `src/blocks/registry.ts` + the implementation in `src/blocks/{Name}/`.
 
 ## Template contract (binding)
 
@@ -54,9 +54,9 @@ Detail in `docs/contracts/frontend/template-contract.md`. The rules:
 
 Detail in `docs/contracts/frontend/theme-tokens.md`. The rules:
 
-- Tokens come from `apps/site-{slug}/src/theme/tokens.json` (exported from Figma Variables).
+- Tokens come from `src/theme/tokens.json` (in client repo, exported from Figma Variables).
 - `tokens.json` must satisfy the `TokensContract` type from `@hwp/core-ui/src/theme/tokens.contract.ts`. Failing this contract fails the build.
-- `apps/site-{slug}/src/theme/tailwind.config.ts` extends `@hwp/config/tailwind-preset` and feeds it `tokens.json`.
+- Tailwind v4: `src/app/globals.css` imports `"tailwindcss"` + `"@hwp/config/theme.css"` and overrides with `@theme { ... }` blocks. No `tailwind.config.ts` + `createHwpPreset()` (that was v3).
 - CSS custom properties are emitted from tokens — never hardcoded in components.
 
 ## Accessibility — WCAG 2.1 AA (binding)

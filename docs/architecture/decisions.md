@@ -1134,3 +1134,45 @@ Once the human approves the visual spec, the normal SPECBOOT cycle continues:
 - **Skip design language, let developers improvise** — rejected. With 300 clients and a team coming from WordPress, visual inconsistency within a single site is guaranteed.
 - **Use AI to generate design images/mockups** — rejected for V1. A text-based visual spec (in terms of Tailwind classes and token references) is sufficient for implementation and avoids image generation API complexity.
 - **Require the designer to create Figma for every block** — rejected operationally. The designer can deliver 2–3 designs per month, becoming a bottleneck at 12+ new blocks in Phase 1.
+
+---
+
+## DEC-017 — Repo split: tools (submodule) + core (npm) + template + client repos
+
+> **Status:** Accepted
+> **Date:** 2026-06-03
+> **Extends:** DEC-011 (independent client repos), DEC-015 (client-owned blocks)
+> **Supersedes:** The single `hwp-platform/` monorepo containing tools + code + docs together
+
+See full spec: `docs/architecture/DEC-017-Repo-Split.md`
+
+### The decision
+
+Split the current `hwp-platform/` monorepo into three purpose-built repos:
+
+| Repo | Contains | Delivery |
+|---|---|---|
+| `hwp-tools` | Skills, agents, commands, docs, specs, contracts, guides | **Git submodule** (mounted as `.hwp-tools/`) |
+| `hwp-core` | React packages: schemas, base-blocks, primitives, renderer, theme, adapters | **npm packages** (`@hwp/core-ui`, `@hwp/config`) |
+| `hwp-template` | Empty starter structure for new clients | **GitHub template repo** |
+
+Client repos are independent, created from the template, and consume tools via submodule + core via npm.
+
+`@hwp/booking` package is eliminated — booking adapters move to `@hwp/core-ui/src/adapters/booking/`.
+
+### Stack versions (binding from this DEC)
+
+- Next.js 15
+- React 19
+- Tailwind v4 with CSS-first `@theme` (replaces JS presets from v3)
+- TypeScript 5.x strict
+
+### Consequences
+
+- `CLAUDE.md` in hwp-tools describes the tools repo only, not the monorepo.
+- `compatibility.json` maps tool versions to compatible `@hwp/core-ui` versions.
+- `templates/design-language.md` and `templates/visual-spec.md` replace `docs/clients/_template/`.
+- Client repos use `.hwp-tools/` submodule path instead of a shared monorepo.
+- All skill paths updated: `hwp-platform/apps/{slug}/` → `site-{slug}/` or relative CWD paths.
+- Skill `globals.css` template updated to Tailwind v4 syntax (`@import "tailwindcss"` + `@theme {}`).
+- `docs/audits/`, `docs/clients/`, `docs/stories/`, `docs/plans/` removed from hwp-tools — these belong in project repos, not in the tools submodule.

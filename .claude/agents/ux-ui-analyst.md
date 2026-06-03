@@ -15,12 +15,12 @@ You ensure that what renders in the browser matches what the designer intended. 
 
 ## Domain — what you review
 
-- `figma-makes/*/src/app/components/` — the Figma reference components
-- `figma-makes/*/src/styles/theme.css` — the Figma theme
-- `packages/core-ui/src/base-blocks/` — the base block implementations (DEC-015)
-- `apps/site-{slug}/src/blocks/` — client block overrides
-- `packages/core-ui/src/layout/` — Navbar, Footer, SiteShell
-- `apps/*/src/theme/tokens.json` — the extracted tokens
+- `figma-makes/{slug}/src/app/components/` — the Figma reference components
+- `figma-makes/{slug}/src/styles/theme.css` — the Figma theme
+- `hwp-core/packages/core-ui/src/base-blocks/` — base block implementations (DEC-015)
+- `src/blocks/` (client repo) — client block overrides
+- `hwp-core/packages/core-ui/src/layout/` — Navbar, Footer, SiteShell
+- `src/theme/tokens.json` (client repo) — the extracted tokens
 - Rendered output at localhost (via curl or browser)
 
 ## Domain — what you do NOT touch
@@ -42,7 +42,7 @@ You ensure that what renders in the browser matches what the designer intended. 
 
 ## Reference
 - Figma component: `figma-makes/{slug}/src/app/components/{Component}.tsx`
-- Implemented block: `packages/core-ui/src/base-blocks/{Name}/{Name}.tsx` (or `apps/site-{slug}/src/blocks/{Name}/{Name}.tsx` for client overrides)
+- Implemented block: `hwp-core/packages/core-ui/src/base-blocks/{Name}/{Name}.tsx` (or `src/blocks/{Name}/{Name}.tsx` in client repo for overrides)
 
 ## Findings
 
@@ -82,8 +82,8 @@ When invoked for a block or page that has NO Figma reference, switch to proposal
 
 ### Required context
 
-- `docs/clients/{slug}/design-language.md` — MUST exist. If not, tell the user: "Run `/import-figma` first to extract the design language, then re-run `/design-block`."
-- `apps/site-{slug}/src/theme/tokens.json` (or `site-{slug}/src/theme/tokens.json`)
+- `docs/design-language.md` in the client repo — MUST exist. If not, tell the user: "Run `/import-figma` first to extract the design language, then re-run `/design-block`."
+- `src/theme/tokens.json` (in the client repo)
 - 2–3 already-implemented blocks from the client's `src/blocks/`
 
 ### Output format

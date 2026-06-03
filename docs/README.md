@@ -184,7 +184,7 @@ On demand: docs/contracts/frontend/block-contract.md   (mandatory files, exports
            docs/specs/security/security-standards.md   (if block has user inputs or connects to an adapter)
 ```
 
-> **DEC-015:** base-blocks go to `packages/core-ui/src/base-blocks/`; client-specific blocks go to `site-{slug}/src/blocks/`. Use `/scaffold-block {Name} --target client` for client blocks. See `docs/skills/frontend/block-creation.md §Decide the target`.
+> **DEC-015 + DEC-017:** base-blocks go to `hwp-core/packages/core-ui/src/base-blocks/`; client-specific blocks go to `src/blocks/` inside the client's independent repo. Use `/scaffold-block {Name} --target client` for client blocks. See `docs/skills/frontend/block-creation.md §Decide the target`.
 
 **Budget:** ~4k tokens. **vs. loading `architecture/architecture.md` whole:** ~50k tokens. **Reduction:** ~12×.
 
@@ -200,7 +200,7 @@ On demand: docs/contracts/frontend/template-contract.md
 
 **Budget:** ~3.5k tokens.
 
-### Bootstrap a new client app (`apps/site-{slug}/`)
+### Bootstrap a new client site (`site-{slug}/`)
 
 ```
 Always:   docs/specs/general/base-standards.md
@@ -257,8 +257,8 @@ Always:   docs/specs/general/base-standards.md
           docs/specs/frontend/frontend-standards.md
           docs/architecture/domain-model.md         (to know if client has hasSeasons → multi-tokens layout)
 On demand: docs/contracts/frontend/theme-tokens.md
-          apps/site-{slug}/src/theme/tokens.json  (single-theme client)
-          apps/site-{slug}/src/theme/tokens-*.json  (seasonized client, per DEC-005)
+          src/theme/tokens.json  (single-theme client)
+          src/theme/tokens-*.json  (seasonized client, per DEC-005)
 ```
 
 **Budget:** ~3k tokens.
@@ -321,10 +321,10 @@ On demand (per story):
 
 ```
 Always:   docs/specs/security/security-standards.md
-On demand: apps/site-{slug}/next.config.mjs               (headers config)
-          apps/site-{slug}/src/app/api/**                 (Route Handlers — Zod coverage)
-          packages/core-ui/src/base-blocks/**             (base-blocks with user input)
-          apps/site-{slug}/src/blocks/**                 (client blocks with user input)
+On demand: next.config.mjs                                (headers config)
+          src/app/api/**                                 (Route Handlers — Zod coverage)
+          hwp-core/packages/core-ui/src/base-blocks/**   (base-blocks with user input)
+          src/blocks/**                                  (client blocks with user input)
           docs/skills/security/security-audit-headers.md  (header audit steps)
           docs/skills/security/security-audit-cookies.md  (cookie consent steps)
           docs/skills/security/security-audit-inputs.md   (input handling steps)

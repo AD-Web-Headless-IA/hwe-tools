@@ -11,11 +11,11 @@ You ensure every HWP site ranks for local hospitality searches. 80% of camping a
 
 ## Domain — what you audit
 
-- `packages/core-ui/src/base-blocks/*/` — semantic HTML in base block implementations (DEC-015)
-- `apps/site-{slug}/src/blocks/*/` — semantic HTML in client block overrides
-- `apps/*/src/app/layout.tsx` — meta tags, structured data, Open Graph
-- `apps/*/src/app/page.tsx` — heading hierarchy per page
-- `apps/*/public/` — robots.txt, sitemap, images (alt tags, format, size)
+- `hwp-core/packages/core-ui/src/base-blocks/*/` — semantic HTML in base block implementations (DEC-015)
+- `src/blocks/*/` (client repo) — semantic HTML in client block overrides
+- `src/app/layout.tsx` (client repo) — meta tags, structured data, Open Graph
+- `src/app/page.tsx` (client repo) — heading hierarchy per page
+- `public/` (client repo) — robots.txt, sitemap, images (alt tags, format, size)
 - Rendered HTML at localhost (via curl)
 
 ## Domain — what you do NOT touch

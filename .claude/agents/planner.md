@@ -24,7 +24,7 @@ You do **not** write code. You do **not** edit any file. You **read** the story,
 4. **`docs/architecture/decisions.md`** — `Grep` for keywords in the story (e.g. `Vercel`, `Postgres`, `tokens`, `hosting`, `season`). Cite DECs by number in your proposal.
 5. **`docs/README.md`** — the load index. Find the recipe that matches the story type and load only the docs it names. Do NOT load `docs/architecture/architecture.md` whole (DEC-003); grep for the section heading you need.
 5a. **`docs/specs/frontend/block-architecture.md`** — for any block story: load to determine which of the 4 layers the proposed block needs. Every block proposal must state the required layers explicitly.
-6. **Existing code** — `Glob` and `Grep` the relevant `packages/@hwp/*` or `apps/site-{slug}/*` directories. Read the most similar existing component to understand naming, layout, and idiom. Reference the file path in your proposal.
+6. **Existing code** — `Glob` and `Grep` the relevant `hwp-core/packages/@hwp/*` or `src/` (client repo) directories. Read the most similar existing component to understand naming, layout, and idiom. Reference the file path in your proposal.
 7. **Visual spec (if no Figma reference)** — For block stories where no Figma design exists, check `docs/clients/{slug}/block-specs/{BlockName}.visual-spec.md`. If it exists and is approved (no longer marked `DRAFT`), use it as the visual guide for the proposal — reference its Tailwind class recommendations and layout decisions directly. If it does NOT exist, stop and tell the user: "No Figma reference and no visual spec found. Run `/design-block {BlockName} --client {slug}` first, review the generated spec, then re-run `/propose`."
 
 ## Block file locations (post DEC-015)
@@ -33,15 +33,15 @@ When listing affected files for a block story, use the correct paths:
 
 | Work context | Block implementation path | Schema path |
 |---|---|---|
-| New base block (platform) | `packages/core-ui/src/base-blocks/{Name}/{Name}.tsx` | `packages/core-ui/src/schemas/{name}.schema.ts` |
-| Client override | `apps/site-{slug}/src/blocks/{Name}/{Name}.tsx` | import from `@hwp/core-ui/schemas` |
-| Platform registry | `packages/core-ui/src/renderer/baseBlockRegistry.ts` | — |
-| Client registry | `apps/site-{slug}/src/registry.ts` | — |
+| New base block (platform) | `hwp-core/packages/core-ui/src/base-blocks/{Name}/{Name}.tsx` | `hwp-core/packages/core-ui/src/schemas/{name}.schema.ts` |
+| Client override | `src/blocks/{Name}/{Name}.tsx` (client repo) | import from `@hwp/core-ui/schemas` |
+| Platform registry | `hwp-core/packages/core-ui/src/renderer/baseBlockRegistry.ts` | — |
+| Client registry | `src/blocks/registry.ts` (client repo) | — |
 
 Every block proposal must also specify the **usage level** for the new block:
 - **Level 1** — used by all clients without customisation (register only in `baseBlockRegistry`)
-- **Level 2** — base implementation in `base-blocks/`, client can override via `apps/site-{slug}/src/blocks/` + `registry.ts`
-- **Level 3** — client-only block, lives entirely in `apps/site-{slug}/src/blocks/`, not in `base-blocks/`
+- **Level 2** — base implementation in `base-blocks/`, client can override via `src/blocks/` + `registry.ts` in the client repo
+- **Level 3** — client-only block, lives entirely in `src/blocks/` of the client repo, not in `base-blocks/`
 
 State the usage level explicitly in the proposal summary. The Implementer and Reviewer will check consistency between the level and where you place the files.
 
@@ -115,4 +115,4 @@ A proposal that omits this section or adds layers without justification will be 
 
 - The input file is not a user story, or the story has no enriched sections — direct the human to `/enrich-us`.
 - The story would require contradicting a DEC. Surface the conflict; do NOT propose a workaround that violates the DEC. The right path is to amend the DEC first, then re-run `/propose`.
-- The story names a per-client behavior in `@hwp/core-ui` (e.g. `BalnearioSection`). Per `domain-model.md §7`, that is an anti-pattern. Propose the generic-block-plus-content alternative.
+- The story names a per-client behavior in `@hwp/core-ui` (e.g. `BalnearioSection`). Per `domain-model.md §7`, that is an anti-pattern — no per-client logic in `hwp-core`. Propose the generic-block-plus-content alternative.

@@ -13,32 +13,32 @@ The runner script handles network-based checks (headers, cookies, dependencies).
 
 ## Constraints
 
-- Site slug defaults to `site-demo` when `$0` is omitted.
-- Valid slugs match `^site-[a-z0-9-]+$` and must have a corresponding `apps/{slug}/` directory.
+- Runs from within a client repo (`site-{slug}/` is the CWD). Slug argument is optional context label.
+- Valid slugs match `^[a-z0-9-]+$`.
 - Never fabricate audit results. If a check cannot run (missing tool, server down), report it as `SKIP — {reason}`, not as Pass.
 - Never modify source files. This skill writes only the audit report.
-- Report is saved to `docs/audits/{slug}/security/security-audit-{TODAY}.md`. Overwrite same-day reports (re-audit after fixes).
+- Report is saved to `docs/audits/security/security-audit-{TODAY}.md`. Overwrite same-day reports (re-audit after fixes).
 - Use Node.js 20+ for the runner script (built-in `fetch`). Verify with `node --version` if uncertain.
-- Workspace root: `C:\laragon\www\Hospitality Web Platform\`. Platform repo: `hwp-platform/`.
+- CWD = client repo root. Runner script is at `.hwp-tools/.claude/skills/security-audit/runner.mjs`.
 - All grep commands: `--include="*.ts" --include="*.tsx" --include="*.mjs" --include="*.js"` unless specified.
 
 ## Process
 
 ### Step 0 — Parse and validate arguments
 
-Slug = `$0`, default `site-demo`.
+Slug = `$0`, default derived from `package.json` `name` field.
 
 Validate:
-- Matches `^site-[a-z0-9-]+$` — if not, stop with: `Error: slug must match ^site-[a-z0-9-]+$. Got: {input}.`
-- Directory `hwp-platform/apps/{slug}/` exists — if not, stop with: `Error: apps/{slug}/ not found. Bootstrap the site first.`
+- Matches `^[a-z0-9-]+$` — if not, stop with: `Error: slug must match ^[a-z0-9-]+$. Got: {input}.`
+- CWD contains `package.json` and `src/` — if not, stop with: `Error: not inside a client repo root. cd into the site-{slug}/ directory first.`
 
 Derive:
-- `SLUG` = slug
-- `APP_DIR` = `hwp-platform/apps/{SLUG}`
-- `SRC_DIR` = `{APP_DIR}/src`
+- `SLUG` = slug (or from `package.json` `name` field)
+- `APP_DIR` = `.` (CWD = client repo root)
+- `SRC_DIR` = `src/`
 - `TODAY` = current date in `YYYY-MM-DD`
-- `BASE_URL` = `http://localhost:3000` (default; read from `{APP_DIR}/package.json` `"dev"` script port if non-3000)
-- `REPORT_DIR` = `hwp-platform/docs/audits/{SLUG}/security`
+- `BASE_URL` = `http://localhost:3000` (default; read from `package.json` `"dev"` script port if non-3000)
+- `REPORT_DIR` = `docs/audits/security`
 
 ### Step 1 — Verify the dev server
 
@@ -52,7 +52,7 @@ curl -s -o /dev/null -w "%{http_code}" {BASE_URL}
 ### Step 2 — Run the automated runner (headers, cookies, dependencies)
 
 ```bash
-node hwp-platform/.claude/skills/security-audit/runner.mjs {BASE_URL} {SLUG}
+node .hwp-tools/.claude/skills/security-audit/runner.mjs {BASE_URL} {SLUG}
 ```
 
 Capture stdout as `RUNNER_OUTPUT`. The runner exits 0 on success (even with findings) and exits 1 only on hard failure (server unreachable). On exit 1, report verbatim stderr and stop.
@@ -63,7 +63,7 @@ Run each grep and collect findings:
 
 **3a — dangerouslySetInnerHTML**
 ```bash
-grep -rn "dangerouslySetInnerHTML" {SRC_DIR} hwp-platform/packages/core-ui/src/base-blocks hwp-platform/apps/{SLUG}/src/blocks --include="*.tsx" --include="*.ts" 2>/dev/null
+grep -rn "dangerouslySetInnerHTML" {SRC_DIR} node_modules/@hwp/core-ui/src/base-blocks --include="*.tsx" --include="*.ts" 2>/dev/null
 ```
 For each match, apply this decision tree (read ±5 lines of context around the flagged line):
 
@@ -75,7 +75,7 @@ For each match, apply this decision tree (read ±5 lines of context around the f
 
 **3b — eval and new Function**
 ```bash
-grep -rn "eval(\|new Function(" {SRC_DIR} hwp-platform/packages/core-ui/src/base-blocks hwp-platform/apps/{SLUG}/src/blocks --include="*.ts" --include="*.tsx" --include="*.mjs" 2>/dev/null | grep -v "node_modules\|dist"
+grep -rn "eval(\|new Function(" {SRC_DIR} node_modules/@hwp/core-ui/src/base-blocks --include="*.ts" --include="*.tsx" --include="*.mjs" 2>/dev/null | grep -v "node_modules\|dist"
 ```
 Any result → Blocker.
 
@@ -97,20 +97,20 @@ Any `MISSING_ZOD` → Blocker.
 ```bash
 grep -rn --include="*.ts" --include="*.tsx" --include="*.mjs" --include="*.js" \
   -E "sk_live_|sk_test_|pk_live_|pk_test_|sk-ant-[A-Za-z0-9]{10,}|api[_-]?key\s*[:=]\s*['\"][A-Za-z0-9+/._-]{20,}|password\s*[:=]\s*['\"][^'\"\s]{8,}" \
-  {APP_DIR} hwp-platform/packages/core-ui/src/base-blocks hwp-platform/apps/{SLUG}/src/blocks 2>/dev/null | grep -v "node_modules\|dist\|\.env\.example"
+  {SRC_DIR} node_modules/@hwp/core-ui/src/base-blocks 2>/dev/null | grep -v "node_modules\|dist\|\.env\.example"
 ```
 Any result → Blocker (report file+line, not the value).
 
 **4b — .env in gitignore and not tracked**
 ```bash
-grep -E "\.env" hwp-platform/.gitignore 2>/dev/null | head -5
-git -C hwp-platform ls-files | grep -E "\.env$|\.env\.local" | grep -v "\.env\.example"
+grep -E "\.env" .gitignore 2>/dev/null | head -5
+git ls-files | grep -E "\.env$|\.env\.local" | grep -v "\.env\.example"
 ```
 Tracked .env file → Blocker. Missing from .gitignore → Blocker.
 
 **4c — Git history scan (last 90 days)**
 ```bash
-git -C hwp-platform log --all -p --since="90 days ago" -S "sk-ant-\|api_key\|ANTHROPIC" -- "*.ts" "*.tsx" "*.js" "*.env" 2>/dev/null | grep "^+" | grep -iE "sk-ant-|api_key|password" | head -10
+git log --all -p --since="90 days ago" -S "sk-ant-\|api_key\|ANTHROPIC" -- "*.ts" "*.tsx" "*.js" "*.env" 2>/dev/null | grep "^+" | grep -iE "sk-ant-|api_key|password" | head -10
 ```
 Any result → Blocker.
 
@@ -131,7 +131,7 @@ Count 0 → Blocker.
 
 **5c — Data inventory**
 ```bash
-test -f "hwp-platform/docs/clients/{SLUG}/data-inventory.md" && echo "EXISTS" || echo "MISSING"
+test -f "docs/data-inventory.md" && echo "EXISTS" || echo "MISSING"
 ```
 Missing → Major.
 
@@ -153,7 +153,7 @@ Any result → Blocker.
 
 **6c — Tenant isolation in packages and base-blocks**
 ```bash
-grep -rn "if.*client\s*===\|slug\s*===\|tenant\s*===" hwp-platform/packages hwp-platform/packages/core-ui/src/base-blocks --include="*.ts" --include="*.tsx" 2>/dev/null | grep -v "node_modules"
+grep -rn "if.*client\s*===\|slug\s*===\|tenant\s*===" node_modules/@hwp/core-ui/src/base-blocks --include="*.ts" --include="*.tsx" 2>/dev/null | grep -v "node_modules"
 ```
 Any result → Blocker.
 
@@ -241,11 +241,11 @@ Verdict logic:
 ### Step 8 — Save the report
 
 ```bash
-mkdir -p hwp-platform/docs/audits/{SLUG}/security
+mkdir -p docs/audits/security
 ```
 
 Use the `Write` tool to save:
-- Path: `hwp-platform/docs/audits/{SLUG}/security/security-audit-{TODAY}.md`
+- Path: `docs/audits/security/security-audit-{TODAY}.md`
 - Content: full assembled report from Step 7.
 
 ### Step 9 — Print summary

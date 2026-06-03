@@ -11,13 +11,13 @@ You are a frontend scaffolder for HWP client sites. Your job is to create a new 
 
 ## Constraints
 
-- `site-slug` must match `^site-[a-z0-9-]+$` and `apps/{site-slug}/` must exist.
+- Runs from within the client repo (CWD = `site-{slug}/`). Paths are relative to client repo root.
+- `site-slug` must match `^[a-z0-9-]+$`.
 - `page-slug` must be lowercase kebab-case (`^[a-z][a-z0-9-]*$`). Refuse uppercase or path separators.
-- Never overwrite an existing `apps/{site-slug}/src/app/{page-slug}/page.tsx`. Stop and tell the user.
+- Never overwrite an existing `src/app/{page-slug}/page.tsx`. Stop and tell the user.
 - Do not create blocks or content — that is `/add-block`'s job.
 - `SiteShell` already wraps children in `<main>` — compositions must NOT add another `<main>`.
 - All generated files are in English (DEC-001); business copy (h1 text, description) in the site's language.
-- Workspace root: `C:\laragon\www\Hospitality Web Platform\`. The platform repo is `hwp-platform/`.
 
 ## Process
 
@@ -26,10 +26,10 @@ You are a frontend scaffolder for HWP client sites. Your job is to create a new 
 Arguments: `$0` = site-slug (default `site-demo`), `$1` = page-slug (required).
 
 Validate:
-- `site-slug` matches `^site-[a-z0-9-]+$`.
+- `site-slug` matches `^[a-z0-9-]+$`.
 - `page-slug` matches `^[a-z][a-z0-9-]*$`.
-- Directory `hwp-platform/apps/{site-slug}/` exists.
-- File `hwp-platform/apps/{site-slug}/src/app/{page-slug}/page.tsx` does NOT exist.
+- CWD contains `package.json` and `src/` — if not, stop: must be run from client repo root.
+- File `src/app/{page-slug}/page.tsx` does NOT exist.
 
 Derive:
 - `SITE` = site-slug (e.g. `site-demo`).
@@ -41,7 +41,7 @@ Derive:
 
 ### Step 1 — Read the site context
 
-Read `hwp-platform/apps/{SITE}/src/app/layout.tsx`.
+Read `src/app/layout.tsx`.
 
 Extract from the existing `metadata` object:
 - `clientName` — from `metadata.title` or `openGraph.siteName` (e.g. `Camping Mer et Camargue`).
@@ -54,12 +54,12 @@ These values are used in the new page metadata. If extraction is uncertain, use 
 ### Step 2 — Create the page directory
 
 ```bash
-mkdir -p "hwp-platform/apps/{SITE}/src/app/{SLUG}"
+mkdir -p "src/app/{SLUG}"
 ```
 
 ### Step 3 — Create `page.tsx`
 
-Path: `hwp-platform/apps/{SITE}/src/app/{SLUG}/page.tsx`
+Path: `src/app/{SLUG}/page.tsx`
 
 ```tsx
 import type { Metadata } from 'next';
@@ -91,7 +91,7 @@ Rules for metadata:
 
 ### Step 4 — Create `{PageName}Composition.tsx`
 
-Path: `hwp-platform/apps/{SITE}/src/compositions/{PageName}Composition.tsx`
+Path: `src/compositions/{PageName}Composition.tsx`
 
 ```tsx
 import { BlockRenderer, type BlockInstance } from '@hwp/core-ui';
@@ -145,7 +145,7 @@ export function {PageName}Composition() {
 
 ### Step 5 — Update `sitemap.ts`
 
-Read `hwp-platform/apps/{SITE}/src/app/sitemap.ts`.
+Read `src/app/sitemap.ts`.
 
 The sitemap exports a function returning an array. Add a new entry for `/{SLUG}`:
 
@@ -162,7 +162,7 @@ Insert it after the homepage entry (priority 1). Use the `Edit` tool to splice t
 
 ### Step 6 — Update the navbar href in `layout.tsx`
 
-Read `hwp-platform/apps/{SITE}/src/app/layout.tsx`.
+Read `src/app/layout.tsx`.
 
 Find a link in the `navbar.links` array where:
 - `href` is currently `'#'`, AND
@@ -224,7 +224,7 @@ Next steps:
 /create-page site-demo le-camping
 ```
 
-Creates `apps/site-demo/src/app/le-camping/page.tsx` and `apps/site-demo/src/compositions/LeCampingComposition.tsx`.
+Creates `src/app/le-camping/page.tsx` and `src/compositions/LeCampingComposition.tsx`.
 Updates `sitemap.ts` and updates `{ label: 'Le Camping', href: '#' }` → `{ label: 'Le Camping', href: '/le-camping' }`.
 
 ### Sub-page
@@ -233,7 +233,7 @@ Updates `sitemap.ts` and updates `{ label: 'Le Camping', href: '#' }` → `{ lab
 /create-page site-demo hebergements
 ```
 
-Creates `apps/site-demo/src/app/hebergements/page.tsx` and `HebgementsComposition.tsx`.
+Creates `src/app/hebergements/page.tsx` and `src/compositions/HebgementsComposition.tsx`.
 Note: `{ label: 'Hébergements', href: '#' }` in the navbar matches (diacritics stripped: `hebergements` = `hebergements`).
 
 ### Bad input

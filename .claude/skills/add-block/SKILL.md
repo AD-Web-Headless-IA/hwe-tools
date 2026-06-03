@@ -12,14 +12,14 @@ You are a frontend scaffolder for HWP client sites. Your job is to add a named b
 ## Constraints
 
 - All three arguments are required.
-- `site-slug` must match `^site-[a-z0-9-]+$`.
+- `site-slug` must match `^[a-z0-9-]+$`.
 - `page-slug` must match `^[a-z][a-z0-9-]*$`.
 - `BlockType` is the stem — **without** the `Block` suffix (e.g. `Hero`, `MediaText`, `Amenities`). The full folder name is `{BlockType}Block`.
-- The target composition `apps/{site-slug}/src/compositions/{PageName}Composition.tsx` must exist. If not, tell the user to run `/create-page` first.
-- The block `packages/core-ui/src/base-blocks/{BlockType}Block/` must exist. If not, tell the user to run `/scaffold-block` first.
+- Runs from within the client repo (CWD = `site-{slug}/`). Paths are relative to client repo root.
+- The target composition `src/compositions/{PageName}Composition.tsx` must exist. If not, tell the user to run `/create-page` first.
+- The block schema is in `node_modules/@hwp/core-ui/src/schemas/{BlockType}Block.schema.ts` or `src/blocks/{BlockType}Block/` (client override). If not found, tell the user to run `/scaffold-block` first.
 - SEO rules apply to generated content: descriptive alt text, h2/h3 hierarchy (never h1 inside a block), no native `<img>`.
-- Generated fake content is in the **site's language** (read it from the existing `fake-content.ts` or `layout.tsx`).
-- Workspace root: `C:\laragon\www\Hospitality Web Platform\`. The platform repo is `hwp-platform/`.
+- Generated fake content is in the **site's language** (read it from the existing `src/data/fake-content.ts` or `src/app/layout.tsx`).
 
 ## Process
 
@@ -41,9 +41,9 @@ Validate in order:
 
 ### Step 1 — Read the block schema
 
-Read `hwp-platform/packages/core-ui/src/schemas/{BlockName}.schema.ts` (canonical schema location).
+Read `node_modules/@hwp/core-ui/src/schemas/{BlockName}.schema.ts` (canonical schema location).
 
-If that file does not exist, fall back to `hwp-platform/packages/core-ui/src/base-blocks/{BlockName}/{BlockName}.schema.ts`.
+If that file does not exist, fall back to `node_modules/@hwp/core-ui/src/base-blocks/{BlockName}/{BlockName}.schema.ts`.
 
 Parse the Zod schema to understand every required field and optional field. Pay attention to:
 - Required vs optional fields.
@@ -51,11 +51,11 @@ Parse the Zod schema to understand every required field and optional field. Pay 
 - Array fields (e.g. `items`, `ctas`, `reviews`) — generate 2–3 realistic items.
 - Enum fields or union literals — use the first valid value as the default variant.
 
-Also read `hwp-platform/packages/core-ui/src/base-blocks/{BlockName}/{BlockName}.types.ts` (if it exists separately) for the `{BlockName}Props` type to confirm the variant prop name and available values.
+Also read `node_modules/@hwp/core-ui/src/base-blocks/{BlockName}/{BlockName}.types.ts` (if it exists separately) for the `{BlockName}Props` type to confirm the variant prop name and available values.
 
 ### Step 2 — Determine the default variant
 
-Read the block's variants file: `hwp-platform/packages/core-ui/src/base-blocks/{BlockName}/{BlockName}.variants.ts` (flat layout) OR `hwp-platform/packages/core-ui/src/base-blocks/{BlockName}/index.ts` (structural variants).
+Read the block's variants file: `node_modules/@hwp/core-ui/src/base-blocks/{BlockName}/{BlockName}.variants.ts` (flat layout) OR `node_modules/@hwp/core-ui/src/base-blocks/{BlockName}/index.ts` (structural variants).
 
 - For CVA (flat): the first key in the `variants` object is the default.
 - For structural variants (`index.ts`): the first key exported from the variants map is the default.
@@ -108,18 +108,18 @@ For the `src` field of any image:
 
 ### Step 4 — Check and update client registry
 
-Read `hwp-platform/apps/{SITE}/src/blocks/registry.ts`.
+Read `src/blocks/registry.ts`.
 
 Verify that `{BlockName}` is already exported in the `clientBlocks` object. If it is not present:
 
-1. Read `hwp-platform/apps/{SITE}/src/blocks/{BlockName}/{BlockName}.tsx`. If this file does not exist, stop and tell the user: "Block `{BlockName}` is not registered in `apps/{SITE}/src/blocks/registry.ts` and no local re-export exists. Run `/scaffold-block {BlockName} --target client --site {SITE}` first, then re-run `/add-block`."
+1. Read `src/blocks/{BlockName}/{BlockName}.tsx`. If this file does not exist, stop and tell the user: "Block `{BlockName}` is not registered in `src/blocks/registry.ts` and no local re-export exists. Run `/scaffold-block {BlockName} --target client --site {SITE}` first, then re-run `/add-block`."
 2. If the file exists (the re-export exists but was not added to the registry), add the missing entry using the `Edit` tool:
    - Add the import line with the other block imports: `import { {BlockName} } from './{BlockName}/{BlockName}';`
    - Add `{BlockName},` to the `clientBlocks` object.
 
 ### Step 5 — Read existing fake-content file
 
-Read `hwp-platform/apps/{SITE}/src/data/fake-content.ts` (or `fake-content-{SLUG}.ts` if it exists) to:
+Read `src/data/fake-content.ts` (or `src/data/fake-content-{SLUG}.ts` if it exists) to:
 - Understand the existing naming convention for content variables.
 - Confirm the site's language and tone.
 - Avoid duplicate variable names.
@@ -159,7 +159,7 @@ Use the `Edit` tool to append to an existing file; use `Write` only if creating 
 
 ### Step 8 — Update the composition
 
-Read `hwp-platform/apps/{SITE}/src/compositions/{PageName}Composition.tsx`.
+Read `src/compositions/{PageName}Composition.tsx`.
 
 Two edits needed:
 

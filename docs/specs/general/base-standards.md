@@ -39,7 +39,7 @@
 ## Architecture
 
 - **Adapter pattern** at every external boundary: `BookingAdapter`, `ContentRepository`, `AIProviderAdapter`. Concrete implementations (`CloudbedsAdapter`, `PayloadAdapter`) inject through the interface. The core never imports a concrete adapter.
-- **No `if (client === '...')` in the core** — ever. Per-client behavior goes in the client's app (`apps/site-{slug}/`) or in the client's config (`client.config.ts`), not in `packages/*`.
+- **No `if (client === '...')` in the core** — ever. Per-client behavior goes in the client repo's `src/` or in `client.config.ts`, not in `hwp-core/packages/*`.
 - **DDD 4 layers** (Presentation / Application / Domain / Infrastructure). Domain does not import Infrastructure. Application orchestrates Domain via interfaces.
 - **Bounded contexts**: Booking, Content, Tenant, AI. Same real-world concept gets different names per context if semantics differ — never share types across contexts just because the shape matches.
 

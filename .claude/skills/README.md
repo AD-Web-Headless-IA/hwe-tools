@@ -1,24 +1,29 @@
-## IMPORTAR UN PROYECTO Y CREAR REPO 
-1. /import-figma https://github.com/agenciawebsqs/Skillskittest base-template
-   → Genera figma-analysis.md + design-language.md (NEW)
+## ONBOARDING DE NUEVO CLIENTE (DEC-017)
 
-2. /scaffold-site site-demo
-   → Crea apps/site-demo/ completo con re-exports de base-blocks + registry
+1. GitHub "Use this template" desde hwp-template → crea `site-{slug}`
+2. git clone --recurse-submodules site-{slug}
+   → Clona repo con .hwp-tools/ submodule ya montado
 
-3. pnpm install && pnpm build
-   → Valida que el site scaffoldeado compila
+3. /import-figma https://github.com/... {slug}
+   → Genera docs/figma-analysis.md + docs/design-language.md + docs/tokens.json
 
-4. /scaffold-block FAQBlock --target base
-   → Crea base-block + schema en core-ui
+4. /scaffold-site {slug}
+   → Configura src/blocks/registry.ts, tailwind, tokens, client.config.ts
 
-5. /scaffold-block FAQBlock --target client --site site-demo
-   → Crea re-export en site-demo + actualiza registry
+5. npm install
+   → Instala @hwp/core-ui + @hwp/config desde npm privado
 
-6. /add-block FAQBlock --site site-demo --page home
+6. /scaffold-block FAQBlock --target base
+   → (en hwp-core) Crea base-block + schema en core-ui
+
+7. /scaffold-block FAQBlock --target client --site {slug}
+   → Crea re-export en src/blocks/ + actualiza registry
+
+8. /add-block FAQBlock --page home
    → Añade a HomeComposition con fake content
 
-7. /design-block FAQBlock --client base-template
-   → Genera visual spec desde design-language.md
+9. /design-block FAQBlock --client {slug}
+   → Genera visual spec desde docs/design-language.md
 
-8. pnpm typecheck && pnpm test && pnpm build
-   → Todo verde
+10. npm run typecheck && npm test && npm run build
+    → Todo verde

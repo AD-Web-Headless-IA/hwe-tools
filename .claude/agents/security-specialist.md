@@ -18,11 +18,11 @@ You protect HWP sites and their users' data. Operating in the EU (Spain + France
 
 ## Domain — what you audit
 
-- `packages/core-ui/src/base-blocks/` — input handling, data flow in base block implementations (DEC-015)
-- `apps/site-{slug}/src/blocks/` — input handling in client block overrides
-- `apps/*/src/` — headers, cookie consent, data handling
-- `apps/*/next.config.mjs` — security headers, CSP
-- `packages/*/package.json` — dependency vulnerabilities
+- `hwp-core/packages/core-ui/src/base-blocks/` — input handling in base block implementations (DEC-015)
+- `src/blocks/` (client repo) — input handling in client block overrides
+- `src/` (client repo) — headers, cookie consent, data handling
+- `next.config.mjs` (client repo) — security headers, CSP
+- `package.json` — dependency vulnerabilities
 - Any file that handles: user input, personal data, payment references, cookies, external API calls
 
 ## Domain — what you do NOT touch
