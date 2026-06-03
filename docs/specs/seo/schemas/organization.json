@@ -1,0 +1,47 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "{{CLIENT_NAME}}",
+  "legalName": "{{CLIENT_LEGAL_NAME}}",
+  "url": "{{CLIENT_URL}}",
+  "logo": {
+    "@type": "ImageObject",
+    "url": "{{LOGO_URL}}",
+    "width": "{{LOGO_WIDTH}}",
+    "height": "{{LOGO_HEIGHT}}"
+  },
+  "description": "{{CLIENT_DESCRIPTION}}",
+  "foundingDate": "{{FOUNDING_YEAR}}",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "{{ADDRESS_STREET}}",
+    "addressLocality": "{{ADDRESS_CITY}}",
+    "postalCode": "{{ADDRESS_POSTAL_CODE}}",
+    "addressRegion": "{{ADDRESS_REGION}}",
+    "addressCountry": "{{ADDRESS_COUNTRY_CODE}}"
+  },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "{{CLIENT_PHONE}}",
+    "email": "{{CLIENT_EMAIL}}",
+    "contactType": "customer service",
+    "availableLanguage": ["{{LANGUAGE_1}}", "{{LANGUAGE_2}}"]
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "{{GEO_LATITUDE}}",
+    "longitude": "{{GEO_LONGITUDE}}"
+  },
+  "sameAs": [
+    "{{GOOGLE_BUSINESS_URL}}",
+    "{{TRIPADVISOR_URL}}",
+    "{{FACEBOOK_URL}}",
+    "{{INSTAGRAM_URL}}",
+    "{{BOOKING_COM_URL}}"
+  ],
+  "vatID": "{{VAT_NUMBER}}",
+  "numberOfEmployees": {
+    "@type": "QuantitativeValue",
+    "value": "{{EMPLOYEE_COUNT}}"
+  }
+}

@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HWP — Hospitality Web Platform</title>
+    <style>
+        :root {
+            --color-bg: #0c1a1d;
+            --color-surface: #142428;
+            --color-surface-2: #1e3438;
+            --color-border: #2a4a50;
+            --color-text: #e8f4f6;
+            --color-text-secondary: #8ab4bc;
+            --color-primary: #1a9e7a;
+            --color-primary-hover: #15b88d;
+            --color-accent: #9fcad0;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+            --color-code-bg: #0a1214;
+            --font-sans: 'Inter', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:var(--font-sans); background:var(--color-bg); color:var(--color-text); line-height:1.7; }
+        .nav { position:fixed; top:0; left:0; width:280px; height:100vh; background:var(--color-surface); border-right:1px solid var(--color-border); overflow-y:auto; padding:24px 16px; z-index:100; }
+        .nav h2 { font-size:14px; text-transform:uppercase; letter-spacing:1px; color:var(--color-text-secondary); margin-bottom:16px; padding:0 8px; }
+        .nav a { display:block; padding:8px 12px; color:var(--color-text-secondary); text-decoration:none; border-radius:6px; font-size:14px; transition:all 0.2s; margin-bottom:2px; }
+        .nav a:hover { background:var(--color-surface-2); color:var(--color-text); }
+        .nav a.active { background:var(--color-primary); color:white; }
+        .nav .section-title { font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--color-text-secondary); margin-top:20px; margin-bottom:8px; padding:0 12px; opacity:0.6; }
+        .nav-logo { font-size:18px; font-weight:800; padding:0 8px 20px; border-bottom:1px solid var(--color-border); margin-bottom:16px; background:linear-gradient(135deg, var(--color-primary), var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:-0.5px; }
+        .main { margin-left:280px; padding:48px 64px; max-width:960px; }
+        .hero { margin-bottom:64px; padding-bottom:48px; border-bottom:1px solid var(--color-border); }
+        .hero h1 { font-size:40px; font-weight:800; line-height:1.2; margin-bottom:16px; background:linear-gradient(135deg, var(--color-primary), var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .hero p { font-size:18px; color:var(--color-text-secondary); max-width:600px; }
+        .badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; margin-bottom:16px; }
+        .badge-teal { background:rgba(26,158,122,0.15); color:var(--color-primary); }
+        .badge-accent { background:rgba(159,202,208,0.15); color:var(--color-accent); }
+        .badge-warning { background:rgba(245,158,11,0.15); color:var(--color-warning); }
+        h2 { font-size:28px; font-weight:700; margin-top:64px; margin-bottom:24px; padding-top:32px; border-top:1px solid var(--color-border); }
+        h3 { font-size:20px; font-weight:600; margin-top:32px; margin-bottom:12px; }
+        h4 { font-size:16px; font-weight:600; margin-top:24px; margin-bottom:8px; color:var(--color-primary); }
+        p { margin-bottom:16px; color:var(--color-text-secondary); }
+        strong { color:var(--color-text); }
+        ul, ol { margin-bottom:16px; padding-left:24px; }
+        li { margin-bottom:8px; color:var(--color-text-secondary); }
+        pre { background:var(--color-code-bg); border:1px solid var(--color-border); border-radius:8px; padding:20px 24px; overflow-x:auto; margin-bottom:24px; position:relative; }
+        pre::before { content:attr(data-lang); position:absolute; top:8px; right:12px; font-size:11px; color:var(--color-text-secondary); opacity:0.6; }
+        code { font-family:var(--font-mono); font-size:13px; line-height:1.6; }
+        p code, li code, td code { background:var(--color-surface-2); padding:2px 6px; border-radius:4px; font-size:13px; color:var(--color-accent); }
+        .card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:24px; margin-bottom:16px; }
+        .card-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:16px; margin-bottom:24px; }
+        .card h4 { margin-top:0; color:var(--color-text); }
+        .card p { font-size:14px; margin-bottom:0; }
+        .card-icon { font-size:24px; margin-bottom:8px; }
+        .flow { display:flex; flex-direction:column; align-items:center; gap:0; margin:32px 0; }
+        .flow-item { background:var(--color-surface); border:1px solid var(--color-border); border-radius:8px; padding:12px 24px; text-align:center; font-weight:500; width:100%; max-width:500px; font-size:14px; }
+        .flow-item.highlight { border-color:var(--color-primary); background:rgba(26,158,122,0.1); }
+        .flow-arrow { font-size:20px; color:var(--color-text-secondary); padding:4px 0; }
+        table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+        th, td { padding:12px 16px; text-align:left; border-bottom:1px solid var(--color-border); }
+        th { background:var(--color-surface); color:var(--color-text); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; }
+        td { color:var(--color-text-secondary); }
+        .step { display:flex; gap:16px; margin-bottom:24px; padding:20px; background:var(--color-surface); border-radius:8px; border-left:3px solid var(--color-primary); }
+        .step-number { flex-shrink:0; width:32px; height:32px; background:var(--color-primary); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; color:white; }
+        .step-content h4 { margin-top:0; margin-bottom:8px; color:var(--color-text); }
+        .step-content p { margin-bottom:0; font-size:14px; }
+        .alert { padding:16px 20px; border-radius:8px; margin-bottom:24px; font-size:14px; }
+        .alert-info { background:rgba(26,158,122,0.1); border:1px solid rgba(26,158,122,0.3); }
+        .alert-warning { background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); }
+        .alert-error { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); }
+        .alert strong { display:block; margin-bottom:4px; }
+        .layer-bar { display:flex; gap:0; margin:24px 0; border-radius:8px; overflow:hidden; }
+        .layer-bar div { padding:12px 16px; text-align:center; font-size:13px; font-weight:600; flex:1; }
+        .l1 { background:#0f6e56; color:#e1f5ee; }
+        .l2 { background:#185fa5; color:#e6f1fb; }
+        .l3 { background:#854f0b; color:#faeeda; }
+        .l4 { background:#993c1d; color:#faece7; }
+        .tag { display:inline-block; padding:2px 10px; border-radius:12px; font-size:11px; font-weight:600; margin-right:4px; }
+        .tag-exists { background:rgba(16,185,129,0.15); color:#10b981; }
+        .tag-new { background:rgba(56,138,221,0.15); color:#85b7eb; }
+        .tag-expand { background:rgba(245,158,11,0.15); color:#f59e0b; }
+        .tag-v2 { background:rgba(159,202,208,0.1); color:#8ab4bc; }
+        @media (max-width:1024px) { .nav{display:none;} .main{margin-left:0; padding:32px 24px;} }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-logo">🏨 HWP Platform</div>
+        <div class="section-title">General</div>
+        <a href="#overview">Visión general</a>
+        <a href="#architecture">Arquitectura</a>
+        <a href="#structure">Estructura del monorepo</a>
+        <div class="section-title">Bloques</div>
+        <a href="#blocks-system">Sistema de bloques</a>
+        <a href="#four-layers">Las 4 capas</a>
+        <a href="#block-catalog">Catálogo de bloques</a>
+        <a href="#slots">Slots y personalización</a>
+        <div class="section-title">Theming</div>
+        <a href="#tokens">Tokens y cascade</a>
+        <a href="#css-rules">Reglas CSS</a>
+        <div class="section-title">Metodología</div>
+        <a href="#specboot">SPECBOOT</a>
+        <a href="#skills">Skills y agentes</a>
+        <a href="#stories">User stories</a>
+        <div class="section-title">Operaciones</div>
+        <a href="#new-client">Nuevo cliente</a>
+        <a href="#new-block">Nuevo bloque</a>
+        <a href="#audits">Auditorías</a>
+        <div class="section-title">Referencia</div>
+        <a href="#decs">Decisiones (DECs)</a>
+        <a href="#rules">Reglas no negociables</a>
+        <a href="#faq">FAQ</a>
+    </nav>
+
+    <div class="main">
+        <div class="hero">
+            <span class="badge badge-teal">v1.0 — Hospitality Web Platform</span>
+            <h1>HWP Platform</h1>
+            <p>Plataforma multi-tenant para webs de camping y hotel. De Figma a producción, con IA, para hasta 300 clientes.</p>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="overview">
+            <h2>Visión general</h2>
+            <p>HWP es el producto de <strong>Septeo Hospitality</strong> que reemplaza las webs WordPress individuales por una plataforma unificada. Cada web de cliente se construye combinando <strong>bloques reutilizables</strong> con la identidad visual propia del cliente.</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-icon">🧱</div>
+                    <h4>Bloques compartidos</h4>
+                    <p>Un catálogo de ~25 bloques (hero, galería, reservas, FAQ...) que todos los clientes comparten. Cada cliente los personaliza con sus colores, fuentes y, si necesita, su propio JSX.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🎨</div>
+                    <h4>Tokens como identidad</h4>
+                    <p>Los colores, fuentes, radios y sombras de cada cliente se definen como tokens. Un mismo bloque se ve completamente diferente entre un camping teal y un hotel dorado.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🤖</div>
+                    <h4>IA integrada</h4>
+                    <p>11 agentes de IA especializados (arquitecto, implementador, revisor, auditor SEO, seguridad...) que garantizan calidad en cada paso del desarrollo.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🚀</div>
+                    <h4>300 clientes independientes</h4>
+                    <p>Cada cliente tiene su propio repositorio y deploy en Vercel. Un bug en un camping nunca afecta al hotel de al lado.</p>
+                </div>
+            </div>
+
+            <h3>Stack tecnológico</h3>
+            <table>
+                <thead><tr><th>Capa</th><th>Tecnología</th><th>Para qué</th></tr></thead>
+                <tbody>
+                    <tr><td>Frontend</td><td><code>Next.js 14</code> App Router</td><td>Renderizado de las webs de cliente</td></tr>
+                    <tr><td>CMS</td><td><code>Payload CMS v3</code></td><td>Gestión de contenido por la agencia</td></tr>
+                    <tr><td>Hosting</td><td><code>Vercel</code> full-stack</td><td>Deploy, DB, Blob Storage, Cron</td></tr>
+                    <tr><td>Base de datos</td><td><code>Vercel Postgres</code></td><td>Una DB por cliente + una compartida</td></tr>
+                    <tr><td>Estilos</td><td><code>Tailwind v3</code> + <code>CVA</code></td><td>Utility-first + variantes declarativas</td></tr>
+                    <tr><td>Validación</td><td><code>Zod</code></td><td>Schemas en cada frontera del sistema</td></tr>
+                    <tr><td>Testing</td><td><code>Vitest</code> + <code>Playwright</code></td><td>Unit/integration + E2E</td></tr>
+                    <tr><td>Monorepo</td><td><code>Turborepo</code> + <code>pnpm</code></td><td>Packages compartidos + apps</td></tr>
+                    <tr><td>Lenguaje</td><td><code>TypeScript strict</code></td><td>Cero <code>any</code>, siempre tipado</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="architecture">
+            <h2>Arquitectura</h2>
+            <p>HWP tiene dos mundos: el <strong>monorepo de plataforma</strong> (donde vive el código compartido) y los <strong>repos de cliente</strong> (donde vive cada web individual). Los clientes consumen los paquetes de la plataforma via npm.</p>
+
+            <div class="flow">
+                <div class="flow-item highlight">📦 hwp-platform/ (monorepo)</div>
+                <div class="flow-arrow">↓ publica @hwp/* via npm</div>
+                <div class="flow-item">📦 site-camping-mer/ (repo independiente)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item">📦 site-hotel-balneario/ (repo independiente)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item">📦 site-camping-sol/ (repo independiente)</div>
+                <div class="flow-arrow" style="opacity:0.4">↓ ... hasta 300 repos</div>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>¿Por qué repos separados?</strong>
+                Escalabilidad (300 repos pequeños > 1 repo enorme), aislamiento (un dev solo clona su proyecto), deploys independientes (un bug en un cliente no bloquea a otro). Decisión: DEC-011.
+            </div>
+
+            <h3>El monorepo: qué contiene</h3>
+            <table>
+                <thead><tr><th>Paquete</th><th>npm</th><th>Contenido</th></tr></thead>
+                <tbody>
+                    <tr><td><code>packages/core-ui</code></td><td><code>@hwp/core-ui</code></td><td>Schemas, base-blocks, primitives, renderer, providers, theme, composition-rules</td></tr>
+                    <tr><td><code>packages/booking</code></td><td><code>@hwp/booking</code></td><td>BookingAdapter interface + adaptadores PMS (THR, Masterbooking, Witbooking)</td></tr>
+                    <tr><td><code>packages/config</code></td><td><code>@hwp/config</code></td><td>Tailwind preset, tsconfig base, ESLint config</td></tr>
+                    <tr><td><code>apps/site-demo</code></td><td>—</td><td>Camping Mer et Camargue: sitio de referencia que valida los packages</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="structure">
+            <h2>Estructura del monorepo</h2>
+            <h3>packages/core-ui/ (DEC-015)</h3>
+<pre data-lang="tree">packages/core-ui/src/
+├── schemas/                ← Zod schemas compartidos (source of truth)
+│   ├── HeroBlock.schema.ts
+│   ├── GalleryBlock.schema.ts
+│   └── ...
+├── types/                  ← Types derivados de schemas (z.infer)
+├── base-blocks/            ← Implementaciones de referencia
+│   ├── index.ts            ← Re-exporta todos → subpath @hwp/core-ui/base-blocks
+│   ├── HeroBlock/
+│   │   ├── HeroBlock.tsx
+│   │   ├── HeroBlock.slots.ts
+│   │   └── HeroBlock.test.tsx
+│   └── BookingBlock/       ← Con variantes estructurales (DEC-008)
+│       ├── index.ts        ← Resolver
+│       ├── BookingInline/
+│       └── BookingSticky/
+├── primitives/             ← Shadcn/Radix (Button, Input, Dialog...)
+├── renderer/
+│   ├── BlockRenderer.tsx   ← Acepta client block map
+│   └── baseBlockRegistry.ts
+├── providers/              ← TenantProvider, SeasonProvider
+├── layout/                 ← SiteShell, Navbar, Footer
+├── theme/                  ← Token contract + cascade
+├── composition-rules/      ← Reglas de composición con Zod
+└── index.ts                ← API pública raíz</pre>
+
+            <h3>Subpath exports de @hwp/core-ui</h3>
+<pre data-lang="json">{
+  "exports": {
+    ".":              "./src/index.ts",
+    "./base-blocks":  "./src/base-blocks/index.ts",
+    "./schemas":      "./src/schemas/index.ts"
+  }
+}</pre>
+
+            <h3>Repo de cliente (independiente)</h3>
+<pre data-lang="tree">site-{slug}/
+├── src/
+│   ├── blocks/                 ← Bloques del cliente
+│   │   ├── HeroBlock/HeroBlock.tsx
+│   │   ├── GalleryBlock/GalleryBlock.tsx
+│   │   └── registry.ts        ← Mapa de bloques → BlockRenderer
+│   ├── primitives/             ← Overrides opcionales (~2% de clientes)
+│   ├── compositions/           ← Montaje de páginas
+│   ├── theme/
+│   │   └── tokens.json         ← Colores y fuentes del cliente
+│   └── app/
+│       ├── globals.css         ← UN CSS: fuentes, animaciones, 3rd-party
+│       ├── layout.tsx
+│       └── page.tsx
+├── client.config.ts            ← Config del tenant
+├── tailwind.config.ts
+└── package.json                ← Depende de @hwp/core-ui, @hwp/config...</pre>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="blocks-system">
+            <h2>Sistema de bloques</h2>
+            <p>Un <strong>bloque</strong> es una sección reutilizable de una página web: un hero, una galería, un formulario de contacto, una sección de reseñas. Cada bloque tiene un contrato de datos (schema Zod) y una implementación visual (React + Tailwind).</p>
+
+            <h3>Dónde vive cada cosa</h3>
+            <table>
+                <thead><tr><th>Pieza</th><th>Ubicación</th><th>Quién la toca</th></tr></thead>
+                <tbody>
+                    <tr><td>Schema Zod (contrato de datos)</td><td><code>@hwp/core-ui/schemas</code></td><td>Equipo de plataforma</td></tr>
+                    <tr><td>Base-block (implementación de referencia)</td><td><code>@hwp/core-ui/base-blocks</code></td><td>Equipo de plataforma</td></tr>
+                    <tr><td>Bloque del cliente (personalizado)</td><td><code>site-{slug}/src/blocks/</code></td><td>Developer del cliente</td></tr>
+                    <tr><td>Composición (montaje de página)</td><td><code>site-{slug}/src/compositions/</code></td><td>Developer del cliente</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Tres niveles de uso</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Level 1 — Re-export (~70%)</h4>
+                    <p>El cliente usa el base-block tal cual. Los tokens (colores, fuentes) lo hacen suyo. Cero código custom.</p>
+<pre><code>export { HeroBlock }
+  from '@hwp/core-ui/base-blocks';</code></pre>
+                </div>
+                <div class="card">
+                    <h4>Level 2 — Slots (~20%)</h4>
+                    <p>El cliente personaliza piezas concretas (cómo se ve el título, el botón) sin reescribir todo el bloque.</p>
+<pre><code>import { HeroBlock as Base }
+  from '@hwp/core-ui/base-blocks';
+export function HeroBlock({ content }) {
+  return &lt;Base content={content}
+    slots={{ heading: miHeading }} /&gt;;
+}</code></pre>
+                </div>
+                <div class="card">
+                    <h4>Level 3 — Full custom (~10%)</h4>
+                    <p>El cliente escribe su propio JSX completo, usando solo el schema compartido para los datos.</p>
+<pre><code>import type { HeroBlockContent }
+  from '@hwp/core-ui/schemas';
+export function HeroBlock({ content }) {
+  return &lt;section&gt;
+    {/* JSX totalmente custom */}
+  &lt;/section&gt;;
+}</code></pre>
+                </div>
+            </div>
+
+            <h3>Cadena de resolución</h3>
+            <div class="flow">
+                <div class="flow-item">Payload envía layout[] con tipo "HeroBlock"</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item highlight">BlockRenderer busca en clientBlocks (registry.ts del cliente)</div>
+                <div class="flow-arrow">↓ ¿Encontrado?</div>
+                <div class="flow-item" style="border-color:var(--color-success)">Sí → usa la implementación del cliente</div>
+                <div class="flow-arrow">↓ ¿No encontrado?</div>
+                <div class="flow-item">Fallback → usa base-block de @hwp/core-ui</div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="four-layers">
+            <h2>Las 4 capas de un bloque</h2>
+            <p>Cada bloque tiene hasta 4 capas. La primera es obligatoria; las demás se añaden según la complejidad del bloque.</p>
+
+            <div class="layer-bar">
+                <div class="l1">L1 — Schema</div>
+                <div class="l2">L2 — Variants</div>
+                <div class="l3">L3 — Config</div>
+                <div class="l4">L4 — Adapter</div>
+            </div>
+
+            <div class="card">
+                <h4>Layer 1 — Content Schema (siempre)</h4>
+                <p>Define qué campos tiene el bloque. Es un schema Zod que valida los datos del CMS. Vive en <code>@hwp/core-ui/schemas</code> y es compartido por todos los clientes.</p>
+<pre data-lang="ts">export const HeroBlockContent = z.object({
+  title:    z.string().min(1),
+  subtitle: z.string().optional(),
+  image:    z.object({ src: z.string().url(), alt: z.string() }),
+  cta:      z.object({ label: z.string(), href: z.string() }).optional(),
+});</pre>
+            </div>
+
+            <div class="card">
+                <h4>Layer 2 — Variants (cuando hay variaciones)</h4>
+                <p>Tres sub-tipos según la complejidad:</p>
+                <table>
+                    <thead><tr><th>Tipo</th><th>Cuándo</th><th>Ejemplo</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>CVA (L2a)</strong></td><td>Solo cambia CSS</td><td>MediaText: imageLeft / imageRight</td></tr>
+                        <tr><td><strong>Structural (L2b)</strong></td><td>Diferente DOM/hooks</td><td>Gallery: slider / masonry / grid</td></tr>
+                        <tr><td><strong>Functional (L2c)</strong></td><td>Diferentes campos por variante</td><td>Gallery links vs Gallery grid</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h4>Layer 3 — Config Schema (cuando hay opciones de comportamiento)</h4>
+                <p>Separado del content. Content es "qué ve el usuario". Config es "cómo se comporta el bloque".</p>
+<pre data-lang="ts">export const GalleryBlockConfig = z.object({
+  lightbox:  z.boolean().default(false),
+  autoplay:  z.boolean().default(false),
+  columns:   z.union([z.literal(2), z.literal(3), z.literal(4)]).default(3),
+});</pre>
+            </div>
+
+            <div class="card">
+                <h4>Layer 4 — Adapter (cuando conecta a un servicio externo)</h4>
+                <p>El bloque no sabe si habla con THR, Masterbooking o Google Maps. Solo usa un hook (<code>useBookingAdapter()</code>) y el adapter concreto se inyecta via provider.</p>
+                <table>
+                    <thead><tr><th>Dominio</th><th>Bloques</th><th>Proveedores</th></tr></thead>
+                    <tbody>
+                        <tr><td>Booking</td><td>BookingBlock</td><td>THR, Masterbooking, Witbooking</td></tr>
+                        <tr><td>Mapas</td><td>MapBlock</td><td>Google Maps, OSM, Mapbox</td></tr>
+                        <tr><td>Reviews</td><td>ReviewsBlock</td><td>Google, TripAdvisor, manual</td></tr>
+                        <tr><td>Formularios</td><td>FormBlock</td><td>Email, CRM, SendGrid</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Decisión rápida: ¿qué capas necesita mi bloque?</h3>
+            <ul>
+                <li>¿Solo renderiza contenido estático? → <strong>L1 solamente</strong> (RichTextBlock, BannerBlock)</li>
+                <li>¿Tiene variaciones visuales o estructurales? → <strong>L1 + L2</strong> (GalleryBlock, FAQBlock)</li>
+                <li>¿Tiene opciones de comportamiento (autoplay, columnas)? → <strong>L1 + L2 + L3</strong></li>
+                <li>¿Conecta a un servicio externo? → <strong>L1 + L2 + L3 + L4</strong> (BookingBlock, MapBlock)</li>
+            </ul>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="block-catalog">
+            <h2>Catálogo de bloques</h2>
+            <p>Inventario completo mapeado desde la biblioteca WordPress de Septeo Hospitality.</p>
+
+            <h4>Bloques existentes</h4>
+            <table>
+                <thead><tr><th>Bloque</th><th>Capas</th><th>Estado</th></tr></thead>
+                <tbody>
+                    <tr><td>HeroBlock</td><td>L1 + L2b + L3</td><td><span class="tag tag-expand">Ampliar: +video, +slider, +parallax</span></td></tr>
+                    <tr><td>BookingBlock</td><td>L1 + L2b + L3 + L4</td><td><span class="tag tag-exists">Completo (inline + sticky)</span></td></tr>
+                    <tr><td>MediaTextBlock</td><td>L1 + L2a</td><td><span class="tag tag-exists">Completo</span></td></tr>
+                    <tr><td>AccommodationGridBlock</td><td>L1 + L2a</td><td><span class="tag tag-exists">Completo</span></td></tr>
+                    <tr><td>AmenitiesBlock</td><td>L1 + L2a</td><td><span class="tag tag-exists">Completo</span></td></tr>
+                    <tr><td>ReviewsBlock</td><td>L1 + L2b + L3 + L4</td><td><span class="tag tag-expand">Ampliar: +slider, +card, +adapter</span></td></tr>
+                </tbody>
+            </table>
+
+            <h4>Bloques nuevos — simples</h4>
+            <table>
+                <thead><tr><th>Bloque</th><th>Capas</th><th>Variantes</th></tr></thead>
+                <tbody>
+                    <tr><td>RichTextBlock</td><td>L1</td><td>—</td></tr>
+                    <tr><td>FAQBlock</td><td>L1 + L2a + L3</td><td>accordion, categorized; config: multipleOpen, searchable</td></tr>
+                    <tr><td>TabsBlock</td><td>L1 + L2a</td><td>horizontal, vertical</td></tr>
+                    <tr><td>RatesBlock</td><td>L1 + L2a</td><td>table, cards</td></tr>
+                    <tr><td>OffersBlock</td><td>L1 + L2a</td><td>grid, featured</td></tr>
+                    <tr><td>ContactBlock</td><td>L1 + L2a</td><td>inline, card</td></tr>
+                    <tr><td>BannerBlock</td><td>L1 + L2a + L3</td><td>topBar, side; config: dismissible</td></tr>
+                    <tr><td>BlogListBlock</td><td>L1 + L2a</td><td>grid, list</td></tr>
+                </tbody>
+            </table>
+
+            <h4>Bloques nuevos — complejos</h4>
+            <table>
+                <thead><tr><th>Bloque</th><th>Capas</th><th>Variantes / Adapters</th></tr></thead>
+                <tbody>
+                    <tr><td>GalleryBlock</td><td>L1 + L2b + L3</td><td>slider, grid, masonry, collage; config: lightbox, autoplay, columns</td></tr>
+                    <tr><td>MapBlock</td><td>L1 + L2b + L3 + L4</td><td>interactive, static; adapter: Google, OSM, Mapbox</td></tr>
+                    <tr><td>FormBlock</td><td>L1 + L2b + L3 + L4</td><td>simple, multiStep; adapter: email, CRM</td></tr>
+                    <tr><td>NewsletterBlock</td><td>L1 + L2a + L4</td><td>inline, footer; adapter: Mailchimp, SendGrid</td></tr>
+                </tbody>
+            </table>
+
+            <h4>Providers (no son bloques)</h4>
+            <table>
+                <thead><tr><th>Provider</th><th>Para qué</th></tr></thead>
+                <tbody>
+                    <tr><td>CookieConsentProvider</td><td>RGPD: banner/modal de cookies, bloqueo de scripts</td></tr>
+                    <tr><td>PopupProvider</td><td>Popups por página, con cookie de dismissal</td></tr>
+                    <tr><td>SidebarProvider</td><td>Barra lateral: recibe bloques como slots (Newsletter, Social...)</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="slots">
+            <h2>Slots y personalización</h2>
+            <p>Los <strong>slots</strong> son puntos de personalización visual dentro de un base-block. El bloque garantiza la estructura semántica (accesibilidad, SEO); el cliente decide cómo se ve cada pieza.</p>
+
+<pre data-lang="ts">// Definición de slots en el base-block
+export type HeroBlockSlots = {
+  media?:   (image: ImageData) =&gt; React.ReactNode;
+  heading?: (title: string, subtitle?: string) =&gt; React.ReactNode;
+  cta?:     (cta: CtaData) =&gt; React.ReactNode;
+};
+
+// El base-block usa slots si los recibe, defaults si no
+export function HeroBlock({ content, slots }: HeroBlockProps) {
+  return (
+    &lt;section aria-labelledby="hero-heading"&gt;
+      {slots?.media   ? slots.media(content.image)   : &lt;DefaultMedia ... /&gt;}
+      {slots?.heading ? slots.heading(content.title)  : &lt;DefaultHeading ... /&gt;}
+      {slots?.cta     ? slots.cta(content.cta)        : &lt;DefaultCta ... /&gt;}
+    &lt;/section&gt;
+  );
+}</pre>
+
+            <div class="alert alert-info">
+                <strong>El bloque siempre pone el &lt;section&gt; y el aria-labelledby</strong>
+                Los slots controlan lo visual. La estructura semántica (accesibilidad, SEO, HTML semántico) la garantiza el base-block — el cliente no puede romperla.
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="tokens">
+            <h2>Tokens y cascade</h2>
+            <p>Los tokens son los valores de diseño (colores, fuentes, espaciado, sombras) que hacen que un mismo bloque se vea diferente en cada cliente. Se resuelven en cascada: plataforma → semántico → marca.</p>
+
+            <div class="flow">
+                <div class="flow-item">🌍 Global (plataforma) — color.teal.600 = #0F6E56</div>
+                <div class="flow-arrow">↓ se mapea a</div>
+                <div class="flow-item">🏷️ Semántico — color.primary = {color.teal.600}</div>
+                <div class="flow-arrow">↓ el cliente overridea</div>
+                <div class="flow-item highlight">🎨 Brand (tokens.json) — color.primary = #8B6914 (dorado)</div>
+                <div class="flow-arrow">↓ se compila a</div>
+                <div class="flow-item">📄 globals.css → :root { --color-primary: #8B6914; }</div>
+                <div class="flow-arrow">↓ Tailwind lo consume</div>
+                <div class="flow-item">🧱 Bloque usa bg-primary → se ve dorado</div>
+            </div>
+
+            <h3>tokens.json del cliente</h3>
+<pre data-lang="json">{
+  "colors": {
+    "background":   { "value": "#FFFFFF" },
+    "surface":      { "value": "#E4F3F5" },
+    "primary":      { "value": "#1A4A52" },
+    "accent":       { "value": "#9FCAD0" },
+    "text-on-dark": { "value": "#FFFFFF" },
+    "border":       { "value": "rgba(159,202,208,0.35)" }
+  },
+  "fonts": {
+    "heading": { "family": "Playfair Display", "fallback": "serif" },
+    "body":    { "family": "Montserrat", "fallback": "sans-serif" }
+  },
+  "spacing": { "container-max": "1440px", "section-y": "clamp(3rem, 8vw, 6rem)" },
+  "radii":   { "sm": "0.25rem", "md": "0.5rem", "lg": "1rem" },
+  "shadows": { "card": "0 4px 12px rgba(0,0,0,0.06)" }
+}</pre>
+
+            <div class="alert alert-warning">
+                <strong>Regla: un componente NUNCA pone un color hexadecimal directo</strong>
+                Siempre usa el token via clase Tailwind (<code>bg-primary</code>, <code>text-accent</code>). Así el mismo bloque se adapta automáticamente a cada cliente.
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="css-rules">
+            <h2>Reglas CSS</h2>
+            <ul>
+                <li><strong>UN <code>globals.css</code> por cliente</strong> en <code>src/app/globals.css</code>. Contiene: <code>@font-face</code>, variables CSS de tokens, <code>@keyframes</code>, overrides de widgets externos (THR, Ideta), <code>@media print</code>.</li>
+                <li><strong>CERO ficheros CSS por bloque.</strong> Los bloques solo usan clases Tailwind y recetas CVA. Nada de <code>HeroBlock.css</code>.</li>
+                <li><strong>Tailwind v3</strong> (DEC-012). No v4 hasta que el ecosistema (Next.js + CVA + Turborepo) sea estable.</li>
+            </ul>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="specboot">
+            <h2>SPECBOOT — Metodología</h2>
+            <p><strong>Spec-driven, Boot-strapped.</strong> La especificación va primero, el código va después. Nunca se escribe código sin una propuesta aprobada.</p>
+
+            <div class="flow">
+                <div class="flow-item">1️⃣ /enrich_us — Enriquecer la historia con detalles técnicos</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item">2️⃣ /propose — Diseñar la solución (qué ficheros, qué tests, qué riesgos)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item highlight">3️⃣ /apply — Implementar con TDD (test → fail → code → pass)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item">4️⃣ /verify — Gates de calidad (typecheck, test, lint, build)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item">5️⃣ /archive — Cerrar historia (actualizar docs, catálogo, marcar done)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item">6️⃣ /commit — Conventional Commit en inglés</div>
+            </div>
+
+            <div class="alert alert-error">
+                <strong>Regla: no se salta ningún paso</strong>
+                Cada paso produce un artefacto que el siguiente consume. Si no hay propuesta aprobada, no se implementa. Si no pasa verify, no se archiva. Si no se archiva, no se commitea.
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="skills">
+            <h2>Skills y agentes</h2>
+
+            <h3>Los 13 skills</h3>
+            <table>
+                <thead><tr><th>Skill</th><th>Qué hace</th></tr></thead>
+                <tbody>
+                    <tr><td><code>/scaffold-block</code></td><td>Crea la estructura de un bloque nuevo (schema + tipos + tests + componente)</td></tr>
+                    <tr><td><code>/scaffold-site</code></td><td>Crea un proyecto de cliente completo desde la plantilla</td></tr>
+                    <tr><td><code>/scaffold-variant</code></td><td>Añade una variante estructural a un bloque existente</td></tr>
+                    <tr><td><code>/import-figma</code></td><td>Importa un Figma Make y extrae tokens</td></tr>
+                    <tr><td><code>/enrich-us</code></td><td>Enriquece una user story con detalles técnicos</td></tr>
+                    <tr><td><code>/plan-to-stories</code></td><td>Descompone un plan en user stories</td></tr>
+                    <tr><td><code>/security-audit</code></td><td>Auditoría de seguridad completa (7 áreas)</td></tr>
+                    <tr><td><code>/security-fix</code></td><td>Aplica fixes de la última auditoría de seguridad</td></tr>
+                    <tr><td><code>/seo-audit</code></td><td>Auditoría SEO completa (7 áreas)</td></tr>
+                    <tr><td><code>/seo-fix</code></td><td>Aplica fixes de la última auditoría SEO</td></tr>
+                    <tr><td><code>/archive</code></td><td>Cierra una historia: sincroniza docs, actualiza catálogo</td></tr>
+                    <tr><td><code>/commit</code></td><td>Prepara commits siguiendo Conventional Commits</td></tr>
+                    <tr><td><code>/create-page</code></td><td>Crea una nueva página con composición y ruta</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Los 11 agentes (DEC-014)</h3>
+            <table>
+                <thead><tr><th>Agente</th><th>Modelo</th><th>Rol</th></tr></thead>
+                <tbody>
+                    <tr><td>planner</td><td>Opus</td><td>Diseña la solución técnica</td></tr>
+                    <tr><td>implementer</td><td>Sonnet</td><td>Implementa con TDD</td></tr>
+                    <tr><td>reviewer</td><td>Opus</td><td>Revisión independiente del diff</td></tr>
+                    <tr><td>verifier</td><td>Haiku</td><td>CI gates: typecheck, test, lint, build</td></tr>
+                    <tr><td>architect</td><td>Opus</td><td>Guardian de la arquitectura, propone DECs</td></tr>
+                    <tr><td>senior-developer</td><td>Sonnet</td><td>Referencia de patrones del core</td></tr>
+                    <tr><td>ux-ui-analyst</td><td>Sonnet</td><td>Compara implementación vs Figma</td></tr>
+                    <tr><td>seo-geo-specialist</td><td>Sonnet</td><td>HTML semántico, JSON-LD, local SEO</td></tr>
+                    <tr><td>security-specialist</td><td>Sonnet</td><td>RGPD, inputs, headers, CSP, cookies</td></tr>
+                    <tr><td>qa-engineer</td><td>Sonnet</td><td>QA behavioral, responsive, accesibilidad</td></tr>
+                    <tr><td>docs-writer</td><td>Sonnet</td><td>Mantiene skills, guías, catálogo, README</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="stories">
+            <h2>User stories</h2>
+            <p>Cada tarea de desarrollo se escribe como una historia de usuario con formato estándar:</p>
+<pre>Como [tipo de usuario],
+quiero [funcionalidad],
+para [beneficio].</pre>
+            <p>Las historias viven en <code>docs/stories/{frontend,cms,infra}/</code> y pasan por el ciclo SPECBOOT completo antes de considerarse terminadas.</p>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="new-client">
+            <h2>Crear un cliente nuevo</h2>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Importar el diseño</h4>
+                    <p><code>/import-figma https://github.com/... camping-sol-y-luna</code><br>Clona el Figma Make, extrae tokens, genera análisis en <code>docs/clients/{slug}/</code>.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Crear el proyecto</h4>
+                    <p><code>/scaffold-site camping-sol-y-luna</code><br>Crea el repo con todos los base-blocks re-exportados, registry, tema, globals.css.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Aplicar tokens</h4>
+                    <p>Del análisis Figma, extraer colores y fuentes a <code>src/theme/tokens.json</code>. Validar con <code>TokensContract.parse()</code>.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>Personalizar bloques</h4>
+                    <p>Por cada bloque: ¿Level 1 basta? ¿Necesita slots (Level 2)? ¿Custom total (Level 3)? La decisión depende del Figma del cliente.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h4>Crear composiciones</h4>
+                    <p>Definir qué bloques van en cada página y en qué orden. Cada composición es un fichero en <code>src/compositions/</code>.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <h4>Auditorías</h4>
+                    <p><code>/seo-audit {slug}</code> y <code>/security-audit {slug}</code>. Corregir issues y re-auditar hasta verde.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">7</div>
+                <div class="step-content">
+                    <h4>Deploy</h4>
+                    <p>Conectar repo a Vercel. Configurar dominio custom. Cada cliente tiene su proyecto Vercel independiente.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="new-block">
+            <h2>Crear un bloque nuevo</h2>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Decidir las capas</h4>
+                    <p>¿Solo contenido? → L1. ¿Variantes? → +L2. ¿Config? → +L3. ¿Adapter? → +L4.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Scaffold</h4>
+                    <p><code>/scaffold-block GalleryBlock --target base</code> → crea en <code>packages/core-ui/src/base-blocks/GalleryBlock/</code> con schema en <code>schemas/</code>.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>TDD — Schema tests</h4>
+                    <p>Escribir tests para el schema Zod: datos mínimos, opcionales, inválidos, repeaters.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>TDD — Component tests</h4>
+                    <p>Render con datos mínimos, cada variante, accesibilidad (axe), interacciones.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h4>Auditorías</h4>
+                    <p>SEO audit (si tiene headings/images/links) + Security audit (si tiene inputs/adapter). Son gates obligatorios para pasar a beta.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="audits">
+            <h2>Auditorías</h2>
+            <table>
+                <thead><tr><th>Tipo</th><th>Áreas</th><th>Cuándo</th></tr></thead>
+                <tbody>
+                    <tr><td>SEO</td><td>Semántica HTML, metas, imágenes, JSON-LD, local SEO, performance, GEO/LLM</td><td>Después de crear bloques o páginas</td></tr>
+                    <tr><td>Security</td><td>Headers, cookies, inputs, secrets, RGPD, dependencias, Next.js patterns</td><td>Antes de cada deploy; después de bloques con inputs o adapters</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="decs">
+            <h2>Decisiones arquitectónicas (DECs)</h2>
+            <p>Cada decisión importante se documenta en <code>docs/architecture/decisions.md</code> con contexto, decisión, alternativas y consecuencias.</p>
+            <table>
+                <thead><tr><th>DEC</th><th>Resumen</th></tr></thead>
+                <tbody>
+                    <tr><td>001</td><td>SPECBOOT skill format adoptado</td></tr>
+                    <tr><td>002</td><td>Un repo Figma Make por cliente con tags por importación</td></tr>
+                    <tr><td>003</td><td>Estructura frontend, naming, docs split para amortización de tokens</td></tr>
+                    <tr><td>004</td><td>Plans: metodología (plan.md) separada de tracking (sources/)</td></tr>
+                    <tr><td>005</td><td>Tokens por temporada para clientes con hasSeasons</td></tr>
+                    <tr><td>006</td><td>Testing: Vitest + Playwright + Testing Library</td></tr>
+                    <tr><td>007</td><td>Vercel full-stack (reemplaza cdmon + Hetzner + MariaDB)</td></tr>
+                    <tr><td>008</td><td>Variantes estructurales para bloques complejos</td></tr>
+                    <tr><td>009</td><td>blockDefaults reemplaza activeBlocks en client.config.ts</td></tr>
+                    <tr><td>010</td><td>BookingBlock en core-ui, BookingProvider en @hwp/booking</td></tr>
+                    <tr><td>011</td><td>Sitios de cliente en repos independientes, monorepo solo plataforma</td></tr>
+                    <tr><td>012</td><td>Tailwind v3 (no v4 hasta estabilidad del ecosistema)</td></tr>
+                    <tr><td>013</td><td>Docs unificados bajo docs/ (merge memory-bank + ai-specs + plans)</td></tr>
+                    <tr><td>014</td><td>11 agentes: 4 pipeline SPECBOOT + 7 especialistas de dominio</td></tr>
+                    <tr><td>015</td><td>Bloques del cliente con schemas compartidos, slots, npm subpath exports</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="rules">
+            <h2>Reglas no negociables</h2>
+            <ul>
+                <li>Nunca <code>if (client === 'nombre')</code> en el core → usar adapter pattern</li>
+                <li>Sin <code>any</code> en TypeScript → <code>unknown</code> + Zod</li>
+                <li>Zod en cada frontera del sistema</li>
+                <li>TDD — test antes que código</li>
+                <li>Conventional Commits en inglés</li>
+                <li>Documentación antes que código (SPECBOOT)</li>
+                <li>RGPD es obligación legal — toda violación es blocker</li>
+                <li>Un <code>globals.css</code> por cliente, cero CSS por bloque</li>
+                <li>Schemas compartidos, implementaciones del cliente</li>
+                <li>Nunca colores hex en componentes → siempre tokens via Tailwind</li>
+            </ul>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <section id="faq">
+            <h2>FAQ</h2>
+
+            <h4>¿Tengo que leer todos los docs antes de empezar?</h4>
+            <p>No. Lee <code>docs/guides/first-day-setup.md</code> y <code>docs/guides/project-map.md</code>. El resto lo consultas según la tarea — <code>docs/README.md</code> te dice qué cargar en cada caso.</p>
+
+            <h4>¿Puedo ignorar un skill y hacer algo manualmente?</h4>
+            <p>Técnicamente sí, pero pierdes las garantías: el skill aplica las specs automáticamente. Si lo haces manual, tú eres responsable de verificar todo.</p>
+
+            <h4>¿Diferencia entre bloque y composición?</h4>
+            <p><strong>Bloque</strong>: pieza visual reutilizable (hero, galería, formulario). <strong>Composición</strong>: montaje de bloques para una página de un cliente. El bloque es la pieza de LEGO; la composición es el modelo.</p>
+
+            <h4>¿Qué pasa cuando se actualiza @hwp/core-ui?</h4>
+            <p>Level 1 (re-export) recibe mejoras automáticamente con <code>npm update</code>. Level 2/3 solo se ven afectados si cambia el schema — eso es un major version bump que se comunica.</p>
+
+            <h4>¿Por qué repos separados y no un monorepo con todo?</h4>
+            <p>300 repos pequeños escalan mejor: CI independiente, deploys independientes, developers que solo clonan lo que necesitan, un bug nunca bloquea otro cliente (DEC-011).</p>
+
+            <h4>¿Esto es como Scrum?</h4>
+            <p>SPECBOOT define el ciclo de una historia individual, no la gestión de sprints. Se puede combinar con Scrum, Kanban, o lo que la empresa prefiera.</p>
+        </section>
+
+        <div style="margin-top:64px; padding:24px 0; border-top:1px solid var(--color-border); text-align:center; font-size:13px; color:var(--color-text-secondary);">
+            HWP Platform v1.0 — Septeo Hospitality<br>
+            Next.js 14 + Payload CMS v3 + Vercel + TypeScript strict
+        </div>
+    </div>
+
+    <script>
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav a');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (window.scrollY >= sectionTop) current = section.getAttribute('id');
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) link.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "AggregateRating",
+      "itemReviewed": {
+        "@type": "{{ESTABLISHMENT_TYPE}}",
+        "name": "{{CLIENT_NAME}}",
+        "url": "{{CLIENT_URL}}"
+      },
+      "ratingValue": "{{AVERAGE_RATING}}",
+      "reviewCount": "{{TOTAL_REVIEW_COUNT}}",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    {
+      "@type": "Review",
+      "itemReviewed": {
+        "@type": "{{ESTABLISHMENT_TYPE}}",
+        "name": "{{CLIENT_NAME}}"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "{{REVIEWER_NAME_1}}"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "{{REVIEW_RATING_1}}",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "reviewBody": "{{REVIEW_TEXT_1}}",
+      "datePublished": "{{REVIEW_DATE_1}}",
+      "inLanguage": "{{REVIEW_LANGUAGE_1}}"
+    },
+    {
+      "@type": "Review",
+      "itemReviewed": {
+        "@type": "{{ESTABLISHMENT_TYPE}}",
+        "name": "{{CLIENT_NAME}}"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "{{REVIEWER_NAME_2}}"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "{{REVIEW_RATING_2}}",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "reviewBody": "{{REVIEW_TEXT_2}}",
+      "datePublished": "{{REVIEW_DATE_2}}",
+      "inLanguage": "{{REVIEW_LANGUAGE_2}}"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "@context": "https://schema.org",
+  "@type": "{{TYPE}}",
+  "name": "{{CLIENT_NAME}}",
+  "description": "{{CLIENT_DESCRIPTION}}",
+  "url": "{{CLIENT_URL}}",
+  "telephone": "{{CLIENT_PHONE}}",
+  "email": "{{CLIENT_EMAIL}}",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "{{ADDRESS_STREET}}",
+    "addressLocality": "{{ADDRESS_CITY}}",
+    "postalCode": "{{ADDRESS_POSTAL_CODE}}",
+    "addressRegion": "{{ADDRESS_REGION}}",
+    "addressCountry": "{{ADDRESS_COUNTRY_CODE}}"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "{{GEO_LATITUDE}}",
+    "longitude": "{{GEO_LONGITUDE}}"
+  },
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+      "opens": "{{OPENING_TIME}}",
+      "closes": "{{CLOSING_TIME}}",
+      "validFrom": "{{SEASON_START}}",
+      "validThrough": "{{SEASON_END}}"
+    }
+  ],
+  "priceRange": "{{PRICE_RANGE}}",
+  "starRating": {
+    "@type": "Rating",
+    "ratingValue": "{{STAR_RATING}}"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{{RATING_VALUE}}",
+    "reviewCount": "{{REVIEW_COUNT}}",
+    "bestRating": "5",
+    "worstRating": "1"
+  },
+  "amenityFeature": [
+    { "@type": "LocationFeatureSpecification", "name": "{{AMENITY_1}}", "value": true },
+    { "@type": "LocationFeatureSpecification", "name": "{{AMENITY_2}}", "value": true },
+    { "@type": "LocationFeatureSpecification", "name": "{{AMENITY_3}}", "value": true }
+  ],
+  "containsPlace": [
+    {
+      "@type": "{{ACCOMMODATION_TYPE}}",
+      "name": "{{ACCOMMODATION_CATEGORY_NAME}}",
+      "numberOfRooms": "{{ACCOMMODATION_COUNT}}"
+    }
+  ],
+  "additionalProperty": [
+    { "@type": "PropertyValue", "name": "distanceToBeach", "value": "{{DISTANCE_BEACH}}" },
+    { "@type": "PropertyValue", "name": "distanceToCity", "value": "{{DISTANCE_CITY}}" }
+  ],
+  "image": {
+    "@type": "ImageObject",
+    "url": "{{HERO_IMAGE_URL}}",
+    "width": "1200",
+    "height": "630",
+    "caption": "{{HERO_IMAGE_ALT}}"
+  },
+  "sameAs": [
+    "{{GOOGLE_BUSINESS_URL}}",
+    "{{TRIPADVISOR_URL}}",
+    "{{FACEBOOK_URL}}",
+    "{{INSTAGRAM_URL}}"
+  ],
+  "hasMap": "{{GOOGLE_MAPS_URL}}",
+  "currenciesAccepted": "{{CURRENCY_CODE}}",
+  "paymentAccepted": "{{PAYMENT_METHODS}}"
+}

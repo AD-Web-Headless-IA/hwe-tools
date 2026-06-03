@@ -1,0 +1,55 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TouristAttraction",
+      "name": "{{ATTRACTION_NAME}}",
+      "description": "{{ATTRACTION_DESCRIPTION}}",
+      "url": "{{ATTRACTION_URL}}",
+      "image": {
+        "@type": "ImageObject",
+        "url": "{{ATTRACTION_IMAGE_URL}}",
+        "width": "1200",
+        "height": "630",
+        "caption": "{{ATTRACTION_IMAGE_ALT}}"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "{{GEO_LATITUDE}}",
+        "longitude": "{{GEO_LONGITUDE}}"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "{{ADDRESS_CITY}}",
+        "addressRegion": "{{ADDRESS_REGION}}",
+        "addressCountry": "{{ADDRESS_COUNTRY_CODE}}"
+      },
+      "touristType": ["{{TOURIST_TYPE_1}}", "{{TOURIST_TYPE_2}}"],
+      "availableLanguage": ["{{LANGUAGE_1}}", "{{LANGUAGE_2}}"],
+      "isAccessibleForFree": "{{IS_FREE}}",
+      "publicAccess": true,
+      "additionalProperty": [
+        { "@type": "PropertyValue", "name": "distanceFromEstablishment", "value": "{{DISTANCE_FROM_ESTABLISHMENT}}" },
+        { "@type": "PropertyValue", "name": "travelTime", "value": "{{TRAVEL_TIME}}" }
+      ]
+    },
+    {
+      "@type": "Place",
+      "name": "{{ENVIRONMENT_NAME}}",
+      "description": "{{ENVIRONMENT_DESCRIPTION}}",
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "{{GEO_LATITUDE}}",
+        "longitude": "{{GEO_LONGITUDE}}"
+      },
+      "containedInPlace": {
+        "@type": "{{REGION_TYPE}}",
+        "name": "{{REGION_NAME}}"
+      },
+      "additionalProperty": [
+        { "@type": "PropertyValue", "name": "naturalFeature", "value": "{{NATURAL_FEATURE}}" },
+        { "@type": "PropertyValue", "name": "activities", "value": "{{AVAILABLE_ACTIVITIES}}" }
+      ]
+    }
+  ]
+}

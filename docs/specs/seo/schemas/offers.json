@@ -1,0 +1,42 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Offer",
+  "name": "{{OFFER_NAME}}",
+  "description": "{{OFFER_DESCRIPTION}}",
+  "url": "{{OFFER_URL}}",
+  "seller": {
+    "@type": "{{ESTABLISHMENT_TYPE}}",
+    "name": "{{CLIENT_NAME}}",
+    "url": "{{CLIENT_URL}}"
+  },
+  "price": "{{OFFER_PRICE}}",
+  "priceCurrency": "{{CURRENCY_CODE}}",
+  "priceSpecification": {
+    "@type": "PriceSpecification",
+    "price": "{{OFFER_PRICE}}",
+    "priceCurrency": "{{CURRENCY_CODE}}",
+    "minPrice": "{{PRICE_MIN}}",
+    "maxPrice": "{{PRICE_MAX}}",
+    "description": "{{PRICE_CONDITIONS}}"
+  },
+  "availability": "https://schema.org/InStock",
+  "validFrom": "{{OFFER_VALID_FROM}}",
+  "validThrough": "{{OFFER_VALID_THROUGH}}",
+  "eligibleQuantity": {
+    "@type": "QuantitativeValue",
+    "minValue": "{{MIN_NIGHTS}}",
+    "unitCode": "DAY"
+  },
+  "itemOffered": {
+    "@type": "{{ACCOMMODATION_TYPE}}",
+    "name": "{{ACCOMMODATION_NAME}}",
+    "url": "{{ACCOMMODATION_URL}}"
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "{{OFFER_IMAGE_URL}}",
+    "width": "1200",
+    "height": "630",
+    "caption": "{{OFFER_IMAGE_ALT}}"
+  }
+}

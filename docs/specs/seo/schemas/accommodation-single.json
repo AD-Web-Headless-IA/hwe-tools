@@ -1,0 +1,56 @@
+{
+  "@context": "https://schema.org",
+  "@type": "{{ACCOMMODATION_TYPE}}",
+  "name": "{{ACCOMMODATION_NAME}}",
+  "description": "{{ACCOMMODATION_DESCRIPTION}}",
+  "url": "{{ACCOMMODATION_URL}}",
+  "image": [
+    {
+      "@type": "ImageObject",
+      "url": "{{IMAGE_URL_1}}",
+      "width": "1200",
+      "height": "800",
+      "caption": "{{IMAGE_ALT_1}}"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "{{IMAGE_URL_2}}",
+      "width": "1200",
+      "height": "800",
+      "caption": "{{IMAGE_ALT_2}}"
+    }
+  ],
+  "occupancy": {
+    "@type": "QuantitativeValue",
+    "minValue": "{{MIN_OCCUPANCY}}",
+    "maxValue": "{{MAX_OCCUPANCY}}"
+  },
+  "floorSize": {
+    "@type": "QuantitativeValue",
+    "value": "{{FLOOR_SIZE_M2}}",
+    "unitCode": "MTK"
+  },
+  "numberOfRooms": "{{NUMBER_OF_ROOMS}}",
+  "petsAllowed": "{{PETS_ALLOWED}}",
+  "amenityFeature": [
+    { "@type": "LocationFeatureSpecification", "name": "{{FEATURE_1}}", "value": true },
+    { "@type": "LocationFeatureSpecification", "name": "{{FEATURE_2}}", "value": true },
+    { "@type": "LocationFeatureSpecification", "name": "{{FEATURE_3}}", "value": true }
+  ],
+  "offers": {
+    "@type": "Offer",
+    "priceSpecification": {
+      "@type": "PriceSpecification",
+      "price": "{{PRICE_FROM}}",
+      "priceCurrency": "{{CURRENCY_CODE}}",
+      "description": "{{PRICE_DESCRIPTION}}"
+    },
+    "availability": "https://schema.org/InStock",
+    "url": "{{BOOKING_URL}}"
+  },
+  "containedInPlace": {
+    "@type": "{{PARENT_TYPE}}",
+    "name": "{{CLIENT_NAME}}",
+    "url": "{{CLIENT_URL}}"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "{{RESTAURANT_NAME}}",
+  "description": "{{RESTAURANT_DESCRIPTION}}",
+  "url": "{{RESTAURANT_URL}}",
+  "telephone": "{{RESTAURANT_PHONE}}",
+  "servesCuisine": ["{{CUISINE_TYPE_1}}", "{{CUISINE_TYPE_2}}"],
+  "priceRange": "{{PRICE_RANGE}}",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "{{ADDRESS_STREET}}",
+    "addressLocality": "{{ADDRESS_CITY}}",
+    "postalCode": "{{ADDRESS_POSTAL_CODE}}",
+    "addressRegion": "{{ADDRESS_REGION}}",
+    "addressCountry": "{{ADDRESS_COUNTRY_CODE}}"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "{{GEO_LATITUDE}}",
+    "longitude": "{{GEO_LONGITUDE}}"
+  },
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      "opens": "{{LUNCH_OPENS}}",
+      "closes": "{{LUNCH_CLOSES}}"
+    },
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+      "opens": "{{DINNER_OPENS}}",
+      "closes": "{{DINNER_CLOSES}}"
+    }
+  ],
+  "hasMenu": "{{MENU_URL}}",
+  "acceptsReservations": true,
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{{RATING_VALUE}}",
+    "reviewCount": "{{REVIEW_COUNT}}",
+    "bestRating": "5",
+    "worstRating": "1"
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "{{RESTAURANT_IMAGE_URL}}",
+    "width": "1200",
+    "height": "630",
+    "caption": "{{RESTAURANT_IMAGE_ALT}}"
+  },
+  "parentOrganization": {
+    "@type": "{{PARENT_TYPE}}",
+    "name": "{{CLIENT_NAME}}",
+    "url": "{{CLIENT_URL}}"
+  }
+}
