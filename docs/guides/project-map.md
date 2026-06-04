@@ -7,7 +7,7 @@
 ## Vista general — los 3 repos + los extras
 
 ```
-C:\laragon\www\Hospitality Web Platform\
+{workspace-root}/
 │
 ├── 📁 hwe-tools/           ← ESTE REPO — skills, agentes, docs, specs
 │   ├── .claude/            ← Skills invocables, agentes, comandos, settings

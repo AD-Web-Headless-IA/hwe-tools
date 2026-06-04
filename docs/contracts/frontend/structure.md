@@ -3,7 +3,7 @@
 > **How** the React monorepo is laid out. Companion to the rules in [`ai-specs/specs/frontend-standards.md`](../../specs/frontend-standards.md).
 > Load this file when scaffolding new packages, new apps, or moving files between layers.
 >
-> **Naming examples in this document** (`HeroBlock`, `AccommodationDetailTemplate`, `apps/site-hotel-balneario-fuente-de-cabriel`) **are illustrative.** The canonical block / template / route catalog is defined in a separate domain-modeling session — do not treat the names below as the final catalog.
+> **Naming examples in this document** (`HeroBlock`, `AccommodationDetailTemplate`, `site-{slug}`) **are illustrative.** The canonical block / template / route catalog is defined in a separate domain-modeling session — do not treat the names below as the final catalog.
 
 ## Repo structure (DEC-017)
 

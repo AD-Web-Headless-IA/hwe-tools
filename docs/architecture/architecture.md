@@ -1,7 +1,8 @@
 # hwe — Arquitectura definitiva
-## Hospitality Web Platform
 
-> Documento exhaustivo de todas las decisiones de arquitectura tomadas para la plataforma hwe. Fuente de verdad del sistema. Última actualización: Mayo 2026.
+> ⚠️ **Partially superseded by DEC-017 (2026-06-03).** This document was written when hwe was a single `hwe-platform/` monorepo. DEC-017 split it into three repos (`hwe-tools`, `hwe-core`, `hwe-template`). References to `hwe-platform/` below are historical. For the current repo structure, see `docs/contracts/general/workspace-structure.md` and `docs/architecture/DEC-017-Repo-Split.md`.
+
+> Documento exhaustivo de todas las decisiones de arquitectura tomadas para la plataforma hwe. Última actualización: Mayo 2026.
 
 > ⚠️ **HOSTING / DEPLOY / DB / API-PROXY: secciones parcialmente superseded por DEC-007** (2026-05-20). El plan original (cdmon estático + Hetzner Payload + MariaDB + PHP proxy) ha sido reemplazado por **Vercel full-stack** (Vercel proyectos + Vercel Functions para Payload + Vercel Postgres + Vercel Blob Storage; PMS y Claude API se proxean via Next.js Route Handlers). Las secciones de alto nivel (Visión, Fases, Stack, Deploy) están actualizadas a Vercel. Las secciones profundas (`PHP PROXY EN CDMON`, schemas MariaDB con paths cdmon, snippets `cdmon /web/...`) conservan el contenido original como registro histórico — para el approach actual ver [`../memory-bank/decisions.md`](./decisions.md#dec-007). Per DEC-003 la constitución no se reescribe de golpe; se anota.
 

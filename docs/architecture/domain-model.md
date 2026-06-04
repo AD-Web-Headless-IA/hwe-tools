@@ -91,7 +91,9 @@ Adding a feature means: a Payload collection (if it stores editable content), a 
 
 hwe supports **4 PMS providers out-of-the-box** today, plus **custom adapters per client** for any non-stock PMS or bespoke integration. No client uses two simultaneously, but the platform is provider-agnostic.
 
-### Stock adapters (in `@hwe/booking/adapters/`)
+### Stock adapters (in `@hwe/core-ui/src/adapters/booking/`)
+
+> **DEC-017:** there is no `@hwe/booking` package. All booking adapters live in `@hwe/core-ui/src/adapters/booking/`.
 
 | Provider | Notes |
 |---|---|
@@ -104,9 +106,8 @@ hwe supports **4 PMS providers out-of-the-box** today, plus **custom adapters pe
 
 When a client uses a PMS not in the stock set (or has a bespoke API):
 
-- The custom adapter implements the same `BookingAdapter` interface from `@hwe/booking`.
-- Lives in `apps/site-{slug}/src/booking/` for client-specific one-offs.
-- OR in `packages/booking-{slug}/` if the same custom integration will be reused across multiple sites of the same chain.
+- The custom adapter implements the same `BookingAdapter` interface from `@hwe/core-ui/src/adapters/booking/`.
+- Lives in `site-{slug}/src/booking/` for client-specific one-offs.
 - The `BookingBlock` (UI shell) does not know whether the active adapter is stock or custom — it talks only to the interface.
 
 ### Architectural implication
@@ -116,24 +117,20 @@ The `BookingBlock` (UI of the widget — date pickers, occupancy selector, "sear
 - adults, children, ages (if needed)
 - accommodation type filter (optional)
 
-Provider-specific differences (auth, endpoint, response shape, error codes) are absorbed by the corresponding adapter in `@hwe/booking`:
+Provider-specific differences (auth, endpoint, response shape, error codes) are absorbed by the corresponding adapter in `@hwe/core-ui/src/adapters/booking/`:
 
 ```
-@hwe/booking
-├── interface BookingAdapter   ← contract any adapter must implement
-├── adapters/                  ← stock adapters shipped with the platform
-│   ├── ThrAdapter
-│   ├── MasterbookingAdapter
-│   ├── WitbookingAdapter
-│   └── ResalysAdapter
-└── react/
-    └── BookingBlock           ← UI shell; receives results from active adapter
+@hwe/core-ui/src/adapters/booking/
+├── BookingAdapter.ts          ← interface (port) any adapter must implement
+├── BookingProvider.tsx        ← React context + useBookingAdapter() hook
+└── stock/
+    ├── ThrAdapter.ts
+    ├── MasterbookingAdapter.ts
+    ├── WitbookingAdapter.ts
+    └── ResalysAdapter.ts
 
-apps/site-{slug}/
-└── src/booking/               ← custom adapter for THIS client (if PMS is non-stock)
+site-{slug}/src/booking/       ← custom adapter for THIS client (if PMS is non-stock)
     └── {ClientName}Adapter    ← also implements BookingAdapter
-
-packages/booking-{chain-slug}/ ← OR a custom adapter shared across multiple sites of the same chain
 ```
 
 The active adapter for a client is declared in `client.config.ts` and injected into the React context at app root. `BookingBlock` never imports a concrete adapter.
@@ -203,7 +200,7 @@ When the classifier (human or agent) reviews a module from `docs/docs/plans/phas
 
 2. **Module appears on a feature-gated page (§4)** → still a `Block` in `core-ui/`, but tagged as "active only when feature X is on". Its inclusion in any client's app is conditional on the feature being declared in `client.config.ts`.
 
-3. **Module wraps a PMS call (search, availability, book button)** → it is the `BookingBlock` (or a sub-component of it). The adapter logic lives in `@hwe/booking`, NEVER in the block. Props are the minimum common denominator across the 4 providers.
+3. **Module wraps a PMS call (search, availability, book button)** → it is the `BookingBlock` (or a sub-component of it). The adapter logic lives in `@hwe/core-ui/src/adapters/booking/`, NEVER in the block. Props are the minimum common denominator across the 4 providers.
 
 4. **Module is a `<XxxSection>` on a client's home (e.g. `BalnearioSection`, `HotelSection`)** → almost always a generic **`FeatureSection`-style block** whose specialness is in its **content** (text, image, CTA target). The block is not per-client; the content is. Naming should be abstract (`FeatureSection`, `HighlightSection`), not domain-specific (`BalnearioSection`).
 

@@ -2,7 +2,7 @@
 
 1. GitHub "Use this template" desde hwe-template → crea `site-{slug}`
 2. git clone --recurse-submodules site-{slug}
-   → Clona repo con .hwe-tools/ submodule ya montado
+   → Clona repo con hwe-tools/ submodule ya montado
 
 3. /import-figma https://github.com/... {slug}
    → Genera docs/figma-analysis.md + docs/design-language.md + docs/tokens.json

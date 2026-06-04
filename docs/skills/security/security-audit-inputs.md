@@ -46,7 +46,7 @@ Run:
 
 ## Steps
 
-All grep commands run from `hwe-platform/` unless specified.
+All grep commands run from the client repo root (`site-{slug}/`) unless specified.
 
 **Step 1 — Find all `dangerouslySetInnerHTML` usages**
 ```bash

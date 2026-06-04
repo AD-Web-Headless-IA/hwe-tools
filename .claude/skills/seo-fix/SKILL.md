@@ -22,13 +22,13 @@ You apply SEO fixes derived from the latest audit report and commit them in 5 lo
 
 Read these specs before starting (they define the exact rules each fix must satisfy):
 
-- `.hwe-tools/docs/specs/seo/seo-standards.md` — title format, meta rules, image rules
-- `.hwe-tools/docs/specs/seo/semantic-html.md` — per-block landmark requirements
-- `.hwe-tools/docs/specs/seo/geo-llm-optimization.md` — citable content, JSON-LD field completeness
-- `.hwe-tools/docs/specs/seo/schemas/README.md` — page→schema mapping
-- `.hwe-tools/docs/specs/seo/schemas/campground-homepage.json` — Campground template
-- `.hwe-tools/docs/specs/seo/schemas/organization.json` — Organization template
-- `.hwe-tools/docs/specs/seo/schemas/faq.json` — FAQPage template
+- `hwe-tools/docs/specs/seo/seo-standards.md` — title format, meta rules, image rules
+- `hwe-tools/docs/specs/seo/semantic-html.md` — per-block landmark requirements
+- `hwe-tools/docs/specs/seo/geo-llm-optimization.md` — citable content, JSON-LD field completeness
+- `hwe-tools/docs/specs/seo/schemas/README.md` — page→schema mapping
+- `hwe-tools/docs/specs/seo/schemas/campground-homepage.json` — Campground template
+- `hwe-tools/docs/specs/seo/schemas/organization.json` — Organization template
+- `hwe-tools/docs/specs/seo/schemas/faq.json` — FAQPage template
 
 ## Process
 

@@ -75,7 +75,7 @@ Also verify via `security-audit-cookies.md` Step 2 that no non-essential cookie 
 
 **Step 4 — Verify data inventory exists**
 ```bash
-ls -la hwe-platform/docs/clients/{slug}/data-inventory.md 2>/dev/null && echo "EXISTS" || echo "MISSING"
+ls -la docs/clients/{slug}/data-inventory.md 2>/dev/null && echo "EXISTS" || echo "MISSING"
 ```
 Expected: `EXISTS`.
 - `MISSING` → **Major** (cannot go to production without it; create `docs/clients/{slug}/data-inventory.md` using the template below)
@@ -89,14 +89,14 @@ If the file exists, verify it covers all 5 dimensions from `security-standards.m
 
 **Step 5 — Verify forms link to privacy policy**
 ```bash
-grep -rn "politique-de-confidentialite\|politica-de-privacidad\|privacy" hwe-platform/apps/{slug}/src --include="*.tsx" | grep -i "form\|input\|booking\|contact"
+grep -rn "politique-de-confidentialite\|politica-de-privacidad\|privacy" src --include="*.tsx" | grep -i "form\|input\|booking\|contact"
 ```
 Expected: every form that collects personal data has a link to the privacy policy within or adjacent to it.
 - Any form without a privacy link → **Major**
 
 **Step 6 — Verify deletion procedure is documented**
 ```bash
-grep -rni "deletion\|erasure\|art.17\|right to" hwe-platform/docs/clients/{slug}/ 2>/dev/null
+grep -rni "deletion\|erasure\|art.17\|right to" docs/clients/{slug}/ 2>/dev/null
 ```
 Expected: at least one mention of how deletion requests are handled (SLA, responsible person, which systems are purged).
 - Not documented → **Major**
@@ -105,14 +105,14 @@ Expected: at least one mention of how deletion requests are handled (SLA, respon
 
 Review the data collection in each form against its stated purpose:
 ```bash
-grep -rn "input\|field\|FormData\|z\.string\|z\.email\|z\.number" hwe-platform/apps/{slug}/src --include="*.tsx" --include="*.ts" | grep -v "node_modules"
+grep -rn "input\|field\|FormData\|z\.string\|z\.email\|z\.number" src --include="*.tsx" --include="*.ts" | grep -v "node_modules"
 ```
 For each field collected, ask: is this field strictly necessary for the stated purpose?
 - Field collected beyond stated purpose (e.g. date of birth when not needed for booking) → **Major**
 
 **Step 8 — Verify marketing consent is separate from booking consent**
 ```bash
-grep -rn "newsletter\|marketing\|promotional" hwe-platform/apps/{slug}/src --include="*.tsx" --include="*.ts" -i
+grep -rn "newsletter\|marketing\|promotional" src --include="*.tsx" --include="*.ts" -i
 ```
 Marketing consent must be a separate opt-in, not bundled with booking consent.
 - Bundled consent → **Blocker** (invalid consent = no legal basis for marketing)

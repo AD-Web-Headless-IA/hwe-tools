@@ -43,7 +43,7 @@ Run:
 
 ## Steps
 
-All commands run from `hwe-platform/`.
+All commands run from the client repo root (`site-{slug}/`).
 
 **Step 1 — Scan for common secret patterns in source code**
 ```bash
@@ -85,7 +85,7 @@ Review each match manually:
 
 **Step 5 — Verify `.env` files are gitignored**
 ```bash
-cat hwe-platform/.gitignore | grep -E "\.env"
+cat .gitignore | grep -E "\.env"
 ```
 Expected: `.env`, `.env.local`, `.env.*.local` are listed.
 - Any `.env` variant NOT in `.gitignore` → **Blocker**

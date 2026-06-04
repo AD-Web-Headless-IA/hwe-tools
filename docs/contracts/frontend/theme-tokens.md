@@ -37,7 +37,7 @@ The contract is the load-bearing piece: it is what keeps a misnamed Figma Variab
 > Figma Make repos never ship a `tokens.json` or a Tailwind config in the hwe shape, so producing the consumable `tokens.json` is **today a manual step**. But not all exports are equally messy — there are two flavors, and which one you got decides how much work the extraction is:
 >
 > - **Flavor A — semantic token layer (preferred, e.g. `base-template` / Camping Mer et Camargue).** The export ships `src/styles/theme.css` with a `:root` block of semantic CSS custom properties (`--primary`, `--accent`, `--muted`, `--foreground`, `--radius`…), an `@theme inline` block exposing them as Tailwind utilities, and `src/styles/fonts.css` for the font `@import`. Extraction is near-mechanical: read `:root`, map each variable to the matching `TokensContract` role.
-> - **Flavor B — scattered inline values (e.g. `hotel-balneario-fuente-de-cabriel`).** Colors live in inline `style={{ color, background }}`, Tailwind arbitrary values (`bg-[#...]`), and font declarations sprinkled across `.tsx` files. There is no single source; extraction means scraping and de-duplicating by hand. `/import-figma`'s analysis already aggregates these into `figma-analysis.md`, which is your starting point.
+> - **Flavor B — scattered inline values.** Colors live in inline `style={{ color, background }}`, Tailwind arbitrary values (`bg-[#...]`), and font declarations sprinkled across `.tsx` files. There is no single source; extraction means scraping and de-duplicating by hand. `/import-figma`'s analysis already aggregates these into `figma-analysis.md`, which is your starting point.
 >
 > Always check for Flavor A first (`src/styles/theme.css`); fall back to the Flavor-B scraping procedure only when there is no semantic token layer.
 >
@@ -90,7 +90,7 @@ Look for `figma-makes/{slug}/src/styles/theme.css`.
 
 ### When to promote this to `/extract-tokens` skill
 
-After doing this manually for both flavors (Flavor A: `base-template`; Flavor B: `hotel-balneario-fuente-de-cabriel`), evaluate:
+After doing this manually for both flavors (Flavor A: `base-template`; Flavor B: a Figma Make export without a semantic token layer), evaluate:
 
 - How many decisions during the process were mechanical (always the same answer)? Those are skill rules. The Flavor-A fast path is almost entirely mechanical — strong skill candidate.
 - How many required human judgment (mapping ambiguous role names, choosing fallbacks, resolving the role mismatches in step 2)? Those become skill prompts that ask the user.

@@ -87,7 +87,7 @@ For every `Set-Cookie` line, verify:
 
 Grep the codebase for consent recording logic:
 ```bash
-grep -rn "consent" hwe-platform/apps/{slug}/src --include="*.ts" --include="*.tsx" | grep -i "timestamp\|date\|record\|log\|store"
+grep -rn "consent" src --include="*.ts" --include="*.tsx" | grep -i "timestamp\|date\|record\|log\|store"
 ```
 Expected: at least one hit showing consent is stored with a timestamp.
 - No storage of consent found → **Major** (cannot prove compliance)
@@ -96,7 +96,7 @@ Expected: at least one hit showing consent is stored with a timestamp.
 
 Grep for a mechanism to withdraw consent:
 ```bash
-grep -rn "withdraw\|revoke\|opt.out\|gérer.*cookies\|manage.*cookies" hwe-platform/apps/{slug}/src --include="*.tsx" --include="*.ts" -i
+grep -rn "withdraw\|revoke\|opt.out\|gérer.*cookies\|manage.*cookies" src --include="*.tsx" --include="*.ts" -i
 ```
 Expected: a settings/preferences link or button that re-opens the consent UI.
 - No withdrawal mechanism found → **Major**
@@ -105,7 +105,7 @@ Expected: a settings/preferences link or button that re-opens the consent UI.
 
 Read the consent component source:
 ```bash
-grep -rn "defaultChecked\|checked={true}\|checked=.true" hwe-platform/apps/{slug}/src --include="*.tsx"
+grep -rn "defaultChecked\|checked={true}\|checked=.true" src --include="*.tsx"
 ```
 Expected: no pre-checked checkboxes for non-essential consent categories.
 - Pre-ticked boxes found → **Blocker** (illegal under RGPD)

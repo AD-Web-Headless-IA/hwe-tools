@@ -19,7 +19,7 @@ The runner script handles network-based checks (headers, cookies, dependencies).
 - Never modify source files. This skill writes only the audit report.
 - Report is saved to `docs/audits/security/security-audit-{TODAY}.md`. Overwrite same-day reports (re-audit after fixes).
 - Use Node.js 20+ for the runner script (built-in `fetch`). Verify with `node --version` if uncertain.
-- CWD = client repo root. Runner script is at `.hwe-tools/.claude/skills/security-audit/runner.mjs`.
+- CWD = client repo root. Runner script is at `hwe-tools/.claude/skills/security-audit/runner.mjs`.
 - All grep commands: `--include="*.ts" --include="*.tsx" --include="*.mjs" --include="*.js"` unless specified.
 
 ## Process
@@ -52,7 +52,7 @@ curl -s -o /dev/null -w "%{http_code}" {BASE_URL}
 ### Step 2 — Run the automated runner (headers, cookies, dependencies)
 
 ```bash
-node .hwe-tools/.claude/skills/security-audit/runner.mjs {BASE_URL} {SLUG}
+node hwe-tools/.claude/skills/security-audit/runner.mjs {BASE_URL} {SLUG}
 ```
 
 Capture stdout as `RUNNER_OUTPUT`. The runner exits 0 on success (even with findings) and exits 1 only on hard failure (server unreachable). On exit 1, report verbatim stderr and stop.

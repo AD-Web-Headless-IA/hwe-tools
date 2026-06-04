@@ -19,7 +19,7 @@ The block contract is defined in [`docs/frontend/block-contract.md`](../../../do
 - Never modify `packages/core-ui/src/renderer/baseBlockRegistry.ts` or `packages/core-ui/src/index.ts` automatically — print the diff the developer must apply manually. The registry edit is intentional and reviewed.
 - Never run package installs, builds, or tests. Pure file generation.
 - All generated files are in English (technical artifacts).
-- Workspace root: `C:\laragon\www\Hospitality Web Platform\`. Core packages repo is `hwe-core/`. Client repos are independent: `site-{slug}/`.
+- Workspace root: the directory the developer has open — its name varies per machine. See `docs/contracts/general/workspace-structure.md`. Core packages repo is `hwe-core/`. Client repos are independent: `site-{slug}/`.
 
 ## Modes
 
@@ -61,7 +61,7 @@ If invalid, stop and tell the user the exact rule violated.
 
 When `--target client` is used, also validate:
 - `--site <slug>` was provided and matches `^site-[a-z0-9-]+$`.
-- Directory `hwe-platform/apps/{siteSlug}/` exists.
+- Directory `{siteSlug}/` exists at the workspace root (client repos are independent — they can live anywhere).
 
 ### Step 2 — Check prerequisites and resolve target directory
 
@@ -227,6 +227,7 @@ Architecture spec:        docs/specs/frontend/block-architecture.md
 
 Per `docs/README.md` task-to-load recipe ("Scaffold a new block"), the agent invoking this skill has already loaded:
 
+- `docs/contracts/general/workspace-structure.md`
 - `docs/specs/general/base-standards.md`
 - `docs/specs/frontend/frontend-standards.md`
 - `docs/contracts/frontend/block-contract.md`

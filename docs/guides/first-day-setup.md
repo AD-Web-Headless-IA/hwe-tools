@@ -97,10 +97,10 @@ git config --global user.email "tu.email@septeo.com"
 "Clonar" significa descargar el código a tu máquina por primera vez.
 
 ```powershell
-# Navega a la carpeta del workspace
-cd C:\laragon\www
-mkdir "Hospitality Web Platform"
-cd "Hospitality Web Platform"
+# Navega a la carpeta donde quieras tener el workspace (el nombre es libre)
+cd <tu-directorio-de-trabajo>
+mkdir hwe-workspace   # o el nombre que prefieras
+cd hwe-workspace
 ```
 
 ### Si eres dev de cliente (`site-{slug}/`)

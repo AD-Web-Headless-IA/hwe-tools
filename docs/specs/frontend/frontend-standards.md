@@ -98,7 +98,7 @@ A block without an a11y test in its `.test.tsx` cannot be promoted past `alpha`.
 ## Anti-patterns specific to frontend (don't)
 
 - Don't import a block, template, or primitive directly by deep path. Use the package's public API.
-- Don't put business logic in a block. Blocks render `content`; logic lives in `@hwe/booking`, `@hwe/content`, services, or the composition layer.
+- Don't put business logic in a block. Blocks render `content`; logic lives in the adapter layer (`@hwe/core-ui/src/adapters/`), services, or the composition layer.
 - Don't add a prop to a block to satisfy one client. Add a variant, or split into two blocks, or move the logic to a composition.
 - Don't create a `useEffect` that fetches data on mount — Server Components or `generateStaticParams` are the answer.
 - Don't add `"use client"` higher in the tree than necessary. Each marked component "infects" its subtree.

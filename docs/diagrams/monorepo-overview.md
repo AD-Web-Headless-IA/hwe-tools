@@ -6,7 +6,7 @@
 
 ```mermaid
 flowchart TB
-  subgraph workspace["C:\\laragon\\www\\Hospitality Web Platform\\"]
+  subgraph workspace["{workspace-root}/"]
     direction TB
 
     subgraph tools["hwe-tools/  (git submodule — no runtime code)"]

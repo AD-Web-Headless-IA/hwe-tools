@@ -61,7 +61,7 @@ If `@hwe/config` has not been published yet, check locally at `hwe-core/packages
 
 ```
 site-{slug}/               (independent repo — DEC-017)
-├── .hwe-tools/            ← git submodule → hwe-tools (already present if cloned from hwe-template)
+├── hwe-tools/             ← git submodule → hwe-tools (already present if cloned from hwe-template)
 ├── src/
 │   ├── app/
 │   │   ├── globals.css

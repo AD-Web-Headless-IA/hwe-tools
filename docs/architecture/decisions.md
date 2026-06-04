@@ -74,18 +74,17 @@ We had a single `figma-make/` directory at the workspace root, holding the clone
 Adopt a fixed layout:
 
 ```
-C:\laragon\www\Hospitality Web Platform\
-├── hwe-platform\                           ← the platform repo (this one)
-└── figma-makes\                            ← plain container, NOT a git repo
-    ├── hotel-balneario-fuente-de-cabriel\  ← own .git, clone of designer's repo
-    ├── camping-sol\                        ← own .git, clone of designer's repo
-    └── {slug}\                             ← one folder per client
+{workspace-root}/
+└── figma-makes/                    ← plain container, NOT a git repo
+    ├── base-template/              ← own .git, reference Figma Make for demo/test
+    ├── camping-sol/                ← own .git, clone of designer's repo
+    └── {slug}/                    ← one folder per client
 ```
 
-- One git repo per client at `figma-makes/{slug}/`, with its own `.git/`, independent from `hwe-platform/`.
+- One git repo per client at `figma-makes/{slug}/`, with its own `.git/`, independent from all project repos.
 - Every import (initial clone or subsequent re-import) is sealed with `git tag import-YYYY-MM-DD`. Re-imports run `git pull --ff-only` against the same origin — never `rm -rf` + re-clone, so history is preserved.
-- Generated artifacts (`figma-analysis.md`, `figma-notes.md`) live under `hwe-platform/docs/clients/{slug}/`, NOT inside the cloned repo. This keeps `figma-makes/{slug}/` pristine and avoids untracked-file noise on future `git pull`.
-- The `figma-makes/` container is a sibling of `hwe-platform/` — outside it on purpose, so it never contaminates the platform repo.
+- Generated artifacts (`figma-analysis.md`, `figma-notes.md`) live under `site-{slug}/docs/`, NOT inside the cloned repo. This keeps `figma-makes/{slug}/` pristine and avoids untracked-file noise on future `git pull`.
+- The `figma-makes/` container lives at the workspace root — outside all project repos on purpose.
 
 ### Why
 
@@ -96,11 +95,8 @@ C:\laragon\www\Hospitality Web Platform\
 
 ### Migration applied today
 
-- Moved `figma-make/` → `figma-makes/hotel-balneario-fuente-de-cabriel/` (preserved the original `.git/`).
-- Moved `ANALYSIS.md` → `hwe-platform/docs/clients/hotel-balneario-fuente-de-cabriel/figma-analysis.md`.
-- Created tag `import-2026-05-18` on the relocated repo.
-- Updated `.claude/skills/import-figma/SKILL.md` to use the new layout, support re-imports via `git pull` + new tag, and write analysis/notes under `docs/clients/{slug}/`.
-- Updated `docs/docs/plans/phase-1-design-system/plan.md` references.
+- Established `figma-makes/base-template/` as the reference Figma Make for the demo/test project.
+- Updated `/import-figma` skill to use this layout, support re-imports via `git pull` + new tag, and write analysis/notes under `site-{slug}/docs/`.
 
 ### Alternatives considered
 
@@ -439,7 +435,7 @@ The **monorepo Turborepo + pnpm** layout stays unchanged from DEC-003. Each clie
 - **A new bootstrap phase (Phase 0.5 or Phase 2)** must be planned to cover: Vercel project provisioning per client, Vercel Postgres schema scaffolding, Vercel Blob Storage bucket layout, env-var management strategy. Not in scope for Phase 0.
 - **The PHP proxy section of `architecture.md`** describes a layer that no longer exists. New equivalent: `apps/site-{slug}/src/app/api/*` and `apps/cms-{type}/src/app/api/*` Route Handlers. To be documented in a future `docs/contracts/frontend/api-routes.md` when the first route is implemented.
 - **Multi-tenant DB isolation rule from `base-standards.md`** still applies — every query is scoped by `tenantId`. The mechanism changes from "one MariaDB per client" to "one Postgres per client", but the constraint is identical.
-- **The `BookingAdapter` and Payload schemas are unaffected.** They are defined in `@hwe/booking` and `@hwe/content` regardless of where they run.
+- **The `BookingAdapter` and Payload schemas are unaffected.** They are defined in `@hwe/core-ui/src/adapters/booking/` and `@hwe/content` regardless of where they run.
 
 ### Alternatives considered
 
@@ -637,8 +633,10 @@ Meanwhile, several blocks need **per-client configuration** that a string array 
 
 ## DEC-010 — `BookingBlock` in `@hwe/core-ui`, `BookingProvider` in `@hwe/booking`
 **Date:** 2026-05-21
-**Status:** Accepted
+**Status:** Superseded by DEC-017
 **Supersedes:** the `@hwe/booking/react/` location for `BookingBlock` mentioned in `docs/architecture/architecture.md` (§Booking Engine).
+
+> **Superseded by DEC-017.** The `@hwe/booking` package no longer exists — it was eliminated in DEC-017. `BookingAdapter`, `BookingProvider`, `useBookingAdapter()`, and all stock adapters now live in `@hwe/core-ui/src/adapters/booking/`. The rationale below (why BookingBlock stays in core-ui, why UI and domain are separated) remains valid and informed DEC-017. Read DEC-017 for the current implementation contract.
 
 ### Context
 
@@ -697,7 +695,9 @@ This creates ambiguity about where the UI component lives versus where the domai
 
 ## DEC-011 — Client sites live in independent repos, monorepo holds only platform + reference site
 **Date:** 2026-05-21
-**Status:** Accepted
+**Status:** Superseded by DEC-017
+
+> **Superseded by DEC-017.** The split described here was executed and formalized in DEC-017, which also renamed `hwe-platform/` to three separate repos (`hwe-tools`, `hwe-core`, `hwe-template`). References to `hwe-platform/` below are historical. The rationale and the "one independent repo per client" principle remain valid.
 
 ### Context
 

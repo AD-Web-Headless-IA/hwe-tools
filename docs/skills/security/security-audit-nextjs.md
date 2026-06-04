@@ -45,7 +45,7 @@ Run:
 
 ## Steps
 
-All grep commands run from `hwe-platform/`.
+All grep commands run from the client repo root (`site-{slug}/`).
 
 **Step 1 — Find all `'use client'` files that receive sensitive props**
 ```bash

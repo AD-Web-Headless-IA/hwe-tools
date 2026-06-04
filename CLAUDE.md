@@ -182,16 +182,16 @@ Ver `compatibility.json` en la raíz — mapea versión de tools a versiones com
 
 ---
 
-## Workspace local
+## Workspace
 
-```
-C:\laragon\www\Hospitality Web Platform\
-├── hwe-tools\           ← ESTE REPO
-├── hwe-core\            ← packages @hwe/* (Turborepo + pnpm)
-├── hwe-template\        ← repo template vacío
-├── site-{slug}\         ← repos de clientes (submodulo hwe-tools como hwe-tools/)
-└── figma-makes\         ← repos del diseñador, uno por cliente (DEC-002)
-```
+> Fuente de verdad completa: `docs/contracts/general/workspace-structure.md`
+
+- El workspace root es el directorio que abre el developer — su nombre varía por máquina. **Sin paths absolutos en ningún fichero.**
+- `hwe-tools/` — este repo (submodulo montado en `hwe-core/`, `hwe-template/` y cada `site-{slug}/`)
+- `hwe-core/` — paquetes npm `@hwe/core-ui` + `@hwe/config` (Turborepo). `apps/site-demo/` es fixture de test, no repo cliente.
+- `hwe-template/` — repo template de GitHub, se clona una vez por cliente
+- `site-{slug}/` — repos cliente independientes, pueden vivir en cualquier directorio del filesystem
+- `figma-makes/` — carpeta plain (no git repo) con un repo clonado por cliente. `base-template/` es la referencia para el proyecto de demo/test.
 
 ---
 

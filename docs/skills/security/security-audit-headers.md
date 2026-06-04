@@ -116,7 +116,7 @@ Expected: `permissions-policy: camera=(), microphone=(), geolocation=()`
 
 **Step 8 — Check source config**
 ```bash
-grep -A 50 "headers()" hwe-platform/apps/{slug}/next.config.mjs
+grep -A 50 "headers()" next.config.mjs
 ```
 Verify that all 6 headers are defined in the `headers()` export. A missing header in config won't survive a Vercel deploy — runtime-only headers are not guaranteed.
 

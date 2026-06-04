@@ -29,9 +29,9 @@ Do not edit test files unless a type-check failure forces it. Do not edit `.env.
 ## What this skill loads
 
 Before starting, read:
-- `.hwe-tools/docs/specs/security/security-standards.md` — CSP template, cookie rules, RGPD obligations, input validation pipeline
-- `.hwe-tools/docs/skills/security/security-audit-headers.md` — exact header values and CSP directives for hospitality sites
-- `.hwe-tools/docs/skills/security/security-audit-rgpd.md` — privacy policy content requirements and data inventory template
+- `hwe-tools/docs/specs/security/security-standards.md` — CSP template, cookie rules, RGPD obligations, input validation pipeline
+- `hwe-tools/docs/skills/security/security-audit-headers.md` — exact header values and CSP directives for hospitality sites
+- `hwe-tools/docs/skills/security/security-audit-rgpd.md` — privacy policy content requirements and data inventory template
 
 ## Process
 
@@ -72,9 +72,9 @@ Re-run /security-audit {SLUG} to verify the current state.
 ### Step 2 — Read specs and site files
 
 Read (in parallel):
-- `hwe-platform/docs/specs/security/security-standards.md`
-- `hwe-platform/docs/skills/security/security-audit-headers.md`
-- `hwe-platform/docs/skills/security/security-audit-rgpd.md`
+- `hwe-tools/docs/specs/security/security-standards.md`
+- `hwe-tools/docs/skills/security/security-audit-headers.md`
+- `hwe-tools/docs/skills/security/security-audit-rgpd.md`
 - `{APP_DIR}/next.config.mjs`
 - `{SRC_DIR}/app/layout.tsx`
 

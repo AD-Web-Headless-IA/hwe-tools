@@ -43,7 +43,7 @@ Run:
 
 ## Steps
 
-All commands run from `hwe-platform/`.
+All commands run from the client repo root (`site-{slug}/`).
 
 **Step 1 — Run `pnpm audit`**
 ```bash
@@ -118,7 +118,7 @@ Then manually verify any unfamiliar package name against npmjs.com.
 
 **Step 7 — Check that `pnpm audit` is in the CI pipeline**
 ```bash
-cat hwe-platform/.github/workflows/*.yml 2>/dev/null | grep "pnpm audit" || echo "NOT IN CI"
+cat .github/workflows/*.yml 2>/dev/null | grep "pnpm audit" || echo "NOT IN CI"
 ```
 Expected: `pnpm audit` appears in at least one CI workflow.
 - Not in CI → **Minor** (vulnerabilities may accumulate between manual checks)

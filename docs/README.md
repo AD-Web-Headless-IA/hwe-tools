@@ -92,9 +92,7 @@ docs/
 │   ├── frontend/
 │   ├── infra/
 │   └── cms/
-├── clients/            ← per-client design analysis
-│   ├── base-template/
-│   └── hotel-balneario-fuente-de-cabriel/
+├── clients/            ← per-client design analysis (one subfolder per client slug)
 ├── diagrams/           ← Mermaid architecture diagrams
 │   ├── block-variant-resolution.md
 │   ├── booking-architecture.md
@@ -121,6 +119,7 @@ docs/
 | `architecture/briefing.md` | Vision, business model, Septeo Hospitality context | Any task touching platform vision or business model |
 | `architecture/domain-model.md` | Multi-tenant model — types, features, accommodation entity | **Always** when classifying Figma modules, designing blocks/templates, modeling Payload schemas, or wiring routes |
 | `architecture/decisions.md` | DEC-001 → latest | Before proposing structural changes — grep for related DECs first |
+| `contracts/general/workspace-structure.md` | Workspace layout — repos, relative paths, what lives where. No absolute paths. | **Always** for scaffolding, bootstrap, or any skill that writes to the filesystem |
 | `contracts/frontend/structure.md` | Monorepo layout, naming, imports | Scaffolding packages/apps, moving files |
 | `contracts/frontend/block-contract.md` | How to build a `@hwe/core-ui` block — the *what* (files, exports, registry) | New block, modifying a block, wiring BlockRenderer |
 | `specs/frontend/block-architecture.md` | 4-layer block system — the *how* (content schema, variants, config schema, adapter). SEO/security gates. Lifecycle. | **Always** for any block task — decides which layers to build before writing a line of code |
@@ -175,7 +174,8 @@ Concrete recipes — copy the load list for the task at hand. The token budget i
 ### Scaffold a new block in `@hwe/core-ui` or in a client site
 
 ```
-Always:   docs/specs/general/base-standards.md
+Always:   docs/contracts/general/workspace-structure.md
+          docs/specs/general/base-standards.md
           docs/specs/frontend/frontend-standards.md
           docs/architecture/domain-model.md             (to know if block is core, feature-gated, or seasonized)
           docs/specs/frontend/block-architecture.md     (decide which of the 4 layers the block needs)
@@ -203,7 +203,8 @@ On demand: docs/contracts/frontend/template-contract.md
 ### Bootstrap a new client site (`site-{slug}/`)
 
 ```
-Always:   docs/specs/general/base-standards.md
+Always:   docs/contracts/general/workspace-structure.md
+          docs/specs/general/base-standards.md
           docs/specs/frontend/frontend-standards.md
 On demand: docs/contracts/frontend/structure.md
           docs/contracts/frontend/theme-tokens.md
@@ -228,7 +229,8 @@ On demand: docs/contracts/frontend/client-composition.md
 ### Import a new Figma Make reference
 
 ```
-Always:   docs/specs/general/base-standards.md
+Always:   docs/contracts/general/workspace-structure.md
+          docs/specs/general/base-standards.md
 On demand: .claude/skills/import-figma/SKILL.md  (the skill is self-contained)
 ```
 

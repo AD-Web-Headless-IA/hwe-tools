@@ -26,10 +26,10 @@ En WordPress sería: abrir Local → activar el site → editar el theme → F5 
 
 ```bash
 # Opción A: desde VS Code
-# File → Open Folder → C:\laragon\www\Hospitality Web Platform\site-{slug}
+# File → Open Folder → {tu-workspace}/site-{slug}
 
 # Opción B: desde terminal
-cd "C:\laragon\www\Hospitality Web Platform\site-{slug}"
+cd "{tu-workspace}/site-{slug}"
 code .
 ```
 
