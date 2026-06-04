@@ -1226,3 +1226,43 @@ Banners remain the right tool for **pointwise, recent supersessions** in a docum
 - **Keep annotating with banners (status quo per DEC-003).** Rejected — see Context. Banners on a majority-stale doc produce internal contradictions and do not help selective readers.
 - **Delete `architecture.md` and rely on `git log` for history.** Rejected — the historical infra narrative is more discoverable in a labeled `architecture-legacy.md` than in git history for someone asking "why is there PHP in here?". Also risks losing not-yet-rehomed content if deleted before extraction.
 - **Rewrite `architecture.md` in full as a new current constitution.** Rejected — re-creates a large always-stale monolith and re-introduces the very token-amortization problem DEC-003 solved. The canonical docs are already the constitution, distributed.
+
+---
+
+## DEC-019 — `site-demo` is the single source; `hwe-template` is generated from it
+
+> **Status:** Accepted
+> **Date:** 2026-06-04
+> **Deciders:** Cristina Gutiérrez
+> **Resolves:** the "generated from `site-demo` **or** kept in lockstep" ambiguity left open in [DEC-011](#dec-011--client-sites-live-in-independent-repos-monorepo-holds-only-platform--reference-site).
+
+### Context
+
+Two things could each act as "the example client": `hwe-core/apps/site-demo/` (the package-validation fixture, which consumes `@hwe/core-ui` via local workspace link for a fast inner loop) and `hwe-template` (the GitHub template a real client is cloned from, which consumes the **published** `@hwe/core-ui` at a pinned version). Maintaining both by hand would mean two parallel codebases drifting apart. But only the template-based path exercises the **real onboarding flow** (published package + submodule + clone), which is `site-demo`'s blind spot.
+
+The owner's constraint: **do not maintain two things**, but **be able to validate the real flow eventually**.
+
+### Decision
+
+1. **`site-demo` is the single hand-maintained source of truth.** It already mirrors a client repo's structure (DEC-015). It is the fast inner-loop fixture (local link) used while building `@hwe/core-ui`. Only `site-demo` is edited by hand.
+2. **`hwe-template` is a generated artifact, not maintained in parallel.** It is produced from `site-demo` by a generator (a script, or the `/scaffold-site` skill in reverse) that: copies the client-repo structure, **swaps the dependency wiring** (local `workspace:` link → pinned published `@hwe/core-ui@<version>`), and strips demo content. Regenerated per release; never edited by hand alongside `site-demo`.
+3. **Real-flow validation is a periodic action, not a second codebase.** When wanted (deferred to the pre-launch milestone, when packages are stable enough to publish): generate `hwe-template` from `site-demo` → publish the packages → clone the template as a client would → `install` + `build` + smoke test. The only thing this proves that `site-demo` cannot is the published-package path — which is exactly the dependency swap in step 2.
+4. **Do not build `hwe-template` yet.** Premature while the packages are embryonic (only `HeroBlock` implemented, `adapters/` not built). Building it now would stand up the publish pipeline + registry + template + submodule wiring before there is anything worth consuming, and would force the slow publish loop during heavy package development.
+
+### Why
+
+- **One source, no drift.** `site-demo` is the only hand-maintained client-shaped repo; the template is derived, so the two cannot diverge.
+- **Fast inner loop preserved.** Package development stays on the local-link fixture; nobody pays the publish-loop tax while building blocks.
+- **Real flow still validated.** The generate→publish→clone→smoke pass exercises the exact path a client takes, on demand, without a second maintained repo.
+
+### Consequences
+
+- A generator (`site-demo` → `hwe-template`) is needed before the first real-flow validation. Tracked as a future skill/script; not built now.
+- `site-demo` must stay a faithful mirror of a client repo (per DEC-015) — that faithfulness is what makes the generated template correct.
+- The pre-launch checklist gains: "generate `hwe-template`, publish packages, clone + smoke test" before client #1.
+
+### Alternatives considered
+
+- **Maintain `hwe-template` and `site-demo` in parallel (lockstep by hand).** Rejected — two codebases drift; doubles maintenance; violates the owner's "don't maintain two things" constraint.
+- **Make `hwe-template` the source and `site-demo` an instance of it.** Rejected — the template pins published packages, which breaks the fast inner loop that package development needs.
+- **Build `hwe-template` now.** Rejected — premature; see Decision step 4.
