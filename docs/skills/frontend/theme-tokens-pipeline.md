@@ -1,6 +1,8 @@
 # Theme tokens pipeline — end-to-end walkthrough
 
-> The **how-to** for the design-token pipeline: how a color value in Figma reaches a CSS rule in the rendered page. Companion to [`docs/frontend/theme-tokens.md`](../../contracts/frontend/theme-tokens.md) (the contract). Load this when bootstrapping a new client's theme, debugging a colour discrepancy, or onboarding a new developer.
+> ⚠️ **Tailwind version (DEC-017): the canonical pipeline is Tailwind v4, CSS-first via `@theme`.** Stages 4–5 below (`createhwePreset(tokens)` returning `Partial<Config>`, `tailwind.config.ts` with `presets: [...]`) describe the **superseded v3 mechanism** (DEC-012, superseded by DEC-017). The token cascade, the Figma extraction stages, fonts, and the verification steps remain valid; the *delivery mechanism* is now `@import "tailwindcss"` + `@import "@hwe/config/theme.css"` + a client `@theme {}` override in `globals.css`. See [`../../contracts/frontend/theme-tokens.md`](../../contracts/frontend/theme-tokens.md) §Per-client `globals.css` and its open question (whether `tokens.json` + `TokensContract` survive in v4) — that reconciliation is a pending hwe-core rewrite. **Do not implement the JS-preset stages for new v4 work.**
+>
+> The **how-to** for the design-token pipeline: how a color value in Figma reaches a CSS rule in the rendered page. Companion to [`../../contracts/frontend/theme-tokens.md`](../../contracts/frontend/theme-tokens.md) (the contract). Load this when bootstrapping a new client's theme, debugging a colour discrepancy, or onboarding a new developer.
 >
 > This is the practical walkthrough. The contract document is the source of truth for naming, validation rules, and the seasonized variant. Read the contract first if you are about to change the shape of `TokensContract` or `createhwePreset`.
 

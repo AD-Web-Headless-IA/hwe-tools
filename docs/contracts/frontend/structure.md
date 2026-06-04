@@ -209,7 +209,7 @@ site-{slug}/
 │
 ├── payload/                               ← Payload schemas for THIS client
 │   └── schemas/
-│       └── {collection}.ts                ← extends base schema from @hwe/content
+│       └── {collection}.ts                ← extends base Zod schema from @hwe/core-ui/schemas (DEC-017: no @hwe/content package)
 │
 ├── public/
 │   ├── brand/                             ← logo, favicon, og-image

@@ -52,7 +52,7 @@ site-{slug}/        ← repos independientes por cliente (clonados desde hwe-tem
 
 ## Documentación principal (carga selectiva — ver `docs/README.md`)
 
-- **Constitución:** `docs/architecture/architecture.md` — cargar SOLO la sección que necesites.
+- **Overview + índice "dónde vive cada cosa":** `docs/architecture/architecture.md` — mapa de 1 pantalla (visión, stack vigente, tabla de punteros). Ya no es una constitución por secciones (DEC-018). El texto histórico está en `docs/architecture/architecture-legacy.md` — **no lo cargues para el estado actual.**
 - **Modelo de dominio:** `docs/architecture/domain-model.md` — **cargar SIEMPRE** en tareas de clasificación de bloques/templates, schemas, routing.
 - **Frontend (cómo construir):** `docs/contracts/frontend/` — `structure.md`, `block-contract.md`, `template-contract.md`, `theme-tokens.md`, `client-composition.md`.
 - **Block architecture (4 capas):** `docs/specs/frontend/block-architecture.md` — **cargar SIEMPRE** en cualquier tarea de bloques.

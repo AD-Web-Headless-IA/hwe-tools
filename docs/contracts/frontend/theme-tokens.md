@@ -1,9 +1,13 @@
 # Theme tokens
 
-> **How** design tokens flow from Figma to the rendered page. Companion to the rules in [`ai-specs/specs/frontend-standards.md`](../../specs/frontend-standards.md) and the architecture's "Sistema de bloques y flujo Figma" section.
+> **How** design tokens flow from Figma to the rendered page. Companion to the rules in [`../../specs/frontend/frontend-standards.md`](../../specs/frontend/frontend-standards.md) and [`../../specs/frontend/block-architecture.md`](../../specs/frontend/block-architecture.md).
 > Load this file when scaffolding a new client's theme, exporting tokens from Figma, or debugging a visual inconsistency between Figma and the rendered site.
 >
 > **Token names and semantic roles below** (`color/primary`, `font/heading`) **are a starting convention.** The final naming taxonomy may be revised once the designer and the agency have processed several clients — flag changes in `decisions.md`.
+>
+> ⚠️ **Tailwind version (DEC-017): the canonical pipeline is Tailwind v4, CSS-first via `@theme`.** The authoritative v4 flow is the one in [§Per-client `globals.css`](#per-client-globalscss-tailwind-v4): `@import "tailwindcss"` + `@import "@hwe/config/theme.css"` + a client `@theme {}` override. **Any section below describing a JS preset** — `createhwePreset()` returning `Partial<Config>`, `tailwind.config.ts`, `presets: [...]` — **is the superseded v3 API (DEC-012, superseded by DEC-017)**, kept only as reference until the hwe-core v4 token-pipeline rewrite lands.
+>
+> **Open question (needs a DEC, decided in hwe-core):** does the v4 pipeline keep `tokens.json` + `TokensContract` as a build-time validation layer feeding `@theme`, or does the client-authored `@theme {}` block become the only source of token values? Today this file documents both and they are not yet reconciled. Do not treat the JS-preset sections as current.
 
 ## The flow
 
@@ -194,7 +198,9 @@ Mapping the Mer et Camargue export (Flavor A) onto `TokensContract` surfaced gap
 
 Until a DEC resolves these, extractors record the mapping/omission in the client's `figma-notes.md` and do not force values into the wrong key.
 
-## Tailwind preset (`@hwe/config/tailwind-preset`)
+## Tailwind preset (`@hwe/config/tailwind-preset`) — ⚠️ SUPERSEDED (v3 API)
+
+> **This entire section is the Tailwind v3 mechanism (DEC-012, superseded by DEC-017).** It is retained as reference for the pending hwe-core rewrite. Under v4, token values flow through `@theme` CSS (see [§Per-client `globals.css`](#per-client-globalscss-tailwind-v4)), not through a JS `createhwePreset()` returning `Partial<Config>`. Do not implement against this section for new v4 work.
 
 The preset is a Tailwind config fragment that other configs extend. It exposes a function that takes a parsed `Tokens` object and produces the theme.
 
@@ -402,6 +408,8 @@ A client that adds `hasSeasons` after launch:
 No code changes required outside the theme folder and Payload data.
 
 ## Token cascade (DEC-015)
+
+> The three-layer cascade (global → semantic → brand) is the intent and remains valid. The **mechanism** described here as `createhwePreset()` is the v3 API (superseded by DEC-017). Under v4 the same cascade flows through `@hwe/config/theme.css` (base) + the client's `@theme {}` override — see [§Per-client `globals.css`](#per-client-globalscss-tailwind-v4).
 
 Tokens flow through three layers, resolved at build time inside `createhwePreset()`:
 

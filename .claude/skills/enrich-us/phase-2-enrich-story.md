@@ -18,7 +18,7 @@ Before writing any specification, you MUST research the codebase. This is not op
 ### Step 1 — Orient yourself
 
 1. Read the documentation files listed in the story's "Documentation Pointers" section.
-2. Read `docs/architecture/briefing.md` and the relevant sections of `docs/architecture/architecture.md` for broader context.
+2. Read `docs/architecture/briefing.md` and the architecture overview `docs/architecture/architecture.md` (then the canonical doc its index points to) for broader context.
 3. If the story depends on other stories, check `docs/plans/*/stories/` for their enriched specs and read them for interface details.
 
 ### Step 2 — Read the code
@@ -156,8 +156,8 @@ Reference hwe's degradation strategy: PMS KO → fallback URL to PMS; Payload KO
 {List every documentation file and source code file you read during research, with a one-line note on what you learned from each.
 
 Example:
-- `packages/@hwe/booking/adapters/CloudbedsAdapter.ts` — Existing PMS adapter pattern; new adapter must follow the same `BookingAdapter` interface and capabilities declaration.
-- `docs/architecture/architecture.md` (section 31) — Booking engine integration modes (api / external-widget / iframe).}
+- `hwe-core/packages/core-ui/src/adapters/booking/stock/ThrAdapter.ts` — Existing PMS adapter pattern (DEC-017: adapters live in `@hwe/core-ui`, not a separate `@hwe/booking`); new adapter must follow the same `BookingAdapter` interface and capabilities declaration.
+- `docs/diagrams/booking-architecture.md` — Booking engine integration modes (api / external-widget / iframe).}
 ```
 
 ## Rules

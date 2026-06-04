@@ -749,7 +749,9 @@ The hosting target ([DEC-007](#dec-007--vercel-full-stack-hosting-replaces-cdmon
 
 ## DEC-012 — Tailwind v3 over v4 for the walking skeleton
 **Date:** 2026-05-21
-**Status:** Accepted
+**Status:** Superseded by DEC-017
+
+> ⚠️ **Superseded by [DEC-017](#dec-017--repo-split-tools-submodule--core-npm--template--client-repos) (2026-06-03).** The stack moved to **Tailwind v4 (CSS-first `@theme`)**. The decision below — pinning v3 for the walking skeleton because the token pipeline was built around a JS preset (`createhwePreset()` returning `Partial<Config>` + `presets: [...]`) — is preserved as historical record. The v4 token pipeline (whether `tokens.json` + `TokensContract` survive, or `@theme` CSS becomes the only source) is an open hwe-core rewrite tracked in `docs/contracts/frontend/theme-tokens.md`. New work targets v4.
 
 ### Context
 
@@ -1026,6 +1028,8 @@ export type HeroBlockSlots = {
 
 Three levels, resolved at build time inside `createhwePreset()`. Compatible with Tailwind v3 (DEC-012). Client `tailwind.config.ts` files continue to work as-is — the cascade is internal to the preset function.
 
+> ⚠️ **Mechanism superseded by [DEC-017](#dec-017--repo-split-tools-submodule--core-npm--template--client-repos).** The stack is now Tailwind v4 CSS-first. The three-layer cascade (global → semantic → brand) remains the intent, but it no longer resolves through `createhwePreset()` / `tailwind.config.ts`; under v4 it flows through `@hwe/config/theme.css` (base) + the client's `@theme {}` override in `globals.css`. See `docs/contracts/frontend/theme-tokens.md`.
+
 #### 9. CSS rules
 
 - **ONE `globals.css` per client** in `src/app/globals.css`.
@@ -1176,3 +1180,49 @@ Client repos are independent, created from the template, and consume tools via s
 - All skill paths updated: `hwe-platform/apps/{slug}/` → `site-{slug}/` or relative CWD paths.
 - Skill `globals.css` template updated to Tailwind v4 syntax (`@import "tailwindcss"` + `@theme {}`).
 - `docs/audits/`, `docs/clients/`, `docs/stories/`, `docs/plans/` removed from hwe-tools — these belong in project repos, not in the tools submodule.
+
+---
+
+## DEC-018 — Retire `architecture.md` as the constitution: thin overview + legacy archive
+
+> **Status:** Accepted
+> **Date:** 2026-06-04
+> **Deciders:** Cristina Gutiérrez
+> **Supersedes:** the "annotate, never rewrite the constitution" policy of [DEC-003](#dec-003--frontend-layout-naming-conventions-and-docs-split-for-token-amortization) **for documents that have become majority-stale.** DEC-003's token-amortization decisions (folder-per-component, schemas in core-ui, docs split, the `docs/README.md` index) all stand.
+
+### Context
+
+`docs/architecture/architecture.md` was written as the system "constitution" when hwe was a single `hwe-platform/` monorepo on cdmon + Hetzner + MariaDB + PHP. Since then, DEC-007 (Vercel), DEC-011 (independent client repos), DEC-015 (client-owned blocks) and DEC-017 (3-repo split) have rewritten almost all of its substance. Per DEC-003 the policy was *annotate with banners, do not rewrite*. That policy has now failed for this document specifically:
+
+1. **Banners do not protect partial readers.** A banner at line 3 says "activeBlocks superseded by DEC-009", and 220 lines later the `client.config.ts` example still shows `activeBlocks`. With selective loading (the norm per `docs/README.md`), readers enter mid-document and read stale bodies as current. The banner only helps a linear reader from line 1 — which the same index tells them not to be.
+2. **The premise broke.** "Don't rewrite because it's stable" held when the doc was mostly correct. It is now >70% superseded (infra, packages, monorepo, stack versions, client config). It is no longer a stable constitution with annotations — it is a historical archive with islands of current truth.
+3. **It violates DEC-003's own token-amortization principle.** A ~4.3k-line document that the docs explicitly say "never load whole" is dead weight: loaded, it is expensive and polluting; not loaded, it is the source of nothing.
+4. **The live truth already migrated.** `workspace-structure.md`, `contracts/`, `specs/`, `domain-model.md` and `decisions.md` are the canonical sources today. `architecture.md` duplicates the live parts (with stale versions) and monopolizes the parts not yet rehomed.
+
+### Decision
+
+1. **`architecture.md` becomes a thin overview (~1 screen):** vision + current stack + a "where each thing lives" index pointing to the canonical docs. It stops being a section-by-section reference.
+2. **Dead infrastructure narrative moves to `architecture-legacy.md`,** explicitly labeled as a historical archive (cdmon / Hetzner / MariaDB / PHP proxy / Verdaccio / `hwe-platform` monorepo / eliminated `@hwe/*` packages / old CI-CD-SSH / staging-backups-monitoring-on-cdmon / OpenAPI aspiration / the old `client.config.ts` snippet with `activeBlocks`).
+3. **Still-valid content with no canonical home is extracted first, then the source is archived:**
+   - Product content-AI system (5 content agents, prompts, bulk editing, client portal, evals, prompt chaining) → new `docs/specs/ai/content-operations.md`, with an explicit separation from the 11 Claude Code dev agents (kills the duplicated-"planner" confusion).
+   - Topics already covered elsewhere (dynamic pages, feature flags, booking, security, SEO, WordPress migration, onboarding, context engineering) are **dropped, not copied** — they live in their canonical docs.
+4. **`client.config.ts` shape is NOT documented as authority in hwe-tools.** Its *definition* is a Zod schema (`ClientConfig`) in `@hwe/core-ui` (hwe-core); hwe-tools only describes semantics (in `domain-model.md`) and points to that schema. The old practice of treating a doc snippet as the field source is what let `activeBlocks` rot.
+5. **Stack confirmed binding (already set by DEC-017):** Next.js 15, React 19, Tailwind v4 (CSS-first `@theme`), TypeScript 5.x strict. DEC-012 (Tailwind v3) is marked superseded.
+
+### Policy change (the part that supersedes DEC-003)
+
+Banners remain the right tool for **pointwise, recent supersessions** in a document that is still mostly correct (e.g. DEC-009 on one field, DEC-010 on one location). When a document needs **more than ~3 banners**, or is majority-stale, the correct action is to **split it** (extract live content to canonical homes → thin overview + labeled legacy archive), not to keep annotating. The decision log (`decisions.md`) is exempt — it is append-only by nature and continues to be annotated, never rewritten.
+
+### Consequences
+
+- `architecture.md` rewritten as overview; `architecture-legacy.md` created.
+- `content-operations.md` created and indexed in `docs/README.md` + `docs/catalog.md`.
+- `CLAUDE.md` and `docs/README.md` references to "the constitution / load sections of architecture.md" updated to point at the overview + canonical docs.
+- DEC-012 marked `Superseded by DEC-017`; DEC-015 §8 annotated for the v4 mechanism.
+- **Pending (out of scope — hwe-core):** verify/create the `ClientConfig` Zod schema in `@hwe/core-ui` reflecting DEC-009/010/015/017 (with `blockDefaults`, without `activeBlocks`/`database`/`cmsDomain`). That is a code story in hwe-core, TDD-first.
+
+### Alternatives considered
+
+- **Keep annotating with banners (status quo per DEC-003).** Rejected — see Context. Banners on a majority-stale doc produce internal contradictions and do not help selective readers.
+- **Delete `architecture.md` and rely on `git log` for history.** Rejected — the historical infra narrative is more discoverable in a labeled `architecture-legacy.md` than in git history for someone asking "why is there PHP in here?". Also risks losing not-yet-rehomed content if deleted before extraction.
+- **Rewrite `architecture.md` in full as a new current constitution.** Rejected — re-creates a large always-stale monolith and re-introduces the very token-amortization problem DEC-003 solved. The canonical docs are already the constitution, distributed.

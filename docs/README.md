@@ -26,7 +26,8 @@ Empieza aquí — en este orden:
 docs/
 ├── guides/             ← onboarding guides for developers new to the project
 ├── architecture/       ← system constitution + domain model + decisions
-│   ├── architecture.md              (~4.2k lines — load sections only)
+│   ├── architecture.md              (overview + 'where each thing lives' index — DEC-018)
+│   ├── architecture-legacy.md       (🗄️ historical archive — NOT current; do not load for state)
 │   ├── architecture-all-options.md  (options evaluated before decisions)
 │   ├── architecture-audit.md        (audit findings — Phase B)
 │   ├── briefing.md                  (vision + business model)
@@ -82,7 +83,8 @@ docs/
 │   └── ai/             ← agent system documentation
 │       ├── agent-directory.md
 │       ├── agent-teams-playbook.md
-│       └── specboot-flow.md
+│       ├── specboot-flow.md
+│       └── content-operations.md      ← product content-AI agents (distinct from dev agents)
 ├── plans/              ← SPECBOOT epic plans
 │   ├── README.md
 │   ├── walking-skeleton.md
@@ -114,7 +116,8 @@ docs/
 | `guides/wordpress-to-hwe.md` | Concept translation dictionary WP → hwe | Onboarding from WP background |
 | `guides/daily-workflow.md` | Day-to-day commands and patterns | Reference during normal work |
 | `guides/glossary.md` | Plain-language definitions of all technical terms | When a term is unfamiliar |
-| `architecture/architecture.md` | The constitution — full system architecture (~4.2k lines, ~50k tokens) | Only when asked, or when reading a specific section by number |
+| `architecture/architecture.md` | Overview (~1 screen): vision, current stack, "where each thing lives" index (DEC-018) | Orientation; finding the canonical doc for a topic |
+| `architecture/architecture-legacy.md` | 🗄️ Historical archive of the old constitution (cdmon/Hetzner/MariaDB/PHP, `hwe-platform` monorepo, eliminated packages). **Not current.** | Only when researching *why* a past approach existed |
 | `architecture/architecture-all-options.md` | Options evaluated before decisions were made | Only when revisiting a past architectural choice |
 | `architecture/briefing.md` | Vision, business model, Septeo Hospitality context | Any task touching platform vision or business model |
 | `architecture/domain-model.md` | Multi-tenant model — types, features, accommodation entity | **Always** when classifying Figma modules, designing blocks/templates, modeling Payload schemas, or wiring routes |
@@ -130,6 +133,7 @@ docs/
 | `specs/ai/agent-directory.md` | All 11 agents: roles, models, when to invoke | When invoking an agent; selecting the right specialist |
 | `specs/ai/agent-teams-playbook.md` | Pre-defined team compositions per task type | Picking a team for a task |
 | `specs/ai/specboot-flow.md` | SPECBOOT pipeline detail: phases, inputs, outputs | Running a full SPECBOOT cycle |
+| `specs/ai/content-operations.md` | The **product** content-AI system: 5 content agents, prompt chaining, bulk editing, client portal, evals (NOT the 11 dev agents) | Any task touching AI content generation/editing, the client portal, or content evals |
 | `skills/security/security-audit-headers.md` | Audit HTTP security headers: CSP, HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy | New site setup; any next.config.mjs change; pre-deploy |
 | `skills/security/security-audit-cookies.md` | Audit cookie consent (RGPD): no non-essential cookies before opt-in, Secure/HttpOnly/SameSite flags | New site setup; adding analytics or booking tracking; pre-deploy |
 | `skills/security/security-audit-inputs.md` | Audit input handling: dangerouslySetInnerHTML, eval(), Route Handler Zod coverage, file upload validation | Any block with user input; any Route Handler added; pre-deploy |
@@ -271,11 +275,11 @@ On demand: docs/contracts/frontend/theme-tokens.md
 Always:   docs/specs/general/base-standards.md
 On demand: docs/architecture/decisions.md  (search for related DECs first — avoid contradicting)
           docs/architecture/domain-model.md  (if the change touches multi-tenant model or client typology)
-          docs/architecture/architecture.md  (specific section only — find via grep on `^## `)
+          docs/architecture/architecture.md  (overview — to find the canonical doc for the area you're changing)
           docs/README.md  (this file — to know what other docs exist)
 ```
 
-**Budget:** depends on which DECs and sections are relevant. **Do NOT load `architecture.md` whole** — grep for the section heading first.
+**Budget:** depends on which DECs are relevant. `architecture.md` is now a thin overview/index — load it to locate the canonical doc, then load that doc.
 
 ### Extend the domain model (add a type, a feature, a season behavior, etc.)
 
@@ -351,7 +355,7 @@ On demand: docs/specs/frontend/coding-standards.md   §Error handling
 
 ## Anti-patterns
 
-- **Don't load `architecture/architecture.md` "to have context."** It is 50k tokens. The whole point of this index is to avoid that.
+- **Don't load `architecture/architecture-legacy.md`.** It is the old ~50k-token constitution, kept only as historical archive. The current `architecture.md` is a thin overview/index — load that instead.
 - **Don't load every doc in `contracts/frontend/` "in case."** Each doc is self-contained. Load only those the task names.
 - **Don't load `decisions.md` whole** to find one DEC. Grep for the DEC number or the topic, then read the section.
 - **Don't load `figma-analysis.md` of clients other than the one in scope.** Each client's analysis is irrelevant to others.
