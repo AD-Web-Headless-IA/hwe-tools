@@ -5,9 +5,7 @@
 >
 > **Token names and semantic roles below** (`color/primary`, `font/heading`) **are a starting convention.** The final naming taxonomy may be revised once the designer and the agency have processed several clients — flag changes in `decisions.md`.
 >
-> ⚠️ **Tailwind version (DEC-017): the canonical pipeline is Tailwind v4, CSS-first via `@theme`.** The authoritative v4 flow is the one in [§Per-client `globals.css`](#per-client-globalscss-tailwind-v4): `@import "tailwindcss"` + `@import "@hwe/config/theme.css"` + a client `@theme {}` override. **Any section below describing a JS preset** — `createhwePreset()` returning `Partial<Config>`, `tailwind.config.ts`, `presets: [...]` — **is the superseded v3 API (DEC-012, superseded by DEC-017)**, kept only as reference until the hwe-core v4 token-pipeline rewrite lands.
->
-> **Open question (needs a DEC, decided in hwe-core):** does the v4 pipeline keep `tokens.json` + `TokensContract` as a build-time validation layer feeding `@theme`, or does the client-authored `@theme {}` block become the only source of token values? Today this file documents both and they are not yet reconciled. Do not treat the JS-preset sections as current.
+> ✅ **Tailwind v4, CSS-first via `@theme` (DEC-017 — confirmed in hwe-core code).** The pipeline is: Figma → `tokens.json` → **`TokensContract` (Zod, build-time validation — kept)** → values delivered via **`@theme` CSS** (`@hwe/config/theme.css` base + a client `@theme {}` override in `globals.css`). There is **no JS preset**: `createhwePreset()` / `tailwind.config.ts` / `presets: [...]` were the Tailwind v3 API (DEC-012) and **do not exist anywhere in `hwe-core` code**. The earlier "open question" (does `TokensContract` survive in v4?) is resolved: it does — `packages/core-ui/src/theme/tokens.contract.ts` is the live contract.
 
 ## The flow
 
@@ -198,52 +196,6 @@ Mapping the Mer et Camargue export (Flavor A) onto `TokensContract` surfaced gap
 
 Until a DEC resolves these, extractors record the mapping/omission in the client's `figma-notes.md` and do not force values into the wrong key.
 
-## Tailwind preset (`@hwe/config/tailwind-preset`) — ⚠️ SUPERSEDED (v3 API)
-
-> **This entire section is the Tailwind v3 mechanism (DEC-012, superseded by DEC-017).** It is retained as reference for the pending hwe-core rewrite. Under v4, token values flow through `@theme` CSS (see [§Per-client `globals.css`](#per-client-globalscss-tailwind-v4)), not through a JS `createhwePreset()` returning `Partial<Config>`. Do not implement against this section for new v4 work.
-
-The preset is a Tailwind config fragment that other configs extend. It exposes a function that takes a parsed `Tokens` object and produces the theme.
-
-```ts
-// packages/config/tailwind-preset.ts
-import type { Config } from 'tailwindcss';
-import type { Tokens } from '@hwe/core-ui';
-
-export function createhwePreset(tokens: Tokens): Partial<Config> {
-  return {
-    theme: {
-      extend: {
-        colors: {
-          background:        tokens.colors.background.value,
-          surface:           tokens.colors.surface.value,
-          primary:           tokens.colors.primary.value,
-          accent:            tokens.colors.accent.value,
-          'accent-secondary': tokens.colors['accent-secondary']?.value,
-          'text-on-dark':    tokens.colors['text-on-dark'].value,
-          border:            tokens.colors.border.value,
-          overlay:           tokens.colors.overlay?.value,
-        },
-        fontFamily: {
-          heading: [tokens.fonts.heading.family, tokens.fonts.heading.fallback],
-          body:    [tokens.fonts.body.family,    tokens.fonts.body.fallback],
-          ui:      [tokens.fonts.ui?.family ?? tokens.fonts.body.family, tokens.fonts.ui?.fallback ?? tokens.fonts.body.fallback],
-        },
-        maxWidth: {
-          container: tokens.spacing['container-max'],
-        },
-        spacing: {
-          'section-y': tokens.spacing['section-y'],
-        },
-        borderRadius: tokens.radii,
-        boxShadow:    tokens.shadows,
-      },
-    },
-  };
-}
-```
-
-The preset never reads `tokens.json` itself — the app reads it and passes the parsed object in. This keeps the preset pure and testable.
-
 ## Per-client `globals.css` (Tailwind v4)
 
 Tailwind v4 uses CSS-first configuration. Token values flow through `src/app/globals.css`:
@@ -334,8 +286,7 @@ apps/site-{slug}/src/theme/
 ├── tokens-winter.json         ← one file per season slug
 ├── tokens-summer.json
 ├── tokens-christmas.json      ← arbitrary slug, defined by the client's Season entities
-├── tailwind.config.ts         ← reads all N
-└── globals.css
+└── globals.css                ← @theme base + per-season @theme overrides (scoped by [data-season])
 ```
 
 The build pipeline auto-detects the mode by file presence:
@@ -361,18 +312,16 @@ export const TokensContract = z.union([SingleTokens, SeasonizedTokens]);
 export type Tokens = z.infer<typeof TokensContract>;
 ```
 
-The Tailwind preset distinguishes the two cases:
+Under Tailwind v4 the seasonized values are emitted as `@theme`/CSS-variable blocks scoped by season, so one CSS bundle carries all seasons and the active one is selected at runtime via the `[data-season="..."]` attribute on `<html>`:
 
-```ts
-// packages/config/tailwind-preset.ts (simplified)
-export function createhwePreset(tokens: Tokens): Partial<Config> {
-  if (isSeasonized(tokens)) {
-    // Emit base theme from the FIRST season (alphabetical) and
-    // override per season via `:where([data-season="..."])` selectors.
-    return createSeasonizedPreset(tokens);
-  }
-  return createSingleThemePreset(tokens);
-}
+```css
+/* globals.css (seasonized client) */
+@import "tailwindcss";
+@import "@hwe/config/theme.css";
+
+@theme { /* base / default season */ --color-primary: #1a4a52; }
+:where([data-season="winter"]) { --color-primary: #2a3a6a; }
+:where([data-season="summer"]) { --color-primary: #1a4a52; }
 ```
 
 ### Runtime — how a block reads the active season
@@ -409,20 +358,18 @@ No code changes required outside the theme folder and Payload data.
 
 ## Token cascade (DEC-015)
 
-> The three-layer cascade (global → semantic → brand) is the intent and remains valid. The **mechanism** described here as `createhwePreset()` is the v3 API (superseded by DEC-017). Under v4 the same cascade flows through `@hwe/config/theme.css` (base) + the client's `@theme {}` override — see [§Per-client `globals.css`](#per-client-globalscss-tailwind-v4).
-
-Tokens flow through three layers, resolved at build time inside `createhwePreset()`:
+The three-layer cascade (global → semantic → brand) flows entirely through Tailwind v4 `@theme` CSS — see [§Per-client `globals.css`](#per-client-globalscss-tailwind-v4):
 
 ```
 global tokens          →  semantic tokens          →  brand tokens
 (spacing, radii,          (color roles: primary,       (client values:
  shadows defaults)         accent, surface, …)          #1A4A52, "Playfair Display", …)
         ↓                         ↓                              ↓
-  @hwe/config                @hwe/core-ui                 tokens.json
-  tailwind-preset.ts         TokensContract               (per-client)
+  @hwe/config                @hwe/core-ui                 globals.css @theme
+  theme.css (@theme)         TokensContract (Zod)         (per-client override)
 ```
 
-- **Global tokens** are the platform defaults declared in the Tailwind preset: base spacing scale, default radii, base shadow values. They are never client-specific.
+- **Global tokens** are the platform defaults declared in `@hwe/config/theme.css` (`@theme` base): base spacing scale, default radii, base shadow values. They are never client-specific.
 - **Semantic tokens** are the roles declared in `TokensContract` (`primary`, `accent`, `surface`, `text-on-dark`, …). They are named by function, not by color. Core-ui components reference semantic tokens only — never raw hex.
 - **Brand tokens** are the client values in `tokens.json`. They satisfy the semantic roles for a specific client.
 
@@ -450,5 +397,5 @@ This file contains:
 - Don't add a `tokens.json` field that no component reads. Dead tokens hide the real design intent.
 - Don't override tokens at the route/page level (`<div style={{ '--color-primary': '...' }}>`). If a route needs a different color, the design has not been thought through.
 - Don't share `tokens.json` between clients. Each client gets its own.
-- Don't fork `@hwe/config/tailwind-preset` per client. Extend it via the app's `tailwind.config.ts` if absolutely necessary; tell the team you did and why (DEC entry).
-- Don't add a `globals.css` inside a block folder or any `packages/core-ui/` subfolder. One file, one place: `apps/site-{slug}/src/app/globals.css`.
+- Don't fork `@hwe/config/theme.css` per client. Override the base tokens in the client's own `@theme {}` block in `globals.css`; if you need a deviation the base doesn't allow, tell the team why (DEC entry).
+- Don't add a `globals.css` inside a block folder or any `packages/core-ui/` subfolder. One file, one place: `src/app/globals.css` in the client repo.

@@ -134,9 +134,7 @@ hwe-core/
 │       └── theme/tokens.contract.ts   ← Define la forma correcta de un tokens.json
 │
 ├── 📦 packages/config/                ← @hwe/config
-│   └── src/
-│       ├── tailwind-preset.ts         ← createhwePreset(tokens) — para uso interno
-│       └── theme.css                  ← @theme base importado en globals.css del cliente
+│       └── theme.css                  ← @theme base (Tailwind v4) importado en globals.css del cliente
 │
 └── 📁 apps/site-demo/                 ← Fixture de prueba (espejo de estructura de cliente)
 ```

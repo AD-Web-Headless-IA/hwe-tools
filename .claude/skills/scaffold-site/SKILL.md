@@ -269,7 +269,7 @@ Otherwise, write a placeholder that matches the `TokensContract` shape:
 
 ## Step 11 — Write client.config.ts
 
-Do NOT import `ClientConfig` from `@hwe/core-ui` — it does not exist. Use a plain object with `as const`:
+There is no `ClientConfig` type — the config type is `TenantConfig` from `@hwe/core-ui` (`providers/TenantProvider`). Annotate with `TenantConfig`, or use a plain object with `as const`:
 
 ```ts
 export const config = {

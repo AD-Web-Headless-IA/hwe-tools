@@ -1206,7 +1206,7 @@ Client repos are independent, created from the template, and consume tools via s
 3. **Still-valid content with no canonical home is extracted first, then the source is archived:**
    - Product content-AI system (5 content agents, prompts, bulk editing, client portal, evals, prompt chaining) → new `docs/specs/ai/content-operations.md`, with an explicit separation from the 11 Claude Code dev agents (kills the duplicated-"planner" confusion).
    - Topics already covered elsewhere (dynamic pages, feature flags, booking, security, SEO, WordPress migration, onboarding, context engineering) are **dropped, not copied** — they live in their canonical docs.
-4. **`client.config.ts` shape is NOT documented as authority in hwe-tools.** Its *definition* is a Zod schema (`ClientConfig`) in `@hwe/core-ui` (hwe-core); hwe-tools only describes semantics (in `domain-model.md`) and points to that schema. The old practice of treating a doc snippet as the field source is what let `activeBlocks` rot.
+4. **`client.config.ts` shape is NOT documented as authority in hwe-tools.** Its *definition* is the **`TenantConfig`** type exported by `@hwe/core-ui` (`providers/TenantProvider`) — minimal today (`name`, `locale`, `defaultLocale?`, `hasSeasons?`, `defaultSeason?`), no Zod schema yet. The canonical name is **`TenantConfig`** (the code's name); earlier DECs/docs called it `ClientConfig` — same concept, one name now to end the dual naming. The rich fields (`bookingAdapter`, `features`, `blockDefaults`, `locales`, `theme`…) are **roadmap, not yet built**. hwe-tools describes semantics (in `domain-model.md`) and points to the type; it must never list the fields as authority — that is what let `activeBlocks` rot.
 5. **Stack confirmed binding (already set by DEC-017):** Next.js 15, React 19, Tailwind v4 (CSS-first `@theme`), TypeScript 5.x strict. DEC-012 (Tailwind v3) is marked superseded.
 
 ### Policy change (the part that supersedes DEC-003)
@@ -1219,7 +1219,7 @@ Banners remain the right tool for **pointwise, recent supersessions** in a docum
 - `content-operations.md` created and indexed in `docs/README.md` + `docs/catalog.md`.
 - `CLAUDE.md` and `docs/README.md` references to "the constitution / load sections of architecture.md" updated to point at the overview + canonical docs.
 - DEC-012 marked `Superseded by DEC-017`; DEC-015 §8 annotated for the v4 mechanism.
-- **Pending (out of scope — hwe-core):** verify/create the `ClientConfig` Zod schema in `@hwe/core-ui` reflecting DEC-009/010/015/017 (with `blockDefaults`, without `activeBlocks`/`database`/`cmsDomain`). That is a code story in hwe-core, TDD-first.
+- **Pending (out of scope — hwe-core):** expand `TenantConfig` toward the documented target (`bookingAdapter`, `features`, `blockDefaults`, `locales`, `theme`…) as the platform is built, and decide whether it warrants Zod validation. Must reflect DEC-009/010/015 (with `blockDefaults`, never `activeBlocks`/`database`/`cmsDomain`). Code story in hwe-core, TDD-first. `site-demo` is the living fixture where this grows incrementally.
 
 ### Alternatives considered
 

@@ -67,7 +67,7 @@ figma-makes/     ← carpeta plain (no git), un repo de diseñador por cliente
 | Page templates (3 capas) | [`../contracts/frontend/template-contract.md`](../contracts/frontend/template-contract.md) |
 | Composición por cliente | [`../contracts/frontend/client-composition.md`](../contracts/frontend/client-composition.md) |
 | Tokens / theming (Tailwind v4) | [`../contracts/frontend/theme-tokens.md`](../contracts/frontend/theme-tokens.md) |
-| `client.config.ts` — **shape canónico = schema Zod `ClientConfig` en `@hwe/core-ui` (hwe-core)**; semántica de `features`/`routes` en | [`domain-model.md`](./domain-model.md) |
+| `client.config.ts` — **tipo canónico = `TenantConfig` en `@hwe/core-ui`** (`providers/TenantProvider`; mínimo hoy, sin Zod aún, ampliándose por roadmap); semántica de `features`/`routes` en | [`domain-model.md`](./domain-model.md) |
 | Booking engine / adapters PMS | [`../diagrams/booking-architecture.md`](../diagrams/booking-architecture.md) + `@hwe/core-ui/src/adapters/booking/` |
 | Sistema de IA de **contenido del producto** (5 agentes, prompts, edición masiva, portal cliente, evals) | [`../specs/ai/content-operations.md`](../specs/ai/content-operations.md) |
 | Agentes de **desarrollo** de Claude Code (11, SPECBOOT) | [`../specs/ai/agent-directory.md`](../specs/ai/agent-directory.md) · [`agent-teams-playbook.md`](../specs/ai/agent-teams-playbook.md) · [`specboot-flow.md`](../specs/ai/specboot-flow.md) |

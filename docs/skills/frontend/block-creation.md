@@ -368,7 +368,7 @@ Tokens defined in `apps/site-{slug}/src/theme/tokens.json` are the design vocabu
 | Background color | `bg-blue-500` | `bg-primary` / `bg-accent` / `bg-surface` |
 | Heading font | `font-serif` | `font-heading` ≡ `tokens.fonts.heading` |
 
-The `createhwePreset` function maps `tokens.radii`, `tokens.shadows`, etc. onto Tailwind's namespaces, so `rounded-md` and `shadow-card` resolve to the token values automatically. But that only protects you if you **use the named utility**. Never write `rounded` (no value — Tailwind picks a default), `shadow` (same), `border` (same).
+The `@theme` tokens map `--radius-*`, `--shadow-*`, etc. onto Tailwind's namespaces, so `rounded-md` and `shadow-card` resolve to the token values automatically. But that only protects you if you **use the named utility**. Never write `rounded` (no value — Tailwind picks a default), `shadow` (same), `border` (same).
 
 ### Rule 2 — If the Figma does not apply a class, your block does not either
 

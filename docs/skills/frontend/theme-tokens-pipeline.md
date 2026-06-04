@@ -1,10 +1,10 @@
 # Theme tokens pipeline — end-to-end walkthrough
 
-> ⚠️ **Tailwind version (DEC-017): the canonical pipeline is Tailwind v4, CSS-first via `@theme`.** Stages 4–5 below (`createhwePreset(tokens)` returning `Partial<Config>`, `tailwind.config.ts` with `presets: [...]`) describe the **superseded v3 mechanism** (DEC-012, superseded by DEC-017). The token cascade, the Figma extraction stages, fonts, and the verification steps remain valid; the *delivery mechanism* is now `@import "tailwindcss"` + `@import "@hwe/config/theme.css"` + a client `@theme {}` override in `globals.css`. See [`../../contracts/frontend/theme-tokens.md`](../../contracts/frontend/theme-tokens.md) §Per-client `globals.css` and its open question (whether `tokens.json` + `TokensContract` survive in v4) — that reconciliation is a pending hwe-core rewrite. **Do not implement the JS-preset stages for new v4 work.**
+> ✅ **Tailwind v4, CSS-first via `@theme` (DEC-017 — confirmed in hwe-core code).** Delivery is `@import "tailwindcss"` + `@import "@hwe/config/theme.css"` + a client `@theme {}` override in `globals.css`. There is **no JS preset**: `createhwePreset()` / `tailwind.config.ts` / `presets: [...]` were the Tailwind v3 API (DEC-012) and do not exist in `hwe-core`. `TokensContract` (Zod, `packages/core-ui/src/theme/tokens.contract.ts`) is kept as the build-time validation layer.
 >
 > The **how-to** for the design-token pipeline: how a color value in Figma reaches a CSS rule in the rendered page. Companion to [`../../contracts/frontend/theme-tokens.md`](../../contracts/frontend/theme-tokens.md) (the contract). Load this when bootstrapping a new client's theme, debugging a colour discrepancy, or onboarding a new developer.
 >
-> This is the practical walkthrough. The contract document is the source of truth for naming, validation rules, and the seasonized variant. Read the contract first if you are about to change the shape of `TokensContract` or `createhwePreset`.
+> This is the practical walkthrough. The contract document is the source of truth for naming, validation rules, and the seasonized variant. Read the contract first if you are about to change the shape of `TokensContract`.
 
 ## Token cascade — the three-tier model
 
@@ -29,10 +29,10 @@ The cascade resolves **at build time**, not at runtime. When Tailwind compiles, 
 
 ```
 1. Figma          →  theme.css (Flavor A)  or scattered inline values (Flavor B)
-2. Extraction     →  apps/site-{slug}/src/theme/tokens.json   (brand tier)
+2. Extraction     →  src/theme/tokens.json                     (brand tier)
 3. Validation     →  TokensContract.parse(tokensJson)          (Zod, build-time)
-4. Preset         →  createhwePreset(tokens)                   (returns Partial<Config>)
-5. Tailwind       →  emits CSS custom properties + utility classes
+4. Delivery       →  @theme {} in globals.css                  (over @hwe/config/theme.css base)
+5. Tailwind v4    →  emits CSS custom properties + utility classes
 ```
 
 Each stage has one input, one output, and one failure mode. Failures are loud (build errors, not silent visual drift).
@@ -153,7 +153,7 @@ The shape is documented in [`theme-tokens.md`](../../contracts/frontend/theme-to
 
 ## Stage 3 — Validation via `TokensContract`
 
-The contract lives at `packages/core-ui/src/theme/tokens.contract.ts`. It is a Zod schema that runs **at build time** when `tailwind.config.ts` parses `tokens.json`.
+The contract lives at `packages/core-ui/src/theme/tokens.contract.ts`. It is a Zod schema that runs **at build time** to validate `tokens.json` before its values are expressed as `@theme` tokens.
 
 ```ts
 import { z } from 'zod';
@@ -197,91 +197,36 @@ Required fields are non-optional. If a client's `tokens.json` is missing `colors
 
 The contract has known open questions (see [`theme-tokens.md`](../../contracts/frontend/theme-tokens.md) §Open contract questions) about whether to widen the required set (add `foreground`, split `surface` from `secondary`/`muted`). Until a DEC resolves them, the extracted tokens go in as-is and any mismatch is noted in `docs/clients/{slug}/figma-notes.md`.
 
-## Stage 4 — `createhwePreset(tokens)`
+## Stage 4 — Delivery via `@theme` (Tailwind v4)
 
-The preset lives at `packages/config/src/tailwind-preset.ts`. It takes a parsed `Tokens` object and returns a `Partial<Config>` that Tailwind v3 understands ([DEC-012](../../architecture/decisions.md#dec-012--tailwind-v3-over-v4-for-the-walking-skeleton)).
+Token values reach the browser through CSS, not a JS preset. `@hwe/config/theme.css` declares the base `@theme` namespace; the client's `globals.css` imports it and overrides only the roles that differ:
 
-```ts
-import type { Config } from 'tailwindcss';
-import type { Tokens } from '@hwe/core-ui';
+```css
+/* src/app/globals.css */
+@import "tailwindcss";
+@import "@hwe/config/theme.css";   /* base @theme tokens */
 
-export function createhwePreset(tokens: Tokens): Partial<Config> {
-  const colors: Record<string, string> = {
-    background:     tokens.colors.background.value,
-    surface:        tokens.colors.surface.value,
-    primary:        tokens.colors.primary.value,
-    accent:         tokens.colors.accent.value,
-    'text-on-dark': tokens.colors['text-on-dark'].value,
-    border:         tokens.colors.border.value,
-  };
-
-  if (tokens.colors.foreground)           colors.foreground           = tokens.colors.foreground.value;
-  if (tokens.colors['primary-foreground']) colors['primary-foreground'] = tokens.colors['primary-foreground'].value;
-  if (tokens.colors['accent-foreground'])  colors['accent-foreground']  = tokens.colors['accent-foreground'].value;
-  if (tokens.colors['accent-secondary'])   colors['accent-secondary']   = tokens.colors['accent-secondary'].value;
-  if (tokens.colors.secondary)            colors.secondary            = tokens.colors.secondary.value;
-  if (tokens.colors['muted-foreground'])   colors['muted-foreground']   = tokens.colors['muted-foreground'].value;
-  if (tokens.colors.overlay)              colors.overlay              = tokens.colors.overlay.value;
-
-  return {
-    theme: {
-      extend: {
-        colors,
-        fontFamily: {
-          heading: [tokens.fonts.heading.family, tokens.fonts.heading.fallback],
-          body:    [tokens.fonts.body.family,    tokens.fonts.body.fallback],
-          ui:      [
-            tokens.fonts.ui?.family   ?? tokens.fonts.body.family,
-            tokens.fonts.ui?.fallback ?? tokens.fonts.body.fallback,
-          ],
-        },
-        maxWidth: { container: tokens.spacing['container-max'] },
-        spacing:  { 'section-y': tokens.spacing['section-y'] },
-        borderRadius: tokens.radii,
-        boxShadow:    tokens.shadows,
-      },
-    },
-  };
+@theme {
+  --color-primary: #1a4a52;
+  --color-accent:  #9fcad0;
+  --font-heading:  "Playfair Display", Georgia, serif;
+  --font-body:     "Montserrat", system-ui, sans-serif;
+  --spacing-section-y: 80px;
+  --width-container: 1280px;
 }
 ```
 
-The preset **never reads `tokens.json` itself.** The app reads the file, parses it with `TokensContract`, and passes the resulting object in. That keeps the preset pure and testable.
+`tokens.json` + `TokensContract` stay as the **validation layer** (Stage 3): the extracted values are validated by Zod, then expressed as the `@theme` overrides above. Whether that `@theme` block is generated from `tokens.json` or authored from it is a build detail owned by hwe-core; the contract ([`theme-tokens.md`](../../contracts/frontend/theme-tokens.md)) is the source of truth.
 
-The preset wires `tokens.radii` onto Tailwind's `borderRadius` namespace, so `rounded-md` resolves to `tokens.radii.md` (3px in the base-template), not Tailwind's default of 6px. Same trick for `boxShadow` (`shadow-card` → `tokens.shadows.card`).
+## Stage 5 — Tailwind v4 emits CSS
 
-## Stage 5 — Tailwind config + emitted CSS
+Tailwind v4 reads the `@theme` declarations and emits CSS custom properties + utility classes: `text-primary`/`bg-primary` resolve to `--color-primary`, `rounded-md` to `--radius-md`, `shadow-card` to `--shadow-card`. There is **no `tailwind.config.ts` and no `presets: [...]`**.
 
-The app's `tailwind.config.ts` ties everything together:
-
-```ts
-import type { Config } from 'tailwindcss';
-import { createhwePreset } from '@hwe/config/tailwind-preset';
-import { TokensContract } from '@hwe/core-ui';
-import tokensJson from './src/theme/tokens.json';
-
-const tokens = TokensContract.parse(tokensJson);   // ← validates at build time
-
-const config: Config = {
-  content: [
-    './src/**/*.{ts,tsx}',
-    '../../packages/core-ui/src/**/*.{ts,tsx}',
-  ],
-  presets: [createhwePreset(tokens) as Config],
-  plugins: [],
-};
-
-export default config;
-```
-
-Three load-bearing lines:
-
-1. `TokensContract.parse(tokensJson)` — Zod validation; throws and fails the build on missing/wrong fields.
-2. `content: [...]` — the JIT scan paths. **Both** the app's own source AND `packages/core-ui/src/**/*` must be listed, otherwise blocks consumed from `core-ui` emit no CSS for their utility classes (you get unstyled blocks at runtime).
-3. `presets: [createhwePreset(tokens) as Config]` — applies the token-derived theme.
+> **Cross-package utilities:** blocks consumed from `@hwe/core-ui` use Tailwind utility classes; the build's source scan must include the core-ui sources, otherwise those blocks render unstyled (no CSS emitted for their classes). See [`theme-tokens.md`](../../contracts/frontend/theme-tokens.md) for the current v4 source-scan setup.
 
 ### Fonts via `next/font/google`
 
-The Tailwind preset declares `fontFamily.heading` and `fontFamily.body` with the **declared family names** from `tokens.json`. Loading the actual font is a separate concern handled by Next.js:
+The `@theme` block declares `--font-heading` and `--font-body` with the **declared family names** from `tokens.json`. Loading the actual font is a separate concern handled by Next.js:
 
 ```tsx
 // apps/site-{slug}/src/app/layout.tsx
@@ -342,7 +287,7 @@ After the dev server compiles, the CSS at `/_next/static/css/app/layout.css` con
 - `.shadow-card { --tw-shadow: 0 2px 20px rgba(26,74,82,0.09); ... }`.
 - `@font-face` rules emitted by `next/font` for each weight × subset × style (≈38 rules for Montserrat + Playfair Display × 4 weights).
 
-If a utility is missing in the emitted CSS, the cause is almost always: the source file using it is not in `content: [...]` of `tailwind.config.ts`.
+If a utility is missing in the emitted CSS, the cause is almost always: the source file using it is not covered by Tailwind v4's source scan (the core-ui sources are not included).
 
 ## Verification — confirming the pipeline reaches the browser
 
@@ -350,8 +295,8 @@ When you suspect a token is not flowing through, run these checks in order:
 
 ```bash
 # 1. Tokens parse?
-cd apps/site-{slug}
-pnpm typecheck                    # tailwind.config.ts compilation will fail loud if not
+cd site-{slug}
+pnpm typecheck                    # TokensContract.parse(tokens.json) fails loud if not
 
 # 2. Utility classes emitted?
 curl -s "http://localhost:3000/_next/static/css/app/layout.css?v=<n>" \
@@ -365,7 +310,7 @@ curl -s "http://localhost:3000/_next/static/css/app/layout.css?v=<n>" \
 curl -s http://localhost:3000     # check class names are in the HTML
 ```
 
-If step 1 fails, the schema/tokens.json mismatch is loud (Zod error). If step 2 fails, check `content: [...]` in `tailwind.config.ts`. If step 3 fails, check `next/font` import in `layout.tsx`. If step 4 fails, restart the dev server (HMR sometimes misses Tailwind config changes).
+If step 1 fails, the schema/tokens.json mismatch is loud (Zod error). If step 2 fails, check that Tailwind v4's source scan covers the core-ui sources. If step 3 fails, check `next/font` import in `layout.tsx`. If step 4 fails, restart the dev server (HMR sometimes misses CSS `@theme` changes).
 
 ## Seasonized clients
 
@@ -375,5 +320,5 @@ The seasonized variant (per [DEC-005](../../architecture/decisions.md#dec-005--p
 
 - [`docs/frontend/theme-tokens.md`](../../contracts/frontend/theme-tokens.md) — the contract (canonical rules).
 - [`docs/skills/block-creation.md`](./block-creation.md) — how the tokens are consumed inside a block.
-- [`memory-bank/decisions.md`](../../architecture/decisions.md) §DEC-005 / §DEC-012 — seasonality and Tailwind v3 choice.
+- [`decisions.md`](../../architecture/decisions.md) §DEC-005 (seasonality) / §DEC-017 (Tailwind v4; DEC-012's v3 choice is superseded).
 - `figma-makes/base-template/src/styles/theme.css` — Flavor A reference export.
