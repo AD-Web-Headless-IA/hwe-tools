@@ -276,7 +276,7 @@ Empty starter cloned via "Use this template" on GitHub. Not published as npm.
 
 ```
 hwe-template/
-├── .hwe-tools/                         ← git submodule → hwe-tools repo
+├── hwe-tools/                         ← git submodule → hwe-tools repo
 │   ├── .claude/
 │   └── docs/
 │
@@ -342,7 +342,7 @@ hwe-template/
 ├── next.config.mjs
 ├── tsconfig.json
 ├── package.json                        ← depends on @hwe/core-ui + @hwe/config
-├── CLAUDE.md                           ← points to .hwe-tools/ for context
+├── CLAUDE.md                           ← points to hwe-tools/ for context
 ├── README.md
 └── .gitignore
 ```
@@ -355,7 +355,7 @@ A real client after `/import-figma` + block customization + audits:
 
 ```
 site-camping-sol/
-├── .hwe-tools/                         ← git submodule (skills, agents, docs, specs)
+├── hwe-tools/                         ← git submodule (skills, agents, docs, specs)
 │
 ├── src/
 │   ├── app/

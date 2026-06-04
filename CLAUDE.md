@@ -1,6 +1,6 @@
 # hwe-tools — Contexto para Claude Code
 
-> Este repo es **`hwe-tools`** — el submodulo de herramientas que se monta como `.hwe-tools/` en cada repo cliente y en `hwe-core`. No contiene código de producción: solo skills, agentes, documentación y specs.
+> Este repo es **`hwe-tools`** — el submodulo de herramientas que se monta como `hwe-tools/` en cada repo cliente y en `hwe-core`. No contiene código de producción: solo skills, agentes, documentación y specs.
 >
 > **Antes de empezar cualquier tarea en un repo cliente, lee `docs/README.md`** — mapea cada tipo de tarea al conjunto mínimo de ficheros a cargar.
 
@@ -21,11 +21,11 @@ hwe-core/           ← repo separado — paquetes npm
     config/         → @hwe/config (tailwind preset, tsconfig base)
 
 hwe-template/       ← repo template de GitHub
-  .hwe-tools/       ← submodulo → hwe-tools
+  hwe-tools/       ← submodulo → hwe-tools
   src/              ← estructura vacía lista para clonar por cliente
 
 site-{slug}/        ← repos independientes por cliente (clonados desde hwe-template)
-  .hwe-tools/       ← submodulo → hwe-tools
+  hwe-tools/       ← submodulo → hwe-tools
   src/
     blocks/         ← implementaciones propias del cliente (Levels 1/2/3)
     compositions/
@@ -189,7 +189,7 @@ C:\laragon\www\Hospitality Web Platform\
 ├── hwe-tools\           ← ESTE REPO
 ├── hwe-core\            ← packages @hwe/* (Turborepo + pnpm)
 ├── hwe-template\        ← repo template vacío
-├── site-{slug}\         ← repos de clientes (submodulo hwe-tools como .hwe-tools/)
+├── site-{slug}\         ← repos de clientes (submodulo hwe-tools como hwe-tools/)
 └── figma-makes\         ← repos del diseñador, uno por cliente (DEC-002)
 ```
 
