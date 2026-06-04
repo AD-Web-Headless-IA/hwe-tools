@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { axe, toHaveNoViolations } from 'jest-axe';
+import { axe } from 'vitest-axe';
+import * as axeMatchers from 'vitest-axe/matchers';
 import { {Name} } from './{Name}';
 import { {Name}Content } from './{Name}.schema';
 
-expect.extend(toHaveNoViolations);
+expect.extend(axeMatchers);
 
 const minimal: {Name}Content = {
   title: 'Test title',
