@@ -219,6 +219,8 @@ After generating `figma-analysis.md` and `figma-notes.md`, extract the visual de
 
 The design language file is a draft — it will be refined by the designer or a senior dev before being used by `/design-block`.
 
+**Capture the atomic visual layer, not just colors** (DEC-022): the CTA/button recipe (variants, shape, padding, hover), eyebrow tracking, card shadow/radius, and transition style. These become **per-project tokens** in `globals.css @theme` (poured by `/scaffold-site`) and are consumed by the shared `@hwe/core-ui` primitives (`Button`, `Eyebrow`, …). Note which patterns map to which primitive so blocks compose primitives instead of re-styling atoms.
+
 ### Step 8 — Generate tokens.json
 
 After extracting the design language, generate a ready-to-use `tokens.json` file.

@@ -15,6 +15,7 @@ You are the hwe site scaffolder. You create the directory structure and boilerpl
 - Never hardcode client-specific values beyond what is passed as arguments.
 - All 6 base-blocks are re-exported as Level 1 (can be upgraded to Level 2 or 3 later).
 - ONE globals.css, ZERO CSS files per block.
+- The `globals.css` `@theme` is the **single source of truth for the project's visual language** (DEC-022): pour the FULL visual layer from `tokens.json` (colors, fonts, radii, shadows, eyebrow tracking), not just colors. Blocks compose the shared token-driven `@hwe/core-ui` primitives (`Button`, `Eyebrow`, …) — never restyle buttons/atoms per block or per client.
 - Follow DEC-011 (independent repo), DEC-015 (client-owned blocks), and DEC-017 (repo split).
 - Use `@hwe/core-ui/base-blocks` for block re-exports, `@hwe/core-ui/schemas` for type imports.
 
@@ -29,7 +30,7 @@ Before creating any files, check if `/import-figma` has been run for this client
    - Client display name (for `client.config.ts` and metadata)
    - Primary language from `## Language` section (for `<html lang="...">` and content)
    - Font families (for `globals.css` @import)
-3. Check for `docs/clients/{slug}/design-language.md`. Not consumed by scaffold, but log its presence.
+3. Check for `docs/clients/{slug}/design-language.md` and `docs/clients/{slug}/figma-analysis.md` — these are the **source** for the project's `DESIGN.md` (Step 19).
 
 If none of these exist, proceed with generic placeholders but WARN:
 > "No import-figma outputs found for {slug}. Using placeholder tokens. Run /import-figma first for real client tokens."
@@ -87,6 +88,7 @@ site-{slug}/               (independent repo — DEC-017)
 │   └── brand/
 ├── tests/
 │   └── e2e/
+├── DESIGN.md                ← project design-system guide (Step 19) — read it to build blocks not in the Figma
 ├── client.config.ts
 ├── tailwind.config.ts
 ├── postcss.config.mjs       ← REQUIRED for Tailwind to work with Next.js
@@ -206,16 +208,49 @@ If figma-analysis.md specifies font families, add a Google Fonts `@import` (acce
 @import "tailwindcss";
 @import "@hwe/config/theme.css";
 
+/* REQUIRED — Tailwind v4 ignores node_modules by default, so the utility
+   classes used INSIDE @hwe/core-ui blocks are never generated and the page
+   renders unstyled. Scan the installed package explicitly. Relative to this
+   file (src/app/globals.css), node_modules is two levels up; the path is the
+   same in the fixture (workspace symlink) and a real client (npm install). */
+@source "../../node_modules/@hwe/core-ui";
+
 /* === FONTS === */
 @import url('https://fonts.googleapis.com/css2?family={HeadingFont}:wght@400;600;700&family={BodyFont}:wght@400;500;600;700&display=swap');
 /* Note: replace with next/font before production deployment */
 
 /* === CLIENT TOKEN OVERRIDES === */
-/* Override @hwe/config base tokens for this client */
+/* The @theme is the SINGLE SOURCE OF TRUTH for this project's visual language
+   (DEC-022). Pour the FULL visual layer from tokens.json — not just colors:
+   colors, fonts, radii (square vs rounded), shadows, eyebrow tracking. The
+   shared @hwe/core-ui primitives (Button, Eyebrow, …) read these tokens, so
+   the whole site — and every block — picks up the brand automatically. */
 @theme {
-  --color-primary: {primary from tokens.json};
+  --color-background: {background};
+  --color-foreground: {foreground};
+  --color-surface: {surface};
+  --color-secondary: {secondary};
+  --color-primary: {primary};
+  --color-primary-foreground: {primary-foreground};
+  --color-accent: {accent};
+  --color-accent-foreground: {accent-foreground};
+  --color-muted-foreground: {muted-foreground};
+  --color-text-on-dark: {text-on-dark};
+  --color-border: {border};
+  --color-overlay: {overlay};
+
   --font-heading: "{HeadingFont}", Georgia, serif;
   --font-body: "{BodyFont}", system-ui, sans-serif;
+  --font-ui: "{BodyFont}", system-ui, sans-serif;
+
+  --radius-sm: {radii.sm};
+  --radius-md: {radii.md};
+  --radius-lg: {radii.lg};
+
+  --shadow-card: {shadows.sm};
+  --shadow-elevated: {shadows.lg};
+
+  --tracking-eyebrow: {eyebrow tracking, e.g. 0.2em};
 }
 
 /* === ANIMATIONS === */
@@ -442,6 +477,28 @@ node -e "require('@hwe/core-ui/schemas')" 2>&1 | head -5
 
 If any subpath fails to resolve, check that the correct version is installed and the package.json `exports` field is present.
 
+## Step 19 — Write `DESIGN.md` (project design-system guide)
+
+Every project gets a **`DESIGN.md` at its root** — the authoritative, human-readable design-system guide (DEC-022). Its purpose: the reference for building **blocks or sections that do NOT exist in the Figma**, so new work stays coherent with the brand. It **supersedes** the lighter `design-language.md` draft (same purpose, fuller form) — `/design-block` reads `DESIGN.md`.
+
+Generate it from the import-figma outputs (`figma-analysis.md`, `design-language.md`, `tokens.json`) for this client. Use the section structure below; fill every section from the analysis, mark anything uncertain `(?)`, and **reference token names** (`--color-primary`, `--radius-md`, `tracking-eyebrow`) and **shared primitives** (`Button`, `Eyebrow`, …) rather than raw values.
+
+Sections (model: `apps/site-demo/DESIGN.md`):
+1. **Header** — client, source repo + tag, "token source of truth = `globals.css @theme`", "compose `@hwe/core-ui` primitives".
+2. **Overview** — the identity in a paragraph + key characteristics.
+3. **Colors** — table of `--color-*` tokens → value → use; colour-usage rules.
+4. **Typography** — families (`--font-*`), hierarchy table, the eyebrow pattern.
+5. **Layout & Spacing** — container, `--spacing-section-y`, grid, alternating backgrounds.
+6. **Elevation & Depth** — flat-first; shadow tokens; hero overlay.
+7. **Shapes (radius)** — `--radius-*` table; the square-vs-pill rule.
+8. **Components** — primitives (`Button` variants/sizes/onDark, `Eyebrow`, …) + blocks; **how to build a new block** (compose primitives, tokens only, the eyebrow→heading→divider→body→CTA pattern, a11y test).
+9. **Do's and Don'ts.**
+10. **Responsive Behavior.**
+11. **Iteration Guide.**
+12. **Known Gaps** — blocks not yet built, adapters, deferred items.
+
+Write to `{project-root}/DESIGN.md`. If no import-figma outputs exist, write a skeleton with the section headers and `(?)` placeholders, and WARN that it needs the designer/dev to fill it.
+
 # Examples
 
 ```
@@ -457,6 +514,7 @@ If any subpath fails to resolve, check that the correct version is installed and
 
 # Known pitfalls
 
+0. **Missing `@source "../../node_modules/@hwe/core-ui"` in `globals.css`** → Tailwind v4 ignores node_modules, so the utility classes used inside `@hwe/core-ui` blocks are never generated and the whole site renders unstyled (content shows, no design). This is the most common cause of a "no styles" page.
 1. **Missing `postcss.config.mjs`** → Tailwind classes silently ignored, page renders with no styles.
 2. **Missing `error.tsx` / `not-found.tsx`** → "missing required error components" infinite refresh loop.
 3. **Using `workspace:*` in client repo** → `npm install` fails, these are only for `hwe-core` internal use.
