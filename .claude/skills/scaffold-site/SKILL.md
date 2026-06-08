@@ -134,27 +134,33 @@ export const clientBlocks: Record<string, BlockComponent> = {
 
 ## Step 7 — Write app/layout.tsx
 
-Use the detected language from Step 0 for `<html lang="...">` (default `en`):
+The layout adopts `SiteShell` from `@hwe/core-ui`, which renders the Navbar + `<main>` + Footer from `client.config.ts` (DEC-024). `<html lang>` comes from the config locale (detected in Step 0).
 
 ```tsx
 import type { Metadata } from 'next';
+import { SiteShell } from '@hwe/core-ui';
+import { config } from '../../client.config';
 import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | {Client Display Name}',
-    default: '{Client Display Name}',
+    template: `%s | ${config.name}`,
+    default: config.name,
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="{detected-language}">
-      <body>{children}</body>
+    <html lang={config.locale}>
+      <body>
+        <SiteShell config={config}>{children}</SiteShell>
+      </body>
     </html>
   );
 }
 ```
+
+**Because `SiteShell` provides the `<main>` landmark, compositions must NOT add their own `<main>`** (see `/create-page` — bare-layout branch is for sites without SiteShell).
 
 ## Step 8 — Write app/error.tsx and app/not-found.tsx
 
@@ -312,16 +318,36 @@ Otherwise, write a placeholder that matches the `TokensContract` shape:
 
 ## Step 11 — Write client.config.ts
 
-There is no `ClientConfig` type — the config type is `TenantConfig` from `@hwe/core-ui` (`providers/TenantProvider`). Annotate with `TenantConfig`, or use a plain object with `as const`:
+The config type is `TenantConfig` from `@hwe/core-ui`. It is the tenant's single, growable source of truth: identity + locale + **chrome content** (logo, contact, nav, footer) that `SiteShell`/`Navbar`/`Footer` render (DEC-024), plus the **booking engine** selection (`booking.provider`, the DEC-017 adapter choice — wired later). Fill nav/footer/contact from the import-figma analysis. At the repo root (`client.config.ts`).
 
 ```ts
-export const config = {
-  slug: '{slug}',
-  displayName: '{Client Display Name}',
-  blockDefaults: {
-    BookingBlock: { defaultVariant: 'inline' },
+import type { TenantConfig } from '@hwe/core-ui';
+
+export const config: TenantConfig = {
+  name: '{Client Display Name}',
+  locale: '{detected-language}',
+  logo: { wordmark: '{Client Display Name}' }, // real logo → public/brand/logo.svg
+  contact: {
+    phone: '{phone}',
+    email: '{email}',
+    address: '{city, region}',
   },
-} as const;
+  nav: {
+    links: [
+      { label: '{Page}', href: '/{slug}' },
+      { label: '{Menu}', href: '#', children: [{ label: '{Child}', href: '#' }] },
+    ],
+    cta: { label: '{Book}', href: '#book' },
+  },
+  footer: {
+    tagline: '{one-line tagline}',
+    columns: [
+      { heading: '{Column}', links: [{ label: '{Link}', href: '#' }] },
+    ],
+    legal: '© {year} {Client Display Name}. {rights}.',
+  },
+  // booking: { provider: 'thr' },  // PMS adapter — uncomment + configure when wiring booking
+};
 ```
 
 ## Step 12 — Write tailwind.config.ts (Tailwind v4)

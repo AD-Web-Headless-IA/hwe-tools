@@ -1441,3 +1441,44 @@ After wiring the visual pipeline (DEC-021 + the Tailwind `@source` fix), blocks 
 - **Map `variant` → named CVA prop inside the renderer.** Rejected — the renderer would need to know each block's prop name; pushing the mapping into the block (which owns its CVA) is simpler and local.
 - **Media kinds as DEC-008 structural variants (separate files per kind).** Rejected for the media slot — a polymorphic content union + small media sub-components is lighter and keeps one block, one registration. DEC-008 remains for blocks whose *whole* DOM/hooks diverge.
 - **A separate block per media type.** Rejected — they share the text+media composition; only a dropped column warrants a new block.
+
+---
+
+## DEC-024 — Site chrome: layout layer (SiteShell/Navbar/Footer) driven by client.config; lucide-based Icon primitive
+
+> **Status:** Accepted
+> **Date:** 2026-06-08
+> **Deciders:** Cristina Gutiérrez
+> **Builds on:** [DEC-017](#dec-017--repo-split-tools-submodule--core-npm--template--client-repos) (adapter pattern), [DEC-021](#dec-021--one-canonical-client-reference-site-demo-sitedir-path-convention-and-contractreference-reconciliation) (deferred shell), [DEC-022](#dec-022--design-system-token-driven-shared-primitives-globalscss-theme-is-the-single-per-project-visual-source) (token-driven primitives).
+
+### Context
+
+Header and footer frame every page and must exist before more content blocks. They are **not** content blocks — they're site chrome. `@hwe/core-ui` already had a skeletal layout layer (`SiteShell`/`Navbar`/`Footer`). Their content (links, contact, footer columns, logo) is **per-client**, and the Figma chrome (and feature lists) lean heavily on icons.
+
+### Decision
+
+1. **Header/footer = the layout layer**, not blocks: `@hwe/core-ui/src/layout/` — `SiteShell` composes `Navbar` + `<main>` + `Footer`. They are shared + token-driven; they **compose** the primitives (`Button`, `Icon`). `SiteShell` **owns the page `<main>`** — a page/composition using it must NOT add another `<main>`.
+2. **Content is driven by `client.config.ts`** (the tenant's single, growable config — `TenantConfig`, extended): identity, `logo` (asset and/or text wordmark), `contact`, `nav` (links + dropdown children + CTA), `footer` (tagline + columns + legal). The **booking engine** lives here too (`booking.provider`) as the DEC-017 adapter-selection point (wired later). Nothing client-specific is hardcoded in `@hwe/core-ui`.
+3. **Icon system = `lucide-react` + an `Icon` primitive.** `Icon` is a **resolver over a curated registry** (custom-core icons → lucide fallback), importing only the icons we use (tree-shakeable), server-friendly, `currentColor` + `size`, decorative by default (`aria-hidden`) or labelled (`role=img`). Icons are referenced **by name** (`<Icon name="phone" />`), including content-driven (`features[].icon`). One source, instantiated by name — the Button principle for icons. The inline-SVG stopgaps were replaced.
+4. **Icons vs images.** UI icons (lucide or custom) are **SVG-as-component** resolved by `<Icon>`. Brand images / logo / photos are **assets in `public/brand/`** (referenced by URL), not the icon system.
+5. **Token added:** `--color-surface-dark` (dark footer / sections).
+
+### Why
+
+- **One place, instantiate** — chrome content in `client.config.ts`, icons by name, all rendered by shared token-driven components; a new client gets correct chrome by editing config, not code.
+- **Icon library beats per-icon asset files** — lucide + a curated registry is DRY, accessible, tree-shakeable; bespoke icons extend the same registry. Asset files would reinvent it.
+- **Booking belongs in client.config** as the adapter selection (DEC-017), so the tenant declares its PMS without touching core.
+
+### Consequences
+
+- `Navbar` (client component — mobile toggle + dropdowns), `Footer`, `SiteShell` fleshed out to the Figma chrome, token-driven, composing `Icon` + `Button`. `TenantConfig` extended with `logo`/`contact`/`nav`/`footer`/`booking`.
+- `site-demo`: `client.config.ts` added; `layout.tsx` adopts `SiteShell`; `HomeComposition` dropped its `<main>` (SiteShell provides it); `public/brand/` established (text wordmark placeholder until a real logo).
+- `lucide-react` added to `@hwe/core-ui` dependencies. `Icon` exported from the root.
+- `scaffold-site` templates updated: `layout.tsx` uses `SiteShell` + `client.config.ts`; the config carries nav/footer/contact.
+- **Deferred:** client-bespoke icons resolved *by name* (would need an `IconProvider` client boundary — for now custom icons extend the core registry); a real logo asset.
+
+### Alternatives considered
+
+- **Header/footer as blocks.** Rejected — they're chrome on every page, not page-section content; the layout layer is their home.
+- **Custom SVG icons as files in `public/` + a resolver.** Rejected for UI icons — reinvents lucide with more code and worse a11y; assets are for brand images, not icons.
+- **Hardcode chrome content in the shared components.** Rejected — violates "no client specifics in `@hwe/core-ui`"; content comes from `client.config.ts`.
