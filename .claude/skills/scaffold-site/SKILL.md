@@ -499,6 +499,14 @@ Sections (model: `apps/site-demo/DESIGN.md`):
 
 Write to `{project-root}/DESIGN.md`. If no import-figma outputs exist, write a skeleton with the section headers and `(?)` placeholders, and WARN that it needs the designer/dev to fill it.
 
+## Step 20 — Write the live `/design-system` route
+
+Alongside the `DESIGN.md` prose guide, every project gets a **live visual reference** at `src/app/design-system/page.tsx` (route `/design-system`) — the rendered counterpart of `DESIGN.md` (model: `site-demo/src/app/design-system/page.tsx`).
+
+It MUST be **live and non-duplicating** (DEC-022): swatches read the actual `var(--color-*)` from `@theme`, and the component sections render the **real `@hwe/core-ui` primitives** (`<Button variant=...>`, `<Eyebrow>`, …) — never hardcoded hex values, never re-implemented atoms. So if a token changes, the page updates itself, and it proves the primitives match the design.
+
+Sections (mirror `DESIGN.md`): header + identity; **Color** (swatch grid reading `--color-*`); **Typography** (the type scale, real `Eyebrow`); **Components** (every `Button` variant/size + `onDark` over a dark surface, plus other primitives as they're added); **Shapes** (`--radius-*` boxes); **Layout** (spacing); **Depth** (`--shadow-*`). Use only token classes/vars and the real components.
+
 # Examples
 
 ```
