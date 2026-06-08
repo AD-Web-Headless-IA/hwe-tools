@@ -1266,3 +1266,43 @@ The owner's constraint: **do not maintain two things**, but **be able to validat
 - **Maintain `hwe-template` and `site-demo` in parallel (lockstep by hand).** Rejected — two codebases drift; doubles maintenance; violates the owner's "don't maintain two things" constraint.
 - **Make `hwe-template` the source and `site-demo` an instance of it.** Rejected — the template pins published packages, which breaks the fast inner loop that package development needs.
 - **Build `hwe-template` now.** Rejected — premature; see Decision step 4.
+
+---
+
+## DEC-020 — Lint toolchain: one shared ESLint flat config exported from `@hwe/config`
+
+> **Status:** Accepted
+> **Date:** 2026-06-08
+> **Deciders:** Cristina Gutiérrez
+> **Resolves:** the lint gate was declared (`eslint src` / `next lint` scripts) but had no ESLint install and no config anywhere — it could never pass. Establishing the toolchain is a new tooling decision, parallel to [DEC-006](#dec-006--testing-toolchain-vitest--playwright--testing-library).
+
+### Context
+
+Four CI gates are intended: typecheck, **lint**, test, build. The lint gate existed only as npm scripts; ESLint itself was not installed and no config file existed in `hwe-core`, so the gate was structurally red. Lint is not only `hwe-core`'s concern: it is a rule for **every** repo in the platform — the `@hwe/core-ui` + `@hwe/config` packages, `site-demo`, and every generated `site-{slug}` client repo. A per-repo `.eslintrc` copied around would reproduce the "dragged, undocumented, drifting decision" disease the foundation cleanup exists to cure.
+
+### Decision
+
+1. **One shared ESLint flat config (ESLint 9), exported from `@hwe/config` as the subpath `@hwe/config/eslint`** (`packages/config/eslint.mjs`). `@hwe/config` is already the platform config package and is already published, so independent `site-{slug}` repos consume the same config over npm. No third package is created — this respects [DEC-017](#dec-017--repo-split-tools-submodule--core-npm--template--client-repos) ("only `@hwe/core-ui` + `@hwe/config`").
+2. **Two layers.** `base` (`typescript-eslint` recommended + `eslint-plugin-react-hooks` + `@typescript-eslint/no-explicit-any: error`, enforcing the existing "no `any`" rule) for packages; `next` (`base` + `@next/eslint-plugin-next` recommended + core-web-vitals) for Next.js apps.
+3. **Each repo's `eslint.config.mjs` is a 3-line re-export** of the layer it needs (`base` for `core-ui`, `next` for `site-demo` and every `site-{slug}`). Plugin dependencies live in `@hwe/config`, so consumers only need `eslint` itself.
+4. **`site-demo` lint runs `eslint .`, not `next lint`.** `next lint` is deprecated in Next 15 in favour of the ESLint CLI; running `eslint` directly keeps every repo on one uniform flat-config toolchain.
+5. **Deliberately NOT type-aware** (no `parserOptions.project`) — fast, no per-repo project wiring. Tighten with a follow-up DEC if needed.
+
+### Why
+
+- **Single source, no drift.** Lint rules change in exactly one file; every package and client repo inherits the change.
+- **Respects DEC-017.** Config ships from an existing published package; no new package, no contradiction.
+- **Forward-looking and uniform.** Flat config + `eslint .` is the modern path; `next lint`'s deprecation does not strand the platform.
+
+### Consequences
+
+- `@hwe/config` gains runtime dependencies (`@eslint/js`, `typescript-eslint`, `eslint-plugin-react-hooks`, `@next/eslint-plugin-next`) and a new `./eslint` export. Its responsibility now spans TS base config, theme tokens, **and** lint config.
+- Every generated `site-{slug}` ships the same 3-line `eslint.config.mjs`; the `site-demo`→`hwe-template` generator (DEC-019) must emit it.
+- `@hwe/config` itself has no `lint` script yet (no source beyond the config); add one if the package grows lintable source.
+
+### Alternatives considered
+
+- **A separate `@hwe/eslint-config` package.** Rejected — contradicts DEC-017's two-package rule; `@hwe/config` is the natural home.
+- **Per-repo `.eslintrc` copied into each client.** Rejected — reproduces the drifting-duplicate-config disease the cleanup targets.
+- **Keep `next lint` for apps.** Rejected — deprecated in Next 15; splits the toolchain (eslintrc for apps, flat for packages).
+- **Full type-aware strict rules now.** Rejected for Fase A — scope creep over embryonic scaffolded code; revisit via a later DEC.
