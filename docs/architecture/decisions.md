@@ -1400,3 +1400,44 @@ After wiring the visual pipeline (DEC-021 + the Tailwind `@source` fix), blocks 
 - **A `design-system.ts` token config.** Rejected — Tailwind v4 is CSS-first; a TS object is a second source of truth. Refactor later if the stack ever changes (YAGNI).
 - **Per-client primitive code by default.** Rejected — the shared primitive themed by tokens covers it; per-client `src/primitives/` overrides exist only for rare exceptions.
 - **Add `lucide-react` now.** Deferred — kept `@hwe/core-ui` dependency-light with an inline SVG; revisit when an icon system is needed broadly.
+
+---
+
+## DEC-023 — Variant bridge: blocks read the `variant` string; media is a content discriminated union
+
+> **Status:** Accepted
+> **Date:** 2026-06-08
+> **Deciders:** Cristina Gutiérrez
+> **Builds on:** [DEC-008](#dec-008--structural-variants-for-complex-blocks) (structural variants), [DEC-015](#dec-015--client-owned-blocks-with-shared-schemas-slot-based-composition-and-npm-subpath-exports), [DEC-022](#dec-022--design-system-token-driven-shared-primitives-globalscss-theme-is-the-single-per-project-visual-source).
+
+### Context
+
+`BlockRenderer` passes `variant={instance.variant}` (a single string from the `BlockInstance`), but blocks read named CVA props (`imageSide`, `tone`), so the variant chosen in the composition/content never reached the block — it silently fell back to the CVA default. Separately, enriching `MediaTextBlock` (image vs gallery vs video; with/without subtitle, icons, multiple CTAs) risked conflating three different concerns into "variants".
+
+### Decision
+
+1. **Variant bridge — one convention.** A block exposes its **single primary variant axis** under the prop name the renderer passes: **`variant` (string)**. The block maps that string to its CVA recipe; blocks with no variant ignore it. `BlockRenderer` already passes `variant={instance.variant}`, so the bridge closes in the blocks (no renderer change). A multi-axis escape hatch (`instance.variantProps` spread by the renderer) is **deferred** until a block genuinely needs more than one axis.
+2. **Three distinct axes — do not conflate.** For any block:
+   - **Layout** (e.g. `media-left | media-right`) → the CVA `variant` (bridge).
+   - **Media type** (image | gallery | video | …) → a **discriminated union in the content schema** (`media.kind`); the block composes a sub-component per kind. NOT a CVA variant, NOT (by default) a DEC-008 structural variant, NOT a separate block.
+   - **Content options** (subtitle, feature list, 0–N CTAs, captions) → **optional schema fields**, rendered conditionally. Not variants at all.
+3. **Block boundary.** A block stays one block while it keeps its defining columns/slots. `MediaTextBlock` = text column + media column. Drop a column (gallery-only, stats-only) → that's a **separate block** (`GalleryBlock`, `StatsBlock`), not a MediaText variant.
+4. **`MediaTextBlock` first iteration:** `variant` `media-left | media-right`; `media` union `image | video` (gallery, before-after, map deferred); optional `subtitle`, `features` (icon/label/description), and 0–N `ctas`. The media slot supports an optional `href` and `caption`.
+
+### Why
+
+- **Content-driven variants actually work** — a `BlockInstance` (and later Payload content) can set `variant` and it reaches the block; the same block is reused with different layouts on a page.
+- **Clean separation** keeps blocks from becoming "everything" components: layout = variant, media = polymorphic content, extras = optional fields.
+- **Decide the convention before scaling** — the remaining blocks adopt the `variant`-prop convention from the start instead of being retrofitted.
+
+### Consequences
+
+- `MediaTextBlock` reworked: CVA axis renamed to `variant` (`media-left|media-right`); content `image` field replaced by the `media` discriminated union; `subtitle` + `features` added; a `MediaSlot` sub-component switches on `media.kind`. Tests cover image, video, both sides, features, and a11y.
+- `site-demo` home now has two `MediaTextBlock` instances (`media-left` image, `media-right` video) — the second proves the bridge end-to-end through `BlockRenderer`.
+- Future blocks expose their primary variant as `variant`. Multi-axis (`variantProps`) and richer media kinds (gallery/before-after/map) are deferred. Icons in `features` are plain strings until an icon system lands (DEC-022 deferral).
+
+### Alternatives considered
+
+- **Map `variant` → named CVA prop inside the renderer.** Rejected — the renderer would need to know each block's prop name; pushing the mapping into the block (which owns its CVA) is simpler and local.
+- **Media kinds as DEC-008 structural variants (separate files per kind).** Rejected for the media slot — a polymorphic content union + small media sub-components is lighter and keeps one block, one registration. DEC-008 remains for blocks whose *whole* DOM/hooks diverge.
+- **A separate block per media type.** Rejected — they share the text+media composition; only a dropped column warrants a new block.
