@@ -1,6 +1,6 @@
 ---
 name: add-block
-description: Add a block with fake content to an existing page composition. Run /create-page first if the composition does not exist yet.
+description: Add a registered block with realistic inline content to an existing page composition's BlockInstance array. Run /create-page first if the composition does not exist yet.
 argument-hint: [site-slug] [page-slug] [BlockType]
 allowed-tools: Read Write Edit Glob Grep Bash(pnpm *) Bash(test *)
 ---
@@ -15,11 +15,11 @@ You are a frontend scaffolder for hwe client sites. Your job is to add a named b
 - `site-slug` must match `^[a-z0-9-]+$`.
 - `page-slug` must match `^[a-z][a-z0-9-]*$`.
 - `BlockType` is the stem — **without** the `Block` suffix (e.g. `Hero`, `MediaText`, `Amenities`). The full folder name is `{BlockType}Block`.
-- Runs from within the client repo (CWD = `site-{slug}/`). Paths are relative to client repo root.
-- The target composition `src/compositions/{PageName}Composition.tsx` must exist. If not, tell the user to run `/create-page` first.
-- The block schema is in `node_modules/@hwe/core-ui/src/schemas/{BlockType}Block.schema.ts` or `src/blocks/{BlockType}Block/` (client override). If not found, tell the user to run `/scaffold-block` first.
+- **Paths resolve from `SITE_DIR` and `PKG`** — defined once in `docs/contracts/general/workspace-structure.md` §"Skill path resolution". Do not re-derive them here. In short: `SITE_DIR` = the target site root (`hwe-core/apps/{SITE}` for the fixture, the repo root for a standalone client); `PKG` = `{SITE_DIR}/node_modules/@hwe/core-ui` (the installed package, which ships `src/`). Never read block source from `hwe-core/packages/core-ui/src/` — that path only exists in the monorepo.
+- The target composition `{SITE_DIR}/src/compositions/{PageName}Composition.tsx` must exist. If not, tell the user to run `/create-page` first.
+- The block must exist in `{PKG}/src/base-blocks/{BlockType}Block/`. If not found, tell the user to run `/scaffold-block` first.
 - SEO rules apply to generated content: descriptive alt text, h2/h3 hierarchy (never h1 inside a block), no native `<img>`.
-- Generated fake content is in the **site's language** (read it from the existing `src/data/fake-content.ts` or `src/app/layout.tsx`).
+- **Content is inline.** `site-demo` keeps block content inline in the composition's `BlockInstance[]` array (see `HomeComposition.tsx`), NOT in a separate `src/data/fake-content.ts`. Do not create or append to a `fake-content*.ts` file. Content language follows the site's `<html lang>` in `layout.tsx`.
 
 ## Process
 
@@ -30,20 +30,20 @@ Arguments: `$0` = site-slug (default `site-demo`), `$1` = page-slug, `$2` = Bloc
 Derive:
 - `SITE` = site-slug.
 - `SLUG` = page-slug.
+- `SITE_DIR`, `PKG` = per `docs/contracts/general/workspace-structure.md` §"Skill path resolution" (fixture: `SITE_DIR = hwe-core/apps/{SITE}`, `PKG = {SITE_DIR}/node_modules/@hwe/core-ui`).
 - `BlockName` = `{BlockType}Block` (e.g. `HeroBlock`, `MediaTextBlock`).
 - `PageName` = PascalCase of page-slug (same rule as `/create-page`).
-- `contentVar` = camelCase of BlockType + page context (e.g. `heroContent`, `mediaTextAboutContent`).
-  If multiple blocks of the same type are on the page, append a disambiguator (e.g. `mediaTextIntroContent`, `mediaTextRegionContent`).
+- `instanceId` = kebab-case BlockType + index on the page (e.g. `hero-1`, `media-text-1`). Used as the `BlockInstance.id`. If a block of the same type is already on the page, increment the suffix (`media-text-2`).
 
 Validate in order:
-1. `apps/{SITE}/src/compositions/{PageName}Composition.tsx` exists → if not, stop: "Run /create-page {SITE} {SLUG} first."
-2. `packages/core-ui/src/base-blocks/{BlockName}/` exists → if not, stop: "Block {BlockName} not found in @hwe/core-ui. Run /scaffold-block {BlockName} to create it first."
+1. `{SITE_DIR}/src/compositions/{PageName}Composition.tsx` exists → if not, stop: "Run /create-page {SITE} {SLUG} first."
+2. `{PKG}/src/base-blocks/{BlockName}/` exists → if not, stop: "Block {BlockName} not found in @hwe/core-ui. Run /scaffold-block {BlockName} to create it first."
 
 ### Step 1 — Read the block schema
 
-Read `node_modules/@hwe/core-ui/src/schemas/{BlockName}.schema.ts` (canonical schema location).
+Read `{PKG}/src/schemas/{BlockName}.schema.ts` (canonical schema location).
 
-If that file does not exist, fall back to `node_modules/@hwe/core-ui/src/base-blocks/{BlockName}/{BlockName}.schema.ts`.
+If that file does not exist, fall back to `{PKG}/src/base-blocks/{BlockName}/{BlockName}.schema.ts`.
 
 Parse the Zod schema to understand every required field and optional field. Pay attention to:
 - Required vs optional fields.
@@ -51,20 +51,20 @@ Parse the Zod schema to understand every required field and optional field. Pay 
 - Array fields (e.g. `items`, `ctas`, `reviews`) — generate 2–3 realistic items.
 - Enum fields or union literals — use the first valid value as the default variant.
 
-Also read `node_modules/@hwe/core-ui/src/base-blocks/{BlockName}/{BlockName}.types.ts` (if it exists separately) for the `{BlockName}Props` type to confirm the variant prop name and available values.
+Also read `{PKG}/src/base-blocks/{BlockName}/{BlockName}.types.ts` (if it exists separately) for the `{BlockName}Props` type to confirm the variant prop name and available values.
 
 ### Step 2 — Determine the default variant
 
-Read the block's variants file: `node_modules/@hwe/core-ui/src/base-blocks/{BlockName}/{BlockName}.variants.ts` (flat layout) OR `node_modules/@hwe/core-ui/src/base-blocks/{BlockName}/index.ts` (structural variants).
+Read the block's variants file: `{PKG}/src/base-blocks/{BlockName}/{BlockName}.variants.ts` (flat layout) OR `{PKG}/src/base-blocks/{BlockName}/index.ts` (structural variants).
 
 - For CVA (flat): the first key in the `variants` object is the default.
 - For structural variants (`index.ts`): the first key exported from the variants map is the default.
 
 Use this variant in the `BlockInstance` entry. Never ask the user to pick — use the default.
 
-### Step 3 — Read the Figma Make source (CRITICAL)
+### Step 3 — Read the Figma Make source (if one exists)
 
-Search for the block equivalent in the Figma Make repo:
+If this client has a Figma Make reference, its text wins over invented copy. This is optional — `site-demo` has none, so skip to the language rule and generate plausible English demo content.
 
 1. `ls figma-makes/` to find available Figma repos.
 2. Identify which Figma slug corresponds to this site — check `docs/clients/{slug}/figma-analysis.md` or infer from site name.
@@ -76,18 +76,18 @@ Search for the block equivalent in the Figma Make repo:
    - All literal text values (headings, body, button labels) — use these AS-IS, in the original language.
    - Image paths — copy to site `public/` or note as placeholder reference.
    - The visual structure (elements present, their order).
-5. If not found: generate content in the SAME LANGUAGE as the site (check `layout.tsx` `<html lang="...">` or `figma-analysis.md` language section). **Never default to English unless the site IS English.**
+5. If not found (or no Figma repo): generate content in the SAME LANGUAGE as the site (see the language rule below).
 
 RULE: Figma text always wins over invented placeholder text. The Figma Make repo contains the real brand voice.
 
 ### Content language rule
 
-NEVER generate fake content in English unless the site's language IS English.
+Generated content is in the **site's language**. NEVER default to English unless the site's language IS English (`site-demo` is English).
 
 To detect the language:
-1. Check `apps/{SITE}/src/app/layout.tsx` for the `<html lang="...">` attribute.
+1. Check `{SITE_DIR}/src/app/layout.tsx` for the `<html lang="...">` attribute.
 2. Check `docs/clients/{slug}/figma-analysis.md` for the `## Language` section.
-3. Check existing `fake-content.ts` entries for the language of already-written content.
+3. Check the existing `BlockInstance` content already inline in the site's compositions.
 
 All generated text (titles, subtitles, CTAs, descriptions, alt text) MUST be in the detected language.
 
@@ -95,10 +95,10 @@ All generated text (titles, subtitles, CTAs, descriptions, alt text) MUST be in 
 
 For the `src` field of any image:
 
-1. FIRST check `figma-makes/{slug}/public/` for the image — if found, copy to `apps/{SITE}/public/images/` and reference as `/images/{filename}`.
+1. FIRST check `figma-makes/{slug}/public/` for the image — if found, copy to `{SITE_DIR}/public/images/` and reference as `/images/{filename}`.
 2. If no local image exists, use `https://picsum.photos/seed/{descriptive-seed}/{width}/{height}` (fixed seed = same image on every reload).
 3. Add `// TODO: replace with real image` comment on every placeholder URL.
-4. If using picsum, ensure `next.config.mjs` has:
+4. If using picsum, ensure `{SITE_DIR}/next.config.mjs` has:
    ```js
    images: {
      remotePatterns: [{ protocol: 'https', hostname: 'picsum.photos' }],
@@ -108,98 +108,79 @@ For the `src` field of any image:
 
 ### Step 4 — Check and update client registry
 
-Read `src/blocks/registry.ts`.
+Read `{SITE_DIR}/src/blocks/registry.ts`.
 
-Verify that `{BlockName}` is already exported in the `clientBlocks` object. If it is not present:
+Verify that `{BlockName}` is already a key in the `clientBlocks` object. If it is not present:
 
-1. Read `src/blocks/{BlockName}/{BlockName}.tsx`. If this file does not exist, stop and tell the user: "Block `{BlockName}` is not registered in `src/blocks/registry.ts` and no local re-export exists. Run `/scaffold-block {BlockName} --target client --site {SITE}` first, then re-run `/add-block`."
-2. If the file exists (the re-export exists but was not added to the registry), add the missing entry using the `Edit` tool:
+1. Read `{SITE_DIR}/src/blocks/{BlockName}/{BlockName}.tsx`. If this file does not exist, stop and tell the user: "Block `{BlockName}` is not registered in `src/blocks/registry.ts` and no local re-export exists. Run `/scaffold-block {BlockName} --target client --site {slug}` first, then re-run `/add-block`."
+2. If the file exists (the re-export exists but was not added to the registry), add the missing entry using the `Edit` tool, **following the registry's type-erasure convention** (see `scaffold-site` Step 6 — `clientBlocks` is `Record<string, BlockComponent>` and each entry is cast `as BlockComponent`):
    - Add the import line with the other block imports: `import { {BlockName} } from './{BlockName}/{BlockName}';`
-   - Add `{BlockName},` to the `clientBlocks` object.
+   - Add `{BlockName}: {BlockName} as BlockComponent,` to the `clientBlocks` object.
 
-### Step 5 — Read existing fake-content file
+### Step 5 — Read the existing composition
 
-Read `src/data/fake-content.ts` (or `src/data/fake-content-{SLUG}.ts` if it exists) to:
-- Understand the existing naming convention for content variables.
-- Confirm the site's language and tone.
-- Avoid duplicate variable names.
+Read `{SITE_DIR}/src/compositions/{PageName}Composition.tsx` to:
+- See the existing `BlockInstance[]` (the `layout` array) — its current entries, their `id`s, and the inline content shape already in use.
+- Confirm the site's language and tone from the content already inline.
+- Pick a non-colliding `instanceId` (Step 0).
 
-### Step 6 — Generate the fake content object
+There is **no** `src/data/fake-content.ts` — content lives inline in the `layout` array (DEC-019 single-source convention; see `site-demo/src/compositions/HomeComposition.tsx`). Do not create one.
 
-Compose a typed fake content object for the block. Rules:
+### Step 6 — Compose the inline content object
 
-- Type it with the schema type: `const {contentVar}: {BlockName}Content = { ... };`
+Build the content object that will sit **inline** inside the new `BlockInstance`. Rules:
+
+- It must satisfy the block's schema type `{BlockName}Content` (read in Step 1). Every required field present; valid enum/union values.
 - Image `alt` text: descriptive, in the site's language. Follow `docs/specs/seo/semantic-html.md` alt rules:
   - Hero: scene + establishment name.
   - Accommodation card: type + capacity.
   - General: subject description + establishment context.
   - Never: `"image"`, `"photo"`, empty string.
-- Image `src`: use a path from `/images/` that plausibly exists (or a `/images/placeholder-{block}.jpg` path with a comment `// TODO: replace with real image`).
-- Text content: realistic hospitality copy matching the block's purpose, in the site's language (French for Camping Mer et Camargue).
-- Array items: 2–3 minimum, representative of the real catalogue (not "Item 1", "Item 2").
+- Image `src`: a `/images/...` path or a picsum URL per the Image rule, with a `// TODO: replace with real image` comment.
+- Text content: realistic hospitality copy matching the block's purpose, in the site's language. Array fields: 2–3 representative items (not "Item 1", "Item 2").
 
-### Step 7 — Update or create the fake-content data file
+### Step 7 — Add the BlockInstance inline (single edit)
 
-Determine the target data file:
-- If `apps/{SITE}/src/data/fake-content-{SLUG}.ts` exists → append to it.
-- If this is the homepage (`SLUG` is empty or `/`) → append to `fake-content.ts`.
-- Otherwise → create `apps/{SITE}/src/data/fake-content-{SLUG}.ts` (if it does not exist), or append to it.
+Add one entry to the composition's `layout` array, with the content **inline** (matching `site-demo`'s `HomeComposition.tsx`). `BlockInstance` is `{ id?, type, variant?, order?, content }`; the convention is `id` + `type` + `content` (+ `variant` only when the block has variants):
 
-Add the import at the top:
 ```ts
-import type { {BlockName}Content } from '@hwe/core-ui';
+{
+  id: '{instanceId}',
+  type: '{BlockName}',
+  variant: '{defaultVariant}',   // omit if the block has no variants
+  content: {
+    // the object composed in Step 6, typed by {BlockName}Content
+  },
+},
 ```
 
-Add the export at the bottom:
-```ts
-export const {contentVar}: {BlockName}Content = { ... };
-```
+Use the `Edit` tool to insert the entry into the `layout` array. No import is added (content is inline); no separate data file is touched.
 
-Use the `Edit` tool to append to an existing file; use `Write` only if creating a new file.
+### Step 8 — Run typecheck
 
-### Step 8 — Update the composition
-
-Read `src/compositions/{PageName}Composition.tsx`.
-
-Two edits needed:
-
-**A. Add the import** of the content variable at the top of the file, next to the existing data imports:
-```ts
-import { {contentVar} } from '@/data/fake-content-{SLUG}';
-```
-(For homepage compositions that use `fake-content.ts`, import from `@/data/fake-content`.)
-
-**B. Add the block entry** to the `layout` array. Determine the next `order` value (max existing order + 1):
-```ts
-{ type: '{BlockName}', order: {N}, content: {contentVar}, variant: '{defaultVariant}' },
-```
-
-Use the `Edit` tool for both changes.
-
-### Step 9 — Run typecheck
+From the workspace root (the pnpm workspace is `hwe-core`):
 
 ```bash
 pnpm --filter {SITE} exec tsc --noEmit
 ```
 
 If typecheck fails, diagnose the error:
-- Missing required field in content → add it to the fake content object.
+- Missing required field in content → add it to the inline content object.
 - Wrong variant value → fix to match the valid union.
-- Import path wrong → correct the import.
+- Content shape mismatch → correct it against `{BlockName}Content`.
 
 Fix and re-run. Do not report success until typecheck is green.
 
-### Step 10 — Print summary
+### Step 9 — Print summary
 
 ```
 Block added: {BlockName} → {PageName}Composition (/{SLUG})
 
-Variant used: {defaultVariant}
-Content variable: {contentVar}
+Instance id:  {instanceId}
+Variant used: {defaultVariant}   (or "—" if the block has no variants)
 
 Files modified:
-  apps/{SITE}/src/compositions/{PageName}Composition.tsx  — added block entry (order {N})
-  apps/{SITE}/src/data/fake-content-{SLUG}.ts             — added {contentVar}
+  {SITE_DIR}/src/compositions/{PageName}Composition.tsx  — added BlockInstance (id {instanceId}, inline content)
 
 Typecheck: ✓ green
 
@@ -222,10 +203,10 @@ Reference: `docs/specs/seo/semantic-html.md`.
 
 ## What this skill loads
 
-- Block schema from `packages/core-ui/src/schemas/{BlockName}.schema.ts` (or `base-blocks/` fallback)
-- Block types from `packages/core-ui/src/base-blocks/{BlockName}/`
-- `apps/{SITE}/src/blocks/registry.ts` — checked to verify block is registered for the site
-- `apps/{SITE}/src/data/fake-content*.ts` — naming convention and language
+- Block schema from `{PKG}/src/schemas/{BlockName}.schema.ts` (or `{PKG}/src/base-blocks/{BlockName}/` fallback), where `PKG = {SITE_DIR}/node_modules/@hwe/core-ui`
+- Block types/variants from `{PKG}/src/base-blocks/{BlockName}/`
+- `{SITE_DIR}/src/compositions/{PageName}Composition.tsx` — read for existing inline content + edited to add the new instance
+- `{SITE_DIR}/src/blocks/registry.ts` — checked to verify the block is registered for the site
 - `figma-makes/*/src/app/components/` — reference copy (if available)
 
 **Total skill-side token cost per invocation: under 3k tokens.**
@@ -233,27 +214,27 @@ Reference: `docs/specs/seo/semantic-html.md`.
 ## Refusal cases
 
 - Missing composition (`/create-page` not run) → stop with clear message.
-- Block does not exist in `packages/core-ui/src/base-blocks/` → stop. Point to `/scaffold-block`.
+- Block does not exist in `{SITE_DIR}/node_modules/@hwe/core-ui/src/base-blocks/` → stop. Point to `/scaffold-block`.
 - `BlockType` includes `Block` suffix (e.g. user typed `HeroBlock`) → normalise silently: strip the suffix, use `Hero`.
 - More than one `BlockType` argument → process only the first; tell the user to run `/add-block` again for each additional block.
 
 ## Examples
 
-### Add HeroBlock to the le-camping page
+### Add a HeroBlock to the home page of site-demo
 
 ```
-/add-block site-demo le-camping Hero
+/add-block site-demo home Hero
 ```
 
-Reads `HeroBlock.schema.ts`, checks for Figma reference, generates French hero content, adds to `fake-content-le-camping.ts`, wires into `LeCampingComposition.tsx` at order 1.
+Reads `HeroBlock.schema.ts` from the installed package, generates a plausible English hero content object, and inserts a `BlockInstance` (`id: 'hero-1'`, inline `content`) into `HomeComposition.tsx`. Default variant from `HeroBlock.variants.ts`.
 
-### Add MediaTextBlock to the le-camping page
+### Add a MediaTextBlock to a page
 
 ```
 /add-block site-demo le-camping MediaText
 ```
 
-Adds a media+text section with camping-themed copy. Variant default from `MediaTextBlock.variants.ts`.
+Adds a media+text `BlockInstance` with inline content in the site's language (e.g. French if `<html lang="fr">`). Variant default from `MediaTextBlock.variants.ts`.
 
 ### Add a second MediaTextBlock
 
@@ -261,12 +242,12 @@ Adds a media+text section with camping-themed copy. Variant default from `MediaT
 /add-block site-demo le-camping MediaText
 ```
 
-Detects existing `mediaTextContent` variable in the file; uses `mediaTextRegionContent` (or similar disambiguator) for the new entry.
+Detects the existing `media-text-1` instance in the `layout` array; uses `media-text-2` as the new `instanceId`.
 
 ### User typed BlockType with suffix
 
 ```
-/add-block site-demo le-camping ReviewsBlock
+/add-block site-demo home ReviewsBlock
 ```
 
 Strips the `Block` suffix silently: treated as `Reviews` → `ReviewsBlock`.

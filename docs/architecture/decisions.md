@@ -1306,3 +1306,50 @@ Four CI gates are intended: typecheck, **lint**, test, build. The lint gate exis
 - **Per-repo `.eslintrc` copied into each client.** Rejected — reproduces the drifting-duplicate-config disease the cleanup targets.
 - **Keep `next lint` for apps.** Rejected — deprecated in Next 15; splits the toolchain (eslintrc for apps, flat for packages).
 - **Full type-aware strict rules now.** Rejected for Fase A — scope creep over embryonic scaffolded code; revisit via a later DEC.
+
+---
+
+## DEC-021 — One canonical client reference (`site-demo`), `SITE_DIR` path convention, and contract↔reference reconciliation
+
+> **Status:** Accepted
+> **Date:** 2026-06-08
+> **Deciders:** Cristina Gutiérrez
+> **Reaffirms:** [DEC-019](#dec-019--site-demo-is-the-single-source-hwe-template-is-generated-from-it) (do not build `hwe-template` yet). **Reconciles** divergences between `docs/contracts/frontend/structure.md` and the actual `site-demo` reference that were causing repeated path confusion and breakage while fixing the generator skills (Fase B).
+
+### Context
+
+Fixing the generator skills (`scaffold-block`, `scaffold-site`, `add-block`, `create-page`) kept breaking because there was no single canonical client-shaped reference: `site-demo` (in the monorepo, workspace-linked, minimal), the `structure.md` contract (fuller: `SiteShell`, `sitemap`, locale), and a hypothetical future `hwe-template` each implied different paths and structures. Every skill edit had to guess which to obey. Three concrete divergences surfaced between the contract and the working, green `site-demo`.
+
+### Decision
+
+1. **`site-demo` is the single canonical client reference.** It IS the content of the future `hwe-template` (minus the dependency swap, which is generation-time per DEC-019). Where the contract and `site-demo` disagree, they are reconciled here and locked. Building a standalone `hwe-template` now is rejected (reaffirms DEC-019): it consumes the not-yet-published package and falls outside `hwe-core`'s turbo gates.
+
+2. **`SITE_DIR` / `PKG` path convention, defined once in `docs/contracts/general/workspace-structure.md`** §"Skill path resolution". `SITE_DIR` = the target site root (`hwe-core/apps/{slug}` for the fixture — the one documented exception — or the repo root for a standalone client, which self-locates via its mounted `hwe-tools` submodule). `PKG` = `{SITE_DIR}/node_modules/@hwe/core-ui` (installed package; ships `src/`). It lives in `hwe-tools` (mounted in every repo; `hwe-core` is absent from client repos). It is a **rule, not a registry** — no client project is ever listed, future `site-{slug}` repos are never "added". Site-targeting skills **reference** it; they never re-derive or hardcode paths.
+
+3. **(A) `baseBlockRegistry` is `Record<string, BlockComponent>`** (bare component, cast at the type-erasure boundary), matching the current `@hwe/core-ui` code and `BlockRenderer`. Base blocks are **not** auto-registered by default; clients own blocks via their own `registry.ts` (DEC-015). Registering a base block in `baseBlockRegistry` is an **optional** platform-default. The richer `Record<BlockType, { component, contentSchema, variants? }>` form (which would enable Zod validation inside the renderer) is **deferred** to a future DEC if/when needed. `structure.md` and `scaffold-block` Step 5 are aligned to the code, not the other way round.
+
+4. **(B) Client blocks are folder-per-component, including Level-1 re-exports.** A Level-1 re-export is `src/blocks/{Name}/{Name}.tsx` containing `export { {Name} } from '@hwe/core-ui/base-blocks'` — matching `site-demo` and the generator skills. This **reverses** the prior `structure.md` line ("Level 1 re-exports are declared directly in registry.ts — no subfolder needed"). Rationale: a stable local module path + an obvious in-place upgrade path to Level 2/3, and uniform registry imports.
+
+5. **(C) `site-demo` stays minimal for now; `create-page`'s `sitemap`/navbar steps are conditional** (skip when absent). The only conformance applied now is the **`<main>` landmark** (a11y): the bare root layout means the composition owns `<main>`. Growing `site-demo` to the full client shell (`SiteShell`, `sitemap.ts`, `robots.ts`, locale routing) is deferred to a separate task — not bundled into the skill fixes.
+
+6. **Maintainability guardrail (fix-and-verify).** A skill is correct iff running its prescribed output into `site-demo` leaves the four gates green. `site-demo` is git-revertible, so verification is cheap and repeatable: run → `turbo run typecheck lint build` → revert. No SKILL.md is edited "blind"; a file that is already green is not rewritten without first contrasting it with the contract.
+
+### Why
+
+- **One reference, one path variable, one contract — no drift.** Collapses the three competing structures into a single source of truth, which is what was causing the breakage.
+- **No redo later.** The per-block/page skills are written against `SITE_DIR`/`PKG` and work unchanged for the fixture and for real clients; the only client-vs-fixture difference (the `workspace:*` → npm dependency swap) lives in one place (`scaffold-site` / template generation), exactly as DEC-019 designed.
+- **Nothing green is broken.** Reconciliation aligned the contract to the working reference where the contract was aspirational; the only `site-demo` code change is the additive `<main>` landmark.
+
+### Consequences
+
+- `docs/contracts/frontend/structure.md` updated: `baseBlockRegistry` shape (A) and client-block folder layout (B).
+- `docs/contracts/general/workspace-structure.md` gains the `SITE_DIR`/`PKG` definition; skills reference it.
+- `scaffold-block` Step 5 base edits: public API via the `./base-blocks` + `./schemas` subpaths (required); `baseBlockRegistry` entry optional and bare-component-shaped.
+- Deferred, tracked: richer `baseBlockRegistry` form (A); full `site-demo` shell conformance (C); the `generate → publish → clone → smoke test` published-package validation (already DEC-019). The published-package boundary risk is minimized now by `site-demo` importing only via public subpaths.
+
+### Alternatives considered
+
+- **Build `hwe-template` now to remove the site-demo/template duality.** Rejected — reintroduces the publish-loop tax DEC-019 avoids, adds a third path model, and falls outside `hwe-core`'s gates. The duality is a sequencing (site-demo now, template generated later), not a parallel-maintenance burden.
+- **Conform `site-demo` UP to the full contract (SiteShell/sitemap/locale) now.** Deferred — scope creep into the skill-fix phase; done as a separate task.
+- **Align the contract DOWN by deleting locale/SiteShell/sitemap as concepts.** Rejected — they are real future client needs, not wrong; only their *mandatory-now* status is relaxed.
+- **Richer `baseBlockRegistry` (`{component, contentSchema}`) now.** Deferred — a code change to green `@hwe/core-ui` with no current consumer; revisit when renderer-side Zod validation is actually wired.

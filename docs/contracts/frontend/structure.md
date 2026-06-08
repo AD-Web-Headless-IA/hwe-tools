@@ -101,7 +101,7 @@ hwe-core/packages/core-ui/
 │   │
 │   ├── renderer/                          ← Payload-to-component bridge
 │   │   ├── BlockRenderer.tsx
-│   │   ├── baseBlockRegistry.ts           ← Record<BlockType, { component, contentSchema, variants? }>
+│   │   ├── baseBlockRegistry.ts           ← Record<string, BlockComponent> — optional platform defaults (DEC-021)
 │   │   └── BlockRenderer.test.tsx
 │   │
 │   ├── composition-rules/                 ← composition validation helpers (optional)
@@ -181,14 +181,15 @@ site-{slug}/
 │   │   └── robots.ts
 │   │
 │   ├── blocks/                            ← Client blocks (Level 1 re-exports + Level 2/3 custom)
-│   │   ├── registry.ts                    ← Record<string, ComponentType> — passed to BlockRenderer as `blocks` prop
-│   │   ├── {CustomName}/                  ← Level 3 full-custom block (same 5-file layout as base-blocks)
-│   │   │   ├── {CustomName}.tsx
-│   │   │   ├── {CustomName}.variants.ts
-│   │   │   ├── {CustomName}.types.ts
-│   │   │   ├── {CustomName}.schema.ts
-│   │   │   └── {CustomName}.test.tsx
-│   │   └── (Level 1 re-exports are declared directly in registry.ts — no subfolder needed)
+│   │   ├── registry.ts                    ← Record<string, BlockComponent> (cast at type-erasure boundary) — passed to BlockRenderer as `blocks` prop
+│   │   ├── {Name}/                        ← every client block is folder-per-component (DEC-021)
+│   │   │   └── {Name}.tsx                 ← Level 1: one-line re-export `export { {Name} } from '@hwe/core-ui/base-blocks'`
+│   │   └── {CustomName}/                  ← Level 2/3: slots or full-custom (grows the 5-file layout as needed)
+│   │       ├── {CustomName}.tsx
+│   │       ├── {CustomName}.variants.ts
+│   │       ├── {CustomName}.types.ts
+│   │       ├── {CustomName}.schema.ts
+│   │       └── {CustomName}.test.tsx
 │   │
 │   ├── compositions/                      ← Client Compositions (one per static page)
 │   │   ├── HomeComposition.tsx

@@ -86,6 +86,18 @@ figma-makes/
 
 ---
 
+## Skill path resolution: `SITE_DIR` and `PKG`
+
+> **Single source of truth for site-targeting skills.** `/create-page`, `/add-block`, and any skill that writes into a client site resolve their paths from these two variables. Skills **reference this definition** — they must not re-derive or hardcode it. This is a generic **rule**, not a registry: no client project is ever listed here, and future `site-{slug}` repos are never "added" to `hwe-tools`.
+
+- **`SITE_DIR`** = the root of the site the skill targets.
+  - **Standalone client repo** (`site-{slug}/`, the normal case): `SITE_DIR` is that repo's root — i.e. the directory that carries `hwe-tools/` as a submodule. A client repo self-locates; nothing in `hwe-tools` needs to know it exists.
+  - **Test fixture** (the one documented exception): the fixture is an app *inside* the `hwe-core` monorepo, so it does not match the "repo root that mounts the submodule" rule. For it, `SITE_DIR = hwe-core/apps/{slug}` (today: `hwe-core/apps/site-demo`). This is one line, and it does not grow — there is exactly one fixture.
+
+- **`PKG`** = `{SITE_DIR}/node_modules/@hwe/core-ui` — the **installed** `@hwe/core-ui` package, however it got there (private npm registry in `hwe-template`/`site-{slug}`, pnpm workspace symlink in the fixture). The package publishes its `src/` (`files: ["src"]`, `exports` to `./src/...`), so block schemas/types/variants are read from `{PKG}/src/...`. Never read block source from `hwe-core/packages/core-ui/src/` — that path only exists in the monorepo and is invalid for a real client.
+
+Because every consumer (fixture, template, client) mounts `hwe-tools` as a submodule, this definition is visible from all of them; `hwe-core` is **not** present inside a client repo, so a path convention could not live there.
+
 ## Key rules
 
 - No absolute paths anywhere — workspace root name is not fixed
@@ -93,3 +105,4 @@ figma-makes/
 - `hwe-core/apps/site-demo/` is a test fixture, not a client repo
 - `figma-makes/base-template/` is the reference Figma Make for the demo/test project
 - Client repos consume `@hwe/*` packages via npm, not via local filesystem paths
+- Site-targeting skills resolve paths via `SITE_DIR` / `PKG` (defined above) — never hardcode or re-derive

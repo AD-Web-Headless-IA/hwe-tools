@@ -104,7 +104,10 @@ export { {Name}Block } from '@hwe/core-ui/base-blocks';
 
 ## Step 6 — Write registry.ts
 
+The registry is the **type-erasure boundary**. Each block is strictly typed by its own content shape, but `BlockRenderer` feeds every block `content: unknown` (validated at runtime). So `clientBlocks` must be typed `Record<string, BlockComponent>` and each entry cast `as BlockComponent` — otherwise `tsc` rejects the map when it is passed to `BlockRenderer`'s `blocks` prop. This is the deliberate erasure point, **not** `any`. (A bare `{ HeroBlock, ... } as const` does NOT typecheck against the renderer — that was the original bug.)
+
 ```ts
+import type { ComponentType } from 'react';
 import { HeroBlock } from './HeroBlock/HeroBlock';
 import { BookingBlock } from './BookingBlock/BookingBlock';
 import { MediaTextBlock } from './MediaTextBlock/MediaTextBlock';
@@ -112,14 +115,19 @@ import { AccommodationGridBlock } from './AccommodationGridBlock/AccommodationGr
 import { AmenitiesBlock } from './AmenitiesBlock/AmenitiesBlock';
 import { ReviewsBlock } from './ReviewsBlock/ReviewsBlock';
 
-export const clientBlocks = {
-  HeroBlock,
-  BookingBlock,
-  MediaTextBlock,
-  AccommodationGridBlock,
-  AmenitiesBlock,
-  ReviewsBlock,
-} as const;
+// The registry is the type-erasure boundary: BlockRenderer feeds `content:
+// unknown`, validated at runtime. The cast is the deliberate erasure point —
+// not `any`.
+type BlockComponent = ComponentType<{ content: unknown; variant?: string }>;
+
+export const clientBlocks: Record<string, BlockComponent> = {
+  HeroBlock: HeroBlock as BlockComponent,
+  BookingBlock: BookingBlock as BlockComponent,
+  MediaTextBlock: MediaTextBlock as BlockComponent,
+  AccommodationGridBlock: AccommodationGridBlock as BlockComponent,
+  AmenitiesBlock: AmenitiesBlock as BlockComponent,
+  ReviewsBlock: ReviewsBlock as BlockComponent,
+};
 ```
 
 ## Step 7 — Write app/layout.tsx

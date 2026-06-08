@@ -1,6 +1,6 @@
 ---
 name: scaffold-block
-description: Scaffold a new block in @hwe/core-ui — creates packages/core-ui/src/base-blocks/{Name}/ with the 5 mandatory files (tsx, variants, types, schema, test) from templates, ready for TDD. Use when adding a new reusable page section to the design system.
+description: Scaffold a new block. --target base creates packages/core-ui/src/base-blocks/{Name}/ with the 5 mandatory files (tsx, variants, types, schema, test) from templates, ready for TDD. --target client creates a single Level-1 re-export file in the client repo. Use when adding a new reusable page section to the design system.
 argument-hint: <BlockName> [--target base|client] [--site <slug>] [--config] [--adapter <domain>]
 allowed-tools: Read Write Glob Grep Bash(test *) Bash(ls *) Bash(mkdir *)
 ---
@@ -15,7 +15,7 @@ The block contract is defined in [`docs/frontend/block-contract.md`](../../../do
 
 - Block names are PascalCase ending in `Block` (e.g. `HeroBlock`, `GalleryBlock`). Refuse names that do not match.
 - Never overwrite an existing block folder. If the target folder already exists, stop and tell the user.
-- Generate the 5 files **only** from the bundled templates in `${CLAUDE_SKILL_DIR}/templates/`. Do not invent content.
+- Generate files **only** from the bundled templates in `${CLAUDE_SKILL_DIR}/templates/`. Do not invent content. `--target base` generates the 5 mandatory files; `--target client` generates a single Level-1 re-export file (DEC-015) — never the 5-file base layout, which is what broke `site-demo`'s first client block.
 - Never modify `packages/core-ui/src/renderer/baseBlockRegistry.ts` or `packages/core-ui/src/index.ts` automatically — print the diff the developer must apply manually. The registry edit is intentional and reviewed.
 - Never run package installs, builds, or tests. Pure file generation.
 - All generated files are in English (technical artifacts).
@@ -23,14 +23,16 @@ The block contract is defined in [`docs/frontend/block-contract.md`](../../../do
 
 ## Modes
 
-This skill supports two targets:
+This skill supports two targets that produce **different** layouts:
 
-| Flag | Target directory | Schema import in generated files |
+| Flag | Target directory | What is generated |
 |---|---|---|
-| `--target base` (default) | `hwe-core/packages/core-ui/src/base-blocks/{Name}/` | `../../schemas/{Name}.schema` |
-| `--target client` | `src/blocks/{Name}/` in the client repo at `site-{slug}/` | `@hwe/core-ui/schemas` |
+| `--target base` (default) | `hwe-core/packages/core-ui/src/base-blocks/{Name}/` | The **5 mandatory files** (tsx, variants, types, schema, test). The block's schema/variants/types live here — this is the platform implementation. |
+| `--target client` | `src/blocks/{Name}/` in the client repo at `site-{slug}/` | A **single Level-1 re-export file** `{Name}.tsx` (DEC-015). Schema, variants, types and tests stay in `@hwe/core-ui` and are NOT duplicated client-side. |
 
 `--target client` requires `--site <slug>` to identify which client repo to scaffold into.
+
+**Why client is one file, not five:** per DEC-015, ~70% of client blocks are Level-1 re-exports of the base block. Scaffolding the full 5-file base layout into a client repo duplicates the schema/CVA/zod imports against a package the client only consumes — exactly the breakage that took down `site-demo`'s first client block. Level 2 (slots) and Level 3 (full custom) are manual upgrades the developer makes by editing the re-export file afterwards.
 
 ## Process
 
@@ -60,8 +62,8 @@ Parse and store:
 If invalid, stop and tell the user the exact rule violated.
 
 When `--target client` is used, also validate:
-- `--site <slug>` was provided and matches `^site-[a-z0-9-]+$`.
-- Directory `{siteSlug}/` exists at the workspace root (client repos are independent — they can live anywhere).
+- `--site <slug>` was provided and the slug matches `^[a-z0-9-]+$` (bare slug, **without** the `site-` prefix — e.g. `hotel-balneario`, not `site-hotel-balneario`).
+- Directory `site-{siteSlug}/` exists at the workspace root (client repos are independent — they can live anywhere). The `site-` prefix is added by the skill, not passed by the user.
 
 ### Step 2 — Check prerequisites and resolve target directory
 
@@ -92,6 +94,28 @@ Run `test -d "hwe-core/packages/core-ui/src/base-blocks"`.
 
 ### Step 4 — Generate files from templates
 
+**The layout depends entirely on the target. Do not generate the 5-file layout for a client block.**
+
+#### Step 4a — `--target client`: single Level-1 re-export
+
+Generate exactly **one** file from `${CLAUDE_SKILL_DIR}/templates/Block.client.tsx.tpl`:
+
+| Template | Output file |
+|---|---|
+| `Block.client.tsx.tpl` | `{TARGET_DIR}/{Name}.tsx` |
+
+That file is a Level-1 re-export:
+
+```ts
+// Level 1 — re-export the base block (DEC-015). Customize via slots (Level 2)
+// or replace with custom JSX (Level 3) when this client needs to diverge.
+export { {Name} } from '@hwe/core-ui/base-blocks';
+```
+
+Do NOT generate `{Name}.variants.ts`, `{Name}.types.ts`, `{Name}.schema.ts`, `{Name}.test.tsx`, or any `--config` / `--adapter` artifact for a client block — the schema, variants, types and tests already live in `@hwe/core-ui`. `--config` and `--adapter` are ignored for `--target client` (warn the user if they were passed). Then skip to Step 5.
+
+#### Step 4b — `--target base`: the 5 mandatory files
+
 Generate the 5 mandatory files from templates in `${CLAUDE_SKILL_DIR}/templates/`:
 
 | Template | Output file |
@@ -102,12 +126,9 @@ Generate the 5 mandatory files from templates in `${CLAUDE_SKILL_DIR}/templates/
 | `Block.schema.ts.tpl` | `{TARGET_DIR}/{Name}.schema.ts` |
 | `Block.test.tsx.tpl` | `{TARGET_DIR}/{Name}.test.tsx` |
 
-**Schema import path substitution:**
+**Schema import path** (base blocks read the schema from the package's own `schemas/` folder):
 
-In all generated files, the schema import path differs by target:
-
-- `--target base`: `import { {Name}Content } from '../../schemas/{Name}.schema';`
-- `--target client`: `import type { {Name}Content } from '@hwe/core-ui/schemas';`
+- `import { {Name}Content } from '../../schemas/{Name}.schema';`
 
 **If `--config` was passed:** also generate from template `Block.config.schema.ts.tpl` → `{Name}.config.schema.ts`. If the template does not exist, write a minimal config schema stub:
 
@@ -144,27 +165,26 @@ Use the `Write` tool to write each file. Do not use shell redirection.
 ```
 === Edits to apply manually ===
 
-1) hwe-core/packages/core-ui/src/renderer/baseBlockRegistry.ts
-   Add these imports at the top:
-     import { {Name} }        from '../base-blocks/{Name}/{Name}';
-     import { {Name}Content } from '../schemas/{Name}.schema';
+1) hwe-core/packages/core-ui/src/base-blocks/index.ts  (REQUIRED — public subpath API)
+   Export the block from the @hwe/core-ui/base-blocks subpath:
+     export { {Name}, type {Name}Props } from './{Name}/{Name}';
 
-   Add this entry to the baseBlockRegistry object:
-     {Name}: {
-       component: {Name},
-       contentSchema: {Name}Content,
-     },
-
-2) hwe-core/packages/core-ui/src/index.ts
-   Add these exports:
-     export { {Name} } from './base-blocks/{Name}/{Name}';
-     export type { {Name}Content, {Name}Props, {Name}Variants } from './base-blocks/{Name}/{Name}.types';
-
-3) hwe-core/packages/core-ui/src/schemas/index.ts  (if it exists)
+2) hwe-core/packages/core-ui/src/schemas/index.ts  (REQUIRED — public schemas subpath)
    Export the new schema:
      export { {Name}Content } from './{Name}.schema';
-     export type { {Name}ContentType } from './{Name}.schema';
+
+3) hwe-core/packages/core-ui/src/renderer/baseBlockRegistry.ts  (OPTIONAL)
+   Only if this block should be a *platform default* (rendered even when a client
+   does not register it). Clients normally own blocks via their own registry
+   (DEC-015), so most base blocks do NOT need this. baseBlockRegistry is
+   Record<string, BlockComponent> — the value is the bare component, cast at the
+   type-erasure boundary (see DEC-021):
+     import { {Name} } from '../base-blocks/{Name}/{Name}';
+     // entry:
+     {Name}: {Name} as BlockComponent,
 ```
+
+Note: blocks are NOT exported from the package root (`src/index.ts`) — only via the `./base-blocks` and `./schemas` subpaths (see `docs/contracts/frontend/structure.md` §Public API rule).
 
 **For `--target client`:**
 
@@ -183,10 +203,26 @@ These edits are intentionally manual. They are the places where the developer ma
 
 ### Step 6 — Final summary
 
-Print a summary that reflects the actual files generated:
+Print a summary that reflects the actual files generated. **Use the branch matching the target.**
+
+**For `--target client` (single re-export):**
 
 ```
-Target: {--target base → hwe-core/packages/core-ui/src/base-blocks/{Name}/ | --target client → site-{siteSlug}/src/blocks/{Name}/}
+Target: site-{siteSlug}/src/blocks/{Name}/
+
+Created:
+  └── {Name}.tsx                    (Level 1 — re-export from @hwe/core-ui/base-blocks)
+
+Next steps:
+  1. Apply the manual registry edit printed above (import + clientBlocks entry).
+  2. To customize: upgrade to Level 2 (slots) or Level 3 (full custom) by editing
+     this file — see block-architecture.md §3. Schema/variants/types stay in @hwe/core-ui.
+```
+
+**For `--target base` (5 files):**
+
+```
+Target: hwe-core/packages/core-ui/src/base-blocks/{Name}/
 
 Created:
   ├── {Name}.tsx                    (Layer 1 content + Layer 2-A CVA variants)
@@ -275,7 +311,7 @@ Generates 5 mandatory files + `BookingBlock.config.schema.ts` + adapter comment 
 /scaffold-block HeroBlock --target client --site hotel-balneario
 ```
 
-Scaffolds a Level-2/3 override in `apps/site-hotel-balneario/src/blocks/HeroBlock/`. Schema types imported from `@hwe/core-ui/schemas`. Prints the manual `registry.ts` edit.
+Scaffolds a single Level-1 re-export at `site-hotel-balneario/src/blocks/HeroBlock/HeroBlock.tsx` (`export { HeroBlock } from '@hwe/core-ui/base-blocks';`). No schema/variants/types/test — those stay in `@hwe/core-ui`. Prints the manual `registry.ts` edit. Upgrade to Level 2/3 by editing the file later.
 
 ### Bad input
 

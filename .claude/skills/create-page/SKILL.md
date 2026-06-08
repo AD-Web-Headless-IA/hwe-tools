@@ -11,12 +11,12 @@ You are a frontend scaffolder for hwe client sites. Your job is to create a new 
 
 ## Constraints
 
-- Runs from within the client repo (CWD = `site-{slug}/`). Paths are relative to client repo root.
+- **Paths resolve from `SITE_DIR`** — defined once in `docs/contracts/general/workspace-structure.md` §"Skill path resolution" (fixture: `hwe-core/apps/{SITE}`; standalone client: the repo root). Do not re-derive it. All site paths below are under `{SITE_DIR}/`.
 - `site-slug` must match `^[a-z0-9-]+$`.
 - `page-slug` must be lowercase kebab-case (`^[a-z][a-z0-9-]*$`). Refuse uppercase or path separators.
-- Never overwrite an existing `src/app/{page-slug}/page.tsx`. Stop and tell the user.
+- Never overwrite an existing `{SITE_DIR}/src/app/{page-slug}/page.tsx`. Stop and tell the user.
 - Do not create blocks or content — that is `/add-block`'s job.
-- `SiteShell` already wraps children in `<main>` — compositions must NOT add another `<main>`.
+- The composition must render a `<main>` landmark exactly once on the page. Check `{SITE_DIR}/src/app/layout.tsx`: if it uses `SiteShell` (which provides `<main>`), the composition must NOT add another; if the layout is bare (like the current `site-demo`), the composition wraps its content in `<main>`. Detect, don't assume.
 - All generated files are in English (DEC-001); business copy (h1 text, description) in the site's language.
 
 ## Process
@@ -28,11 +28,12 @@ Arguments: `$0` = site-slug (default `site-demo`), `$1` = page-slug (required).
 Validate:
 - `site-slug` matches `^[a-z0-9-]+$`.
 - `page-slug` matches `^[a-z][a-z0-9-]*$`.
-- CWD contains `package.json` and `src/` — if not, stop: must be run from client repo root.
-- File `src/app/{page-slug}/page.tsx` does NOT exist.
+- `{SITE_DIR}` contains `package.json` and `src/` — if not, stop: site not found at `hwe-core/apps/{SITE}`.
+- File `{SITE_DIR}/src/app/{page-slug}/page.tsx` does NOT exist.
 
 Derive:
 - `SITE` = site-slug (e.g. `site-demo`).
+- `SITE_DIR` = per `docs/contracts/general/workspace-structure.md` §"Skill path resolution" (fixture: `hwe-core/apps/{SITE}`).
 - `SLUG` = page-slug (e.g. `le-camping`).
 - `PageName` = PascalCase of page-slug: split on `-`, capitalise each part, join.
   Examples: `le-camping` → `LeCamping`, `hebergements` → `Hebergements`, `le-restaurant` → `LeRestaurant`.
@@ -41,7 +42,7 @@ Derive:
 
 ### Step 1 — Read the site context
 
-Read `src/app/layout.tsx`.
+Read `{SITE_DIR}/src/app/layout.tsx`. Note whether it uses `SiteShell` or is a bare layout (`<body>{children}</body>`) — this decides whether the composition adds its own `<main>` (Step 4).
 
 Extract from the existing `metadata` object:
 - `clientName` — from `metadata.title` or `openGraph.siteName` (e.g. `Camping Mer et Camargue`).
@@ -54,12 +55,12 @@ These values are used in the new page metadata. If extraction is uncertain, use 
 ### Step 2 — Create the page directory
 
 ```bash
-mkdir -p "src/app/{SLUG}"
+mkdir -p "{SITE_DIR}/src/app/{SLUG}"
 ```
 
 ### Step 3 — Create `page.tsx`
 
-Path: `src/app/{SLUG}/page.tsx`
+Path: `{SITE_DIR}/src/app/{SLUG}/page.tsx`
 
 ```tsx
 import type { Metadata } from 'next';
@@ -91,34 +92,14 @@ Rules for metadata:
 
 ### Step 4 — Create `{PageName}Composition.tsx`
 
-Path: `src/compositions/{PageName}Composition.tsx`
+Path: `{SITE_DIR}/src/compositions/{PageName}Composition.tsx`
 
-```tsx
-import { BlockRenderer, type BlockInstance } from '@hwe/core-ui';
-import { clientBlocks } from '@/blocks/registry';
+Match the host site's `<main>` ownership (detected in Step 1):
 
-const layout: BlockInstance[] = [
-  // Add blocks with: /add-block {SITE} {SLUG} {BlockType}
-];
+- **Bare layout** (current `site-demo` — `<body>{children}</body>`, no `SiteShell`): the composition owns the `<main>` landmark.
+- **`SiteShell` layout**: `SiteShell` already renders `<main>` — the composition must NOT add one (it would nest two `<main>`s). Drop the `<main>` wrapper and keep just the fragment.
 
-export function {PageName}Composition() {
-  return (
-    <>
-      <h1 className="sr-only">{pageLabel} — {clientName}, {clientCity}</h1>
-      <BlockRenderer layout={layout} blocks={clientBlocks} />
-    </>
-  );
-}
-```
-
-Notes:
-- `SiteShell` already wraps children in `<main>` — no additional `<main>` here.
-- `layout` is the renamed prop (was `blocks` before DEC-015) — it holds the `BlockInstance[]` array.
-- `blocks` (second prop) is the optional `Record<string, ComponentType>` map of client-registered blocks from `src/blocks/registry.ts`.
-- The `<h1>` uses `sr-only` because the first block added (typically HeroBlock) will render the visible h1; this ensures the page always has a semantic h1 before any block is added.
-- Once a HeroBlock is added via `/add-block`, the developer should remove this sr-only h1 and rely on the hero's heading instead. Document this in a JSDoc comment.
-
-Actual template to write (replace `{pageLabel}` and `{clientName}` / `{clientCity}` with extracted values):
+Bare-layout template (replace `{pageLabel}` / `{clientName}` / `{clientCity}` with the Step 1 values):
 
 ```tsx
 import { BlockRenderer, type BlockInstance } from '@hwe/core-ui';
@@ -135,19 +116,26 @@ const layout: BlockInstance[] = [
  */
 export function {PageName}Composition() {
   return (
-    <>
+    <main>
       <h1 className="sr-only">{pageLabel} — {clientName}, {clientCity}</h1>
       <BlockRenderer layout={layout} blocks={clientBlocks} />
-    </>
+    </main>
   );
 }
 ```
 
-### Step 5 — Update `sitemap.ts`
+(For a `SiteShell` layout, replace `<main>...</main>` with a `<>...</>` fragment.)
 
-Read `src/app/sitemap.ts`.
+Notes:
+- `layout` is the renamed prop (was `blocks` before DEC-015) — it holds the `BlockInstance[]` array.
+- `blocks` (second prop) is the optional `Record<string, BlockComponent>` map of client-registered blocks from `{SITE_DIR}/src/blocks/registry.ts`.
+- The `<h1>` uses `sr-only` because the first block added (typically HeroBlock) will render the visible h1; this ensures the page always has a semantic h1 before any block is added. Once a HeroBlock is added via `/add-block`, remove this sr-only h1 and rely on the hero's heading.
 
-The sitemap exports a function returning an array. Add a new entry for `/{SLUG}`:
+### Step 5 — Update `sitemap.ts` (only if it exists)
+
+Read `{SITE_DIR}/src/app/sitemap.ts`. **If the site has no `sitemap.ts`** (the current `site-demo` does not), skip this step with a note — do not create one here.
+
+If it exists, it exports a function returning an array. Add a new entry for `/{SLUG}`:
 
 ```ts
 {
@@ -160,11 +148,11 @@ The sitemap exports a function returning an array. Add a new entry for `/{SLUG}`
 
 Insert it after the homepage entry (priority 1). Use the `Edit` tool to splice the new entry.
 
-### Step 6 — Update the navbar href in `layout.tsx`
+### Step 6 — Update the navbar href in `layout.tsx` (only if a navbar exists)
 
-Read `src/app/layout.tsx`.
+Read `{SITE_DIR}/src/app/layout.tsx`. **If the layout has no `navbar.links` array** (the current `site-demo` does not), skip this step with a note.
 
-Find a link in the `navbar.links` array where:
+If a navbar exists, find a link where:
 - `href` is currently `'#'`, AND
 - the `label` value matches the page-slug when both are normalised (lowercase, diacritics stripped, hyphens removed).
   Example: `{ label: 'Le Camping', href: '#' }` matches `le-camping`.
@@ -186,12 +174,12 @@ If typecheck fails, diagnose the error, fix it, and re-run. Do not proceed to th
 Page created: /{SLUG}
 
 Files written:
-  apps/{SITE}/src/app/{SLUG}/page.tsx            — page component + metadata
-  apps/{SITE}/src/compositions/{PageName}Composition.tsx — empty composition
+  {SITE_DIR}/src/app/{SLUG}/page.tsx                       — page component + metadata
+  {SITE_DIR}/src/compositions/{PageName}Composition.tsx    — empty composition
 
 Files updated:
-  apps/{SITE}/src/app/sitemap.ts                 — added /{SLUG} entry
-  apps/{SITE}/src/app/layout.tsx                 — navbar href #{pageLabel} → /{SLUG}  [or "no matching link found"]
+  {SITE_DIR}/src/app/sitemap.ts                            — added /{SLUG} entry  [or "skipped — no sitemap.ts"]
+  {SITE_DIR}/src/app/layout.tsx                            — navbar href #{pageLabel} → /{SLUG}  [or "skipped — no navbar"]
 
 Typecheck: ✓ green
 
