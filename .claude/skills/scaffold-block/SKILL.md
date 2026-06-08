@@ -1,7 +1,7 @@
 ---
 name: scaffold-block
 description: Scaffold a new block. --target base creates packages/core-ui/src/base-blocks/{Name}/ with the 5 mandatory files (tsx, variants, types, schema, test) from templates, ready for TDD. --target client creates a single Level-1 re-export file in the client repo. Use when adding a new reusable page section to the design system.
-argument-hint: <BlockName> [--target base|client] [--site <slug>] [--config] [--adapter <domain>]
+argument-hint: <BlockName> [--target base|client] [--site <slug>] [--variants <a,b,...>] [--config] [--adapter <domain>]
 allowed-tools: Read Write Glob Grep Bash(test *) Bash(ls *) Bash(mkdir *)
 ---
 
@@ -43,6 +43,7 @@ The first positional argument is `$0` (the block name). Optional flags may appea
 - `--target base` — (default) scaffold in `hwe-core/packages/core-ui/src/base-blocks/`. Schema import path: `../../schemas/{Name}.schema`.
 - `--target client` — scaffold in `src/blocks/` inside the client repo at `site-{slug}/`. Requires `--site <slug>`. Schema import path: `@hwe/core-ui/schemas`.
 - `--site <slug>` — client site slug, required when `--target client`. Must match `^[a-z0-9-]+$`.
+- `--variants <a,b,...>` — comma-separated keys for the block's primary variant axis (the `variant` string BlockRenderer passes — DEC-023). E.g. `--variants media-left,media-right`. The first key is the default. If omitted, the template ships placeholder keys (`variant-a`/`variant-b`) to fill in later. This is how you "tell" the skill the variants up front. Only the layout/style axis — media kinds (image/gallery/video) belong in the schema as a discriminated union, not here.
 - `--config` — generate `{Name}.config.schema.ts` (Layer 3: behavioral config schema).
 - `--adapter <domain>` — inject an adapter comment in `{Name}.tsx` referencing `@hwe/<domain>` (Layer 4). The domain is the next token after `--adapter` (e.g. `--adapter booking`).
 
@@ -53,6 +54,7 @@ Parse and store:
 - `siteSlug` = token after `--site` (required when `target === 'client'`).
 - `withConfig` = `true` if `--config` is present, `false` otherwise.
 - `adapterDomain` = the token after `--adapter` if present, `null` otherwise.
+- `variants` = the comma-split list after `--variants` if present (e.g. `['media-left','media-right']`), else `null`.
 
 **Validate the name:**
 
@@ -149,6 +151,11 @@ export type {Name}Config = z.infer<typeof {Name}Config>;
 ```
 
 Replace `{Domain}` with the PascalCase version of the adapter domain (e.g. `booking` → `Booking`).
+
+**Variant axis substitution (`{Name}.variants.ts`):** the template ships a `variant` axis (DEC-023) with placeholder keys `'variant-a' | 'variant-b'`.
+- If `--variants` was passed: replace the placeholder keys with the provided list (keeping each value an empty `''` class string for the dev to fill), and set `defaultVariants.variant` to the **first** key. E.g. `--variants media-left,media-right` → `variant: { 'media-left': '', 'media-right': '' }`, default `'media-left'`.
+- If not: leave the `variant-a`/`variant-b` placeholders for the dev to rename.
+- Do NOT rename the axis — it MUST stay `variant` (that is the prop `BlockRenderer` passes). Media kinds (image/gallery/video) are NOT variants — they go in the schema as a discriminated union.
 
 **Substitution rules (apply to all generated files):**
 
@@ -287,7 +294,15 @@ This skill itself loads only its bundled templates from `${CLAUDE_SKILL_DIR}/tem
 /scaffold-block HeroBlock
 ```
 
-Generates 5 mandatory files in `packages/core-ui/src/base-blocks/HeroBlock/` (no config, no adapter reference).
+Generates 5 mandatory files in `packages/core-ui/src/base-blocks/HeroBlock/` (no config, no adapter reference). The `variant` axis ships with placeholder keys (`variant-a`/`variant-b`).
+
+### Input — base block with declared variants
+
+```
+/scaffold-block MediaTextBlock --variants media-left,media-right
+```
+
+Generates the 5 files; `MediaTextBlock.variants.ts` has `variant: { 'media-left': '', 'media-right': '' }` (default `media-left`), and the component already reads `variant` and maps it to the CVA (DEC-023). Fill in the class strings + content shape during implementation.
 
 ### Input — base block with config
 

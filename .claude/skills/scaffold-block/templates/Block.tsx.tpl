@@ -7,10 +7,13 @@ export type {Name}Props = {
   content: {Name}Content;
 } & {Name}Variants;
 
-export function {Name}({ content, tone }: {Name}Props) {
+// Reads `variant` (the string BlockRenderer passes from BlockInstance.variant)
+// and maps it to the CVA recipe — DEC-023. Compose @hwe/core-ui primitives
+// (Button, Eyebrow, …) for CTAs and labels instead of restyling atoms (DEC-022).
+export function {Name}({ content, variant }: {Name}Props) {
   return (
-    <section className={{name}Variants({ tone })} aria-labelledby="{name}-heading">
-      <h2 id="{name}-heading">{content.title}</h2>
+    <section className={{name}Variants({ variant })}>
+      <h2>{content.title}</h2>
       {content.image && (
         <Image
           src={content.image.src}
