@@ -1482,3 +1482,49 @@ Header and footer frame every page and must exist before more content blocks. Th
 - **Header/footer as blocks.** Rejected — they're chrome on every page, not page-section content; the layout layer is their home.
 - **Custom SVG icons as files in `public/` + a resolver.** Rejected for UI icons — reinvents lucide with more code and worse a11y; assets are for brand images, not icons.
 - **Hardcode chrome content in the shared components.** Rejected — violates "no client specifics in `@hwe/core-ui`"; content comes from `client.config.ts`.
+
+---
+
+## DEC-025 — Booking adapter pattern — engine-agnostic blocks with UI delegation
+
+> **Status:** Accepted
+> **Date:** 2026-06-11
+> **Deciders:** Cristina Gutiérrez
+> **Builds on:** [DEC-017](#dec-017--repo-split-tools-submodule--core-npm--template--client-repos) (adapters inside `@hwe/core-ui`, no `@hwe/booking` package), [DEC-023](#dec-023--variant-bridge-blocks-read-the-variant-string-media-is-a-content-discriminated-union) (the `variant` string bridge).
+> **Supersedes the data-only adapter assumption** of the earlier `booking-architecture.md` (which modelled a `BookingAdapter` of `checkAvailability`/`createReservation` only). The diagram is rewritten to this DEC.
+
+### Context
+
+Booking engines (THR, Witbooking, Mastercamping, Resalys) do not share an integration model. THR (eSeasonResa) ILib v3 injects a third-party `<script>` that renders its own Web Component (`<thr-search-engine>`); other engines embed an iframe; others expose an API a native form would drive. A single `BookingBlock` handling every engine would need engine-specific conditionals inside `@hwe/core-ui` — exactly the `if (client === '…')` / `if (engine === '…')` branching the platform forbids. The earlier booking architecture assumed an adapter that only abstracts **data**; the real variation is in **how the UI is instantiated**. The search widget is also only the first of several booking UI elements (one-night, favorites, rates) that will share whatever pattern we pick now.
+
+### Decision
+
+1. **One block per booking UI element, not modes of a mega-block.** `BookingSearchBlock` is its own block; future `BookingOnenightBlock`, `BookingFavoritesBlock`, `BookingRatesBlock` are separate blocks. (The pre-existing `BookingBlock.schema.ts` — labels only, no component — is a distinct, untouched artifact.)
+2. **Blocks are engine-agnostic and delegate rendering.** A booking block resolves a `BookingSearchAdapter` via `resolveSearchAdapter(engine)` and hands it the container; it never imports a concrete adapter. The block depends on the interface (the port); infrastructure provides the adapter (hexagonal).
+3. **The adapter encapsulates the integration type and the full mount/destroy lifecycle.** The contract declares `integrationType: 'script-injection' | 'iframe' | 'native'` and an idempotent `mount(container, config, events) → { destroy, mounted }` that resolves even on failure and is safe to re-call after `destroy()` (SPA re-navigation).
+4. **Registry is a map, no if/else, no engine names in block code.** `adapters/booking/registry.ts` maps each engine to a factory; unimplemented engines register a factory that throws "not yet implemented". Adding an engine = writing an adapter + swapping its factory.
+5. **External widget styling is overridden via `data-engine` scoped selectors in the client's `globals.css`.** The block sets `data-engine="{engine}"` on its `<section>`; clients restyle with `[data-engine="…"]`-scoped `!important` rules. Zero CSS lives in the block.
+6. **Script loading is framework-agnostic (plain DOM, not `next/script`)** so the adapter layer carries no React dependency and is portable; the shared `script-loader.ts` dedupes by `src`.
+7. **Content carries the engine config** as a Zod discriminated union on `engine` (`BookingSearchBlock.schema.ts`); the resolved content is passed straight to `adapter.mount`. (`TenantConfig.booking` expansion to hold engine config is deferred — still `{ provider?: string }`.)
+
+### Why
+
+- **No engine branching in core.** The only switch point is the registry map; the block and every other consumer are blind to which engine is active.
+- **Adding an engine doesn't touch the block.** New engine = new adapter + registration. The block, renderer, and schema union absorb it without edits to rendering logic.
+- **Honest about integration reality.** Abstracting the *integration type* (not just data) is what lets one block serve a script-widget engine and a native-form engine alike.
+
+### Consequences
+
+- Adding a new engine follows [`docs/skills/frontend/booking-adapter.md`](../skills/frontend/booking-adapter.md); each engine's integration docs live in `docs/integrations/bookings/{engine}/`.
+- THR is implemented (`script-injection`); Witbooking/Mastercamping/Resalys are throwing placeholders.
+- **Client-specific CSS overrides are required per engine per client** — the platform does not manage widget skins.
+- **A GDPR consent bridge must be implemented per engine that loads external scripts.** THR's adapter accepts `consentAds`; the live Cookiebot wiring (and THR CSP domains in client `next.config.mjs`) are separate, still-open tasks.
+- `BookingSearchBlock` is registered as a **platform default** in `baseBlockRegistry` (uncommon — most blocks are client-owned per DEC-015 — justified because the block is fully engine-agnostic).
+- `docs/diagrams/booking-architecture.md` rewritten to this pattern.
+
+### Alternatives considered
+
+- **One `BookingBlock` with an engine/mode switch inside.** Rejected — pushes engine conditionals into core and grows an unmaintainable mega-component as engines and widget types multiply.
+- **Data-only adapter (`checkAvailability`/`createReservation`), block always renders our form.** Rejected — does not fit script-injection/iframe engines that render their own UI; the variation is in mounting, not just data.
+- **A block per engine (`ThrSearchBlock`, `WitbookingSearchBlock`).** Rejected — duplicates the block per engine and re-introduces engine names into the block layer; the engine belongs in the adapter, selected by config.
+- **`next/script` for loading.** Rejected — couples the adapter layer to React/Next; a plain-DOM loader keeps adapters portable and testable with mocked externals.

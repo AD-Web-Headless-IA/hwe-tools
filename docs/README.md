@@ -62,6 +62,7 @@ docs/
 ├── skills/
 │   ├── frontend/       ← how-to guides for common dev tasks
 │   │   ├── block-creation.md
+│   │   ├── booking-adapter.md
 │   │   └── theme-tokens-pipeline.md
 │   ├── security/       ← 8 security audit how-to guides (one per audit type)
 │   │   ├── security-audit-headers.md
@@ -95,6 +96,8 @@ docs/
 │   ├── infra/
 │   └── cms/
 ├── clients/            ← per-client design analysis (one subfolder per client slug)
+├── integrations/       ← external service integration docs
+│   └── bookings/       ← booking engines (THR done; Witbooking/Mastercamping/Resalys planned)
 ├── diagrams/           ← Mermaid architecture diagrams
 │   ├── block-variant-resolution.md
 │   ├── booking-architecture.md
@@ -151,6 +154,10 @@ docs/
 | `skills/seo/seo-audit-geo-llm.md` | Audit GEO citability: first paragraph, FAQPage, sameAs, SSR | Homepage setup; structured data changes; pre-deploy |
 | `specs/frontend/coding-standards.md` | Day-to-day coding rules: component structure, TS strict patterns, React patterns, anti-patterns table | Any frontend task; code review; onboarding |
 | `specs/security/security-standards.md` | RGPD compliance, input handling, HTTP headers, secrets, prompt injection, pre-deploy checklist | New site setup; Payload/booking integration; any block with user input; pre-deploy |
+| `diagrams/booking-architecture.md` | Booking adapter layer + `BookingSearchBlock` — architecture, mount sequence, file map, CSS overrides, status | Understanding or extending booking; before adding an engine |
+| `skills/frontend/booking-adapter.md` | How-to: add a new booking engine adapter (steps + checklist) | Adding/implementing Witbooking/Mastercamping/Resalys (or a new booking widget) |
+| `integrations/bookings/README.md` | Booking engine integrations index | Any booking adapter task |
+| `integrations/bookings/thr/*` | THR ILib v3 docs, widget reference, internal notes | Implementing or modifying THR adapter |
 
 ## Rules layer (always loaded)
 
