@@ -225,6 +225,17 @@ On demand: docs/contracts/frontend/structure.md
 
 **Budget:** ~3k tokens.
 
+### Onboard a booking engine for a client site
+
+```
+Always:   docs/diagrams/booking-architecture.md           (the pattern: tenant-driven engine + adapter)
+On demand: .claude/skills/setup-booking/SKILL.md            (the /setup-booking skill — self-contained)
+          docs/integrations/bookings/{engine}/{engine}-notes.md  (CSP domains, quirks)
+          docs/skills/frontend/booking-adapter.md           (only if the engine's adapter is not implemented yet)
+```
+
+**Shortcut:** `/setup-booking --engine <engine> <credentials> [--with-block]` wires `client.config.ts` (booking) + CSP + CSS overrides + `TenantProvider` in one pass. **Budget:** ~2k tokens.
+
 ### Build a per-client composition
 
 ```
