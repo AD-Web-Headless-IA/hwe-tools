@@ -71,6 +71,22 @@ booking?:
 
 If `booking` is absent, the block renders an always-visible config-error message (no retry). The app must be wrapped in `TenantProvider` for `useTenant()` to work (`site-demo/src/app/layout.tsx` does this).
 
+### Placement & sticky
+
+The block's presentation `variant` (per-instance) controls placement: `inline` (default, in flow), `sticky` (pins on scroll), `modal` (deferred). The sticky behavior is a **common default that's customized per design via tokens** — no code change per client:
+
+| Token | Default | Set it to… |
+|---|---|---|
+| `--booking-sticky-top` | `0px` (pins to top) | the navbar height to stick **below the menu** instead of top:0 |
+| `--booking-sticky-shadow` | `none` | a shadow per design, e.g. `var(--shadow-elevated)` |
+
+```css
+/* site-{slug}/globals.css — Figma wants it below the menu, with a shadow */
+:root { --booking-sticky-top: var(--navbar-height, 4.5rem); --booking-sticky-shadow: var(--shadow-elevated); }
+```
+
+`sticky` uses CSS `position: sticky` (no JS, no layout jump). A design needing a fundamentally different sticky (condense-on-scroll, mobile collapse-to-button, desktop-only) is a Level-2/3 client block or a new variant — out of the common default.
+
 ## Integration types
 
 The adapter declares its `integrationType` so the block (and the team) knows how a widget mounts. Defined in `adapters/booking/types.ts` as `SearchIntegrationType`.
