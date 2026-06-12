@@ -134,11 +134,11 @@ export const clientBlocks: Record<string, BlockComponent> = {
 
 ## Step 7 — Write app/layout.tsx
 
-The layout adopts `SiteShell` from `@hwe/core-ui`, which renders the Navbar + `<main>` + Footer from `client.config.ts` (DEC-024). `<html lang>` comes from the config locale (detected in Step 0).
+The layout wraps the app in `TenantProvider` (exposes `client.config.ts` via `useTenant()` — consumed by `BookingSearchBlock` for the booking engine + credentials, DEC-025) and adopts `SiteShell` from `@hwe/core-ui`, which renders the Navbar + `<main>` + Footer from `client.config.ts` (DEC-024). `<html lang>` comes from the config locale (detected in Step 0).
 
 ```tsx
 import type { Metadata } from 'next';
-import { SiteShell } from '@hwe/core-ui';
+import { SiteShell, TenantProvider } from '@hwe/core-ui';
 import { config } from '../../client.config';
 import './globals.css';
 
@@ -153,7 +153,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang={config.locale}>
       <body>
-        <SiteShell config={config}>{children}</SiteShell>
+        {/* TenantProvider exposes client.config via useTenant() (booking engine,
+            etc.). SiteShell provides the Navbar + <main> + Footer. */}
+        <TenantProvider config={config}>
+          <SiteShell config={config}>{children}</SiteShell>
+        </TenantProvider>
       </body>
     </html>
   );
@@ -559,3 +563,4 @@ Sections (mirror `DESIGN.md`): header + identity; **Color** (swatch grid reading
 8. **Not loading fonts** → heading/body fonts fall back to system fonts, breaking brand fidelity.
 9. **Adding `@hwe/booking`** → this package does not exist; booking adapter is inside `@hwe/core-ui`.
 10. **Not overriding `rootDir` in tsconfig** → TypeScript rejects imports of files outside `src/`.
+11. **Missing `TenantProvider` in `layout.tsx`** → any block that calls `useTenant()` (e.g. `BookingSearchBlock`) throws "must be used within a TenantProvider" at runtime. Step 7 wraps it.

@@ -126,7 +126,7 @@ import { SiteShell, TenantProvider } from '@hwe/core-ui';
 </TenantProvider>
 ```
 
-> **Follow-up (not this skill):** `/scaffold-site` Step 7 does not yet emit `TenantProvider`, so freshly scaffolded sites need this. Track a separate task to fix `scaffold-site` so new sites ship it by default.
+> `/scaffold-site` Step 7 now emits `TenantProvider` by default, so freshly scaffolded sites already have it — this step is the safety net for older sites or hand-built layouts.
 
 ## Step 7 — `--with-block` (optional)
 
@@ -168,7 +168,7 @@ Print a per-file summary, then the tasks this skill does NOT do:
 # Known pitfalls
 
 1. **Putting the engine in block content.** The engine is authoritative in `TenantConfig.booking` (DEC-025); block content is presentation only.
-2. **Missing `TenantProvider`.** Without it `useTenant()` throws — Step 6 guards this (scaffold-site doesn't emit it yet).
+2. **Missing `TenantProvider`.** Without it `useTenant()` throws — Step 6 guards this (scaffold-site now emits it; this covers older/hand-built layouts).
 3. **`output: 'export'`** silently drops `headers()` → the CSP never applies. Warn; not our deploy mode.
 4. **Placeholder engines** (`witbooking`/`mastercamping`/`resalys`) set valid config but their adapter throws at runtime until implemented — warn, don't block.
 5. **Non-idempotent edits.** Always key on the `booking:{engine}` marker so re-runs update rather than duplicate.
