@@ -7,11 +7,12 @@ This file is for the HWE team — not from THR's official docs.
 
 | Resource | URL | Notes |
 |---|---|---|
-| ILib v3 script | `https://thelisresa.webcamp.fr/ilib/v3/ilib.js` | HTTPS required. May support widget selection query params. |
+| **ILib v4 script** ✅ | `https://thelisresa.webcamp.fr/ilib/v4/?<widgets>` | HTTPS. Widgets selected via query flags (`searchengine`, `categories`, `favorites`, `simpleblock`). HWE search adapter uses `?searchengine`. **This is the one we use** (`THR_ILIB_SRC`). |
+| `/ilib/` (no version) | `https://thelisresa.webcamp.fr/ilib/` | Returns the **legacy** `ThelisResa.options` script (200). Not Web Components — **do not use.** |
 | Booking tunnel | `https://thelisresa.webcamp.fr/` | Where users land after search. Hosted by THR. |
-| Legacy ILib (v1/v2) | `https://ajax.webcamp.fr/ilib/` | **Do not use.** Old global-config pattern, not Web Components. |
+| Legacy ILib (v1/v2) | `https://ajax.webcamp.fr/ilib/` | **Do not use.** Old global-config pattern. |
 
-**TODO:** Confirm exact script URL with THR. The v3 docs mention a "quick integration form" that generates the script tag with selective widget loading — we may need a different URL per widget combination.
+Verified 2026-06-12 against the `demosalons` demo account. Config is set via `thelisresa.ilib('camping', <account>)` / `ilib('language', …)` — see [`thr-ilib-v4.md` §1](./thr-ilib-v4.md).
 
 ## CSP (Content Security Policy) domains
 
@@ -46,44 +47,59 @@ The adapter wraps the widget element like this:
 </section>
 ```
 
-### Override pattern in `globals.css`
-
-```css
-/* =================================================================
-   Booking widget overrides — THR
-   Scope: [data-engine="thr"] prevents leaking to other engines
-   ================================================================= */
-
-[data-engine="thr"] .thr-class-name {
-  background-color: var(--color-primary) !important;
-  font-family: var(--font-sans) !important;
-  border-radius: var(--radius-md) !important;
-}
-```
-
 ### Guidelines
 
-- **Always scope** to `[data-engine="thr"]` — never write naked `.thr-*` selectors
-- **Use `!important`** — the widget's internal styles often have high specificity
-- **Use CSS custom properties** from the client's theme tokens so overrides adapt per-client
-- **Inspect the widget** in DevTools to find the actual CSS class names THR uses — they're not documented and may change between ILib versions
-- **Zero CSS in the block component** — all overrides go in `globals.css` (per DEC: one `globals.css` per client, zero CSS per block)
-- **Test after THR updates** — external widget CSS can change without notice
+- **Always scope** to `[data-engine="thr"]` — never write naked `.thr-*` selectors.
+- **`!important` + extra specificity** — THR's account-theme layer uses `!important` (see "Override pattern" below).
+- **Theme tokens only** so overrides adapt per client.
+- **Zero CSS in the block component** — all overrides live in the client's `globals.css` (one per client).
 
-### Known CSS classes (inspect and update)
+The verified render details, class map, and a working override baseline follow.
 
-**TODO:** Document the actual CSS class names used by `<thr-search-engine>` after first successful mount. Inspect in DevTools and list here.
+### How THR renders (verified — ILib v4, 2026-06-12)
 
+- **Light DOM (AngularJS app), not shadow DOM and not an iframe.** The widget injects regular `<div>`/`<select>`/`<button>` inside `<thr-search-engine>` (markers like `ng-scope`, `ng-isolate-scope`). → our `[data-engine="thr"] …` overrides **reach it**.
+- **THR ships Bootstrap 3** scoped under a root `.thr` class, **plus a second "account theme" layer** in the same stylesheet that applies the account's configured colours (`color1`/`color2`) **with `!important`** — e.g. `.thr .btn-primary { background-color: <color2> !important }`, `.btn-secondary { <color1> }`, and `.thr .form-control/.thr-select/.thr-range-picker { border-radius: 0 }`.
+- **Icons:** Font Awesome (`fas fa-search`, `fa-chevron-down`, `far fa-calendar-alt`, `fa-check`, `fa-long-arrow-alt-right`).
+- **Theming is two layers:** (1) account colours `color1`/`color2` configured **in THR's back-office** per client; (2) CSS overrides here for structure/typography/shape. Fix the brand colours at the source (THR panel) AND override structure via CSS.
+- **Multisite vs single-site:** a multisite account (e.g. `demosalons`) also renders *Regions* + *Campsites* selectors (`component-multi`); single-site accounts render a simpler tree without them. Style the shared classes below and both work.
+
+### Class map (`<thr-search-engine>`)
+
+| Class | Element |
+|---|---|
+| `.thr` | root wrapper (when ILib) |
+| `.thr-search-engine-multi` · `-main` (+`-full`/`-half`/`-none`) | container + criteria row |
+| `.thr-search-engine-{regions,campsites,dates,type,pers,promocode}` | per-field wrappers (`pers` = capacity) |
+| `.thr-search-engine-hide-{type,capacity,promocode}` · `-alone-criteria` | layout modifiers |
+| `.form-group` + `<label>` | field group + label |
+| `.thr-select` · `.thr-select-placeholder` · `.thr-select-options` · `-options-container` · `-option-selected` · `-header` · `-option-disabled` (+ `.active`/`.thr-focus`/`.thr-disabled`) | custom select + dropdown |
+| `.thr-range-picker` | date range field |
+| `.form-control` | text input (promocode) |
+| **`.btn.btn-primary.thr-btn-search`** | **the search submit button** |
+
+### Override pattern (beats THR's `!important`)
+
+Because THR's account-theme layer uses `!important`, overrides must use **`!important` AND extra specificity** (chain a second class, e.g. `.btn.btn-primary`, or `[data-engine="thr"]` + the THR class). Token-driven baseline (see the working copy in `site-demo/src/app/globals.css` §THIRD-PARTY OVERRIDES):
+
+```css
+/* labels → eyebrow; inputs/selects/date → hairline+flat; dropdown; submit → brand */
+[data-engine="thr"] .form-group label { text-transform: uppercase !important;
+  letter-spacing: var(--tracking-eyebrow) !important; color: var(--color-muted-foreground) !important; }
+[data-engine="thr"] .thr-select,
+[data-engine="thr"] .thr-range-picker,
+[data-engine="thr"] .form-control { border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-sm) !important; box-shadow: none !important; font-family: var(--font-ui) !important; }
+[data-engine="thr"] .btn.btn-primary,
+[data-engine="thr"] .thr-btn-search { background-color: var(--color-primary) !important;
+  color: var(--color-primary-foreground) !important; border-radius: var(--radius-md) !important; }
 ```
-.thr-search-engine__???  — main container
-.thr-search-engine__???  — date picker
-.thr-search-engine__???  — submit button
-.thr-search-engine__???  — accommodation type selector
-```
+
+> **Note:** captured from ILib **v4** on 2026-06-12. v4 is THR's stable/only version (no v5 planned), so this is fixed — the only caveat is that THR doesn't *publish* its class names, so they were read from the live widget.
 
 ## Known quirks
 
-1. **Script load order matters** — The `thelisresa` global config (`codeCamping`, `language`) should be set BEFORE the script loads, or the widget may initialize with defaults.
+1. **Config is queued, order is forgiving** — push config with `thelisresa.ilib('camping', …)` / `ilib('language', …)` after bootstrapping the `ilib` setter; calls before the script finishes are queued in `thelisresa.a` and consumed on load. (The adapter sets them before calling `loadScript`.)
 
 2. **Web Component registration** — The `<thr-search-engine>` element must be inserted AFTER the ILib script has loaded and registered the custom element. Inserting before will result in an empty unknown element that doesn't upgrade.
 
@@ -93,13 +109,13 @@ The adapter wraps the widget element like this:
 
 5. **WordPress DIVI conflict** — DIVI ≥ 4.14 has a feature that conflicts with ILib. Not relevant for HWE, but noted in case clients mention it from their old WordPress sites.
 
-6. **Consent timing** — `thelisresa.setConsentMode()` must be called AFTER the ILib script has loaded (because it depends on `thelisresa.ilib()` being available). The adapter handles this by calling it post-script-load.
+6. **Consent** — set via `thelisresa.ilib('consent_ads', 0|1)`; because the `ilib` setter is bootstrapped up front and queues, it can be set before or after the script loads. (The adapter queues it alongside `camping`/`language`.)
 
 ## Account setup
 
 Each camping client needs:
 - A THR / eSeasonResa account with a `codeCamping` identifier
-- The eSeasonResa V3 tunnel enabled (required for ILib v3)
+- The eSeasonResa tunnel enabled (required for ILib v4)
 - For group accounts: the `site` ID for each camping in the group
 
 These values are configured in `client.config.ts` under `booking.provider` config and stored in Payload as tenant booking config.

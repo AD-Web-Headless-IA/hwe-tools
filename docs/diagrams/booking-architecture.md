@@ -26,7 +26,7 @@ flowchart TB
     loader["script-loader.ts\n(shared, deduped)"]
   end
 
-  pms["External PMS\n(THR ILib v3 Web Component, …)"]
+  pms["External PMS\n(THR ILib v4 Web Component, …)"]
 
   cfg -- "TenantProvider / useTenant()" --> block
   payload --> renderer --> block --> resolve
@@ -83,7 +83,7 @@ The adapter declares its `integrationType` so the block (and the team) knows how
 
 ## THR mount sequence
 
-THR (eSeasonResa) ILib v3 uses Web Components. The adapter is `ThrSearchAdapter` (`integrationType: 'script-injection'`).
+THR (eSeasonResa) ILib v4 uses Web Components. The adapter is `ThrSearchAdapter` (`integrationType: 'script-injection'`). Config is set through the `thelisresa.ilib(key, value)` queue (`camping`, `language`, `consent_ads`), not property assignment — see [`thr-ilib-v4.md`](../integrations/bookings/thr/thr-ilib-v4.md).
 
 ```mermaid
 sequenceDiagram
@@ -95,10 +95,9 @@ sequenceDiagram
 
   B->>A: mount(container, assembledConfig, events)
   A->>A: validateConfig(config)  (checks codeCamping + locale)
-  A->>W: set codeCamping + language  (before script)
-  A->>L: loadScript(THR_ILIB_V3_SRC)  (deduped)
-  L-->>A: resolved (script loaded)
-  A->>W: define + call setConsentMode(consentAds)  (after load)
+  A->>W: bootstrap thelisresa.ilib; queue ilib('camping'/'language'/'consent_ads')
+  A->>L: loadScript(THR_ILIB_SRC = /ilib/v4/?searchengine)  (deduped)
+  L-->>A: resolved (script loaded, queue consumed)
   A->>D: create <thr-search-engine> (title/type/site attrs)
   A->>D: set on-load = unique global callback
   A->>D: container.appendChild(element)
@@ -109,7 +108,7 @@ sequenceDiagram
 ```
 
 Key invariants (from `ThrSearchAdapter.ts` + `docs/integrations/bookings/thr/`):
-- Global `thelisresa` config is set **before** the script loads; consent is set **after** (it depends on `thelisresa.ilib()`).
+- Config is queued via `thelisresa.ilib(key, value)` (`camping`, `language`, `consent_ads`) **before** the script loads; the v4 script consumes the queue on load (order is forgiving).
 - The `<thr-search-engine>` element is inserted **after** the script registers the custom element.
 - `destroy()` removes the element and its global callback but **keeps the script** — other THR widgets on the page may need it.
 - The block depends on the `BookingSearchAdapter` interface, never on `ThrSearchAdapter` directly. Tests inject a fake adapter.
@@ -132,17 +131,20 @@ Key invariants (from `ThrSearchAdapter.ts` + `docs/integrations/bookings/thr/`):
 
 ## CSS override pattern
 
-External widgets ship their own styles with high specificity. The block sets `data-engine="{engine}"` on its `<section>`; clients restyle the widget from their own `globals.css` — never inside the block (zero CSS per block).
+External widgets ship their own styles. The block sets `data-engine="{engine}"` on its `<section>`; clients restyle the widget from their own `globals.css` — never inside the block (zero CSS per block). The block also **constrains its own layout** (centers within `--width-container`) so a `width:100%` widget isn't full-bleed.
+
+**THR specifics (verified):** the widget is **AngularJS light DOM** (overrides reach it — not shadow DOM/iframe), styled with **Bootstrap 3 + an account-theme layer that uses `!important`** (the account's `color1`/`color2`). So theming is **two layers**: (1) the account colours set **in THR's back-office** per client; (2) CSS overrides here. Because THR's rules use `!important`, overrides need **`!important` AND extra specificity** (chain a second class).
 
 ```css
-/* site-{slug}/src/app/globals.css */
-[data-engine="thr"] .thr-search-engine__btn {
+/* site-{slug}/src/app/globals.css — token-driven, beats THR's themed !important */
+[data-engine="thr"] .btn.btn-primary,
+[data-engine="thr"] .thr-btn-search {
   background-color: var(--color-primary) !important;
   border-radius: var(--radius-md) !important;
 }
 ```
 
-Rules: always scope to `[data-engine="…"]` (no naked `.thr-*`), use `!important` (the widget's specificity is high), use theme-token custom properties so overrides adapt per client. Class names are not documented by THR — inspect in DevTools and record them in `docs/integrations/bookings/thr/thr-notes.md`.
+Rules: always scope to `[data-engine="…"]`; use `!important` + extra specificity; use theme tokens so overrides adapt per client. The full THR class map + baseline live in [`thr-notes.md` §CSS](../integrations/bookings/thr/thr-notes.md) (THR doesn't publish class names; v4 is its stable/only version, so they're fixed once captured). Working example: `site-demo/src/app/globals.css` §THIRD-PARTY OVERRIDES.
 
 ## Status — implemented vs not
 

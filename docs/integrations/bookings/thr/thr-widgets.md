@@ -1,12 +1,12 @@
 # THR — Widget reference
 
-Quick reference for all THR ILib v3 widgets. For full integration docs see `thr-ilib-v3.md`.
+Quick reference for all THR ILib v4 widgets. For full integration docs see `thr-ilib-v4.md`.
 
 ## Widget map → HWE blocks
 
 | THR widget | HWE block | Adapter method | Priority |
 |---|---|---|---|
-| `<thr-search-engine>` | `BookingSearchBlock` | `mount()` in `ThrSearchAdapter` | P0 — implementing now |
+| `<thr-search-engine>` | `BookingSearchBlock` | `mount()` in `ThrSearchAdapter` | ✅ implemented |
 | `<thr-onenight>` | `BookingOnenightBlock` (future) | TBD | P2 |
 | `<thr-favorites>` | `BookingFavoritesBlock` (future) | TBD | P2 |
 | `<thr-tarifs>` | `BookingRatesBlock` (future) | TBD | P3 |
@@ -30,7 +30,7 @@ Quick reference for all THR ILib v3 widgets. For full integration docs see `thr-
 | `site` | string | — | Required for group accounts |
 | `on-load` | string | — | Global function name |
 
-**⚠️ Attribute list incomplete — see `thr-ilib-v3.md` §4.**
+**⚠️ Attribute list incomplete — see `thr-ilib-v4.md` §4.**
 
 ## `<thr-onenight>` — Passage booking
 
@@ -62,11 +62,11 @@ Quick reference for all THR ILib v3 widgets. For full integration docs see `thr-
 
 ## `<thr-tarifs>` — Rates & availability
 
-Documentation pending. Widget exists in ILib v3 but attribute details not yet documented here.
+Documentation pending. Widget exists in ILib v4 but attribute details not yet documented here.
 
 ## `<thr-categories>` — Accommodation categories
 
-Documentation pending. Widget exists in ILib v3 but attribute details not yet documented here.
+Documentation pending. Widget exists in ILib v4 but attribute details not yet documented here.
 
 ## Common patterns
 
@@ -79,4 +79,4 @@ Documentation pending. Widget exists in ILib v3 but attribute details not yet do
 ### Consent
 
 All widgets respect the consent value set via `thelisresa.setConsentMode()`.
-This must be called after the ILib script loads. See `thr-ilib-v3.md §2`.
+This must be called after the ILib script loads. See `thr-ilib-v4.md §2`.

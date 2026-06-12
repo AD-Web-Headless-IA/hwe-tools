@@ -8,7 +8,7 @@ Each engine has its own subdirectory with integration docs, widget reference, an
 
 | Engine | Provider | Integration type | Status | Directory |
 |---|---|---|---|---|
-| THR (eSeasonResa) | Sequoiasoft / Thelis | script-injection (Web Components) | 🟡 In progress | `thr/` |
+| THR (eSeasonResa) | Sequoiasoft / Thelis | script-injection (ILib v4 Web Components) | ✅ Implemented (search) | `thr/` |
 | Witbooking | Witbooking | TBD | 🔴 Not started | `witbooking/` |
 | Mastercamping | Mastercamping | TBD | 🔴 Not started | `mastercamping/` |
 | Resalys | Resalys | TBD | 🔴 Not started | `resalys/` |
@@ -23,7 +23,7 @@ Each engine has its own subdirectory with integration docs, widget reference, an
 
 ```
 @hwe/core-ui/src/
-├── base-blocks/BookingSearch/    ← The block component (engine-agnostic)
+├── base-blocks/BookingSearchBlock/  ← The block component (engine-agnostic)
 └── adapters/booking/             ← Engine adapter implementations
     ├── types.ts                  ← BookingSearchAdapter interface
     ├── registry.ts               ← Engine → adapter resolution
@@ -54,7 +54,7 @@ External widgets come with their own styles. To match the client's brand:
 
 ## Adding a new engine
 
-1. Research the engine's integration method and document it in `docs/integrations/booking/{engine}/`
+1. Research the engine's integration method and document it in `docs/integrations/bookings/{engine}/`
 2. Classify integration type (script-injection / iframe / native)
 3. Create adapter in `@hwe/core-ui/src/adapters/booking/{engine}/`
 4. Register in `adapters/booking/registry.ts`

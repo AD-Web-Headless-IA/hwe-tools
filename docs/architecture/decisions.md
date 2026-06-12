@@ -1495,7 +1495,7 @@ Header and footer frame every page and must exist before more content blocks. Th
 
 ### Context
 
-Booking engines (THR, Witbooking, Mastercamping, Resalys) do not share an integration model. THR (eSeasonResa) ILib v3 injects a third-party `<script>` that renders its own Web Component (`<thr-search-engine>`); other engines embed an iframe; others expose an API a native form would drive. A single `BookingBlock` handling every engine would need engine-specific conditionals inside `@hwe/core-ui` — exactly the `if (client === '…')` / `if (engine === '…')` branching the platform forbids. The earlier booking architecture assumed an adapter that only abstracts **data**; the real variation is in **how the UI is instantiated**. The search widget is also only the first of several booking UI elements (one-night, favorites, rates) that will share whatever pattern we pick now.
+Booking engines (THR, Witbooking, Mastercamping, Resalys) do not share an integration model. THR (eSeasonResa) ILib v4 injects a third-party `<script>` that renders its own Web Component (`<thr-search-engine>`); other engines embed an iframe; others expose an API a native form would drive. A single `BookingBlock` handling every engine would need engine-specific conditionals inside `@hwe/core-ui` — exactly the `if (client === '…')` / `if (engine === '…')` branching the platform forbids. The earlier booking architecture assumed an adapter that only abstracts **data**; the real variation is in **how the UI is instantiated**. The search widget is also only the first of several booking UI elements (one-night, favorites, rates) that will share whatever pattern we pick now.
 
 ### Decision
 

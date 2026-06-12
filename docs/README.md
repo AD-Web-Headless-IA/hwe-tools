@@ -157,7 +157,7 @@ docs/
 | `diagrams/booking-architecture.md` | Booking adapter layer + `BookingSearchBlock` — architecture, mount sequence, file map, CSS overrides, status | Understanding or extending booking; before adding an engine |
 | `skills/frontend/booking-adapter.md` | How-to: add a new booking engine adapter (steps + checklist) | Adding/implementing Witbooking/Mastercamping/Resalys (or a new booking widget) |
 | `integrations/bookings/README.md` | Booking engine integrations index | Any booking adapter task |
-| `integrations/bookings/thr/*` | THR ILib v3 docs, widget reference, internal notes | Implementing or modifying THR adapter |
+| `integrations/bookings/thr/*` | THR ILib v4 docs (`thr-ilib-v4.md`), widget reference, internal notes + CSS personalization reference | Implementing or modifying THR adapter, or theming the THR widget |
 
 ## Rules layer (always loaded)
 

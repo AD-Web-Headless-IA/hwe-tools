@@ -40,9 +40,9 @@ export interface BookingSearchAdapter {
 ### 1. Document the engine — `docs/integrations/bookings/{engine}/`
 
 Mirror the `thr/` structure:
-- `{engine}-ilib-v3.md` (or equivalent) — the integration reference (script URL, widget elements, attributes, consent).
+- `{engine}-ilib.md` (or equivalent) — the integration reference (exact script URL, how config is passed, widget elements, attributes, consent). **Verify the URL and config mechanism against the engine's real integration snippet** — don't trust assumptions; capture the authoritative values once and treat them as the source of truth.
+- `{engine}-notes.md` — internal notes incl. the **render mode** (light DOM vs shadow DOM vs iframe — decides whether CSS overrides reach it), any **account-level theming** (e.g. THR's back-office `color1`/`color2`), the **CSS class map**, and CSP domains.
 - `{engine}-widgets.md` — quick widget → block mapping.
-- `{engine}-notes.md` — internal notes: **CSP domains**, known quirks, CSS override class names, account setup.
 
 Update `docs/integrations/bookings/README.md` — set the engine's row from 🔴 to 🟡 and fill its integration type.
 
