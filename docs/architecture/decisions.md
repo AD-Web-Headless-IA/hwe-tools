@@ -1505,7 +1505,7 @@ Booking engines (THR, Witbooking, Mastercamping, Resalys) do not share an integr
 4. **Registry is a map, no if/else, no engine names in block code.** `adapters/booking/registry.ts` maps each engine to a factory; unimplemented engines register a factory that throws "not yet implemented". Adding an engine = writing an adapter + swapping its factory.
 5. **External widget styling is overridden via `data-engine` scoped selectors in the client's `globals.css`.** The block sets `data-engine="{engine}"` on its `<section>`; clients restyle with `[data-engine="…"]`-scoped `!important` rules. Zero CSS lives in the block.
 6. **Script loading is framework-agnostic (plain DOM, not `next/script`)** so the adapter layer carries no React dependency and is portable; the shared `script-loader.ts` dedupes by `src`.
-7. **Content carries the engine config** as a Zod discriminated union on `engine` (`BookingSearchBlock.schema.ts`); the resolved content is passed straight to `adapter.mount`. (`TenantConfig.booking` expansion to hold engine config is deferred — still `{ provider?: string }`.)
+7. **Engine + credentials are authoritative in the tenant config; block content is presentation only.** `TenantConfig.booking` is a **discriminated union by `engine`**, each member declaring its own **real-named** credential fields (`{ engine: 'thr'; codeCamping; siteId? }`, `{ engine: 'witbooking'; hotelId }`, …) — no generic `propertyId` at this layer. The block reads it via `useTenant()`; **there is no engine field in block content and no fallback**. Block content is presentation only (`widgetTitle`, `accommodationType`, `debug`). The block assembles the adapter config as `{ ...tenant.booking, locale: tenant.locale, ...content }` and the adapter reads its own real field names (THR reads `codeCamping`). Account IDs like `codeCamping` are **public** (visible in any THR site's HTML) — they live in `client.config.ts`, not env vars. Missing `booking` → an always-visible config-error in the block (not a crash, no retry).
 
 ### Why
 
@@ -1520,7 +1520,8 @@ Booking engines (THR, Witbooking, Mastercamping, Resalys) do not share an integr
 - **Client-specific CSS overrides are required per engine per client** — the platform does not manage widget skins.
 - **A GDPR consent bridge must be implemented per engine that loads external scripts.** THR's adapter accepts `consentAds`; the live Cookiebot wiring (and THR CSP domains in client `next.config.mjs`) are separate, still-open tasks.
 - `BookingSearchBlock` is registered as a **platform default** in `baseBlockRegistry` (uncommon — most blocks are client-owned per DEC-015 — justified because the block is fully engine-agnostic).
-- `docs/diagrams/booking-architecture.md` rewritten to this pattern.
+- `TenantConfig.booking` is now a real discriminated union (it was a `{ provider?: string }` stub from DEC-024's "wired later" note — superseded here). Adding an engine means adding a member to that union (real credential names) **and** registering its adapter. The app must be wrapped in `TenantProvider` for the block to read it (`site-demo` layout does this).
+- `docs/diagrams/booking-architecture.md` rewritten to this pattern; the add-an-engine guide is `docs/skills/frontend/booking-adapter.md`.
 
 ### Alternatives considered
 

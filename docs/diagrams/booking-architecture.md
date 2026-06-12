@@ -6,16 +6,17 @@
 
 ## Overview
 
-`BookingSearchBlock` renders a property's availability search widget. Booking engines integrate in fundamentally different ways — THR injects a third-party script that renders its own Web Component, others embed an iframe, others would be a native form we build and submit to an API. A single block trying to handle every engine would need per-engine conditionals in `@hwe/core-ui` (forbidden — no `if (engine === '…')` in core). Instead the block is **engine-agnostic**: it resolves a `BookingSearchAdapter` from the engine named in its content and delegates the entire mount/destroy lifecycle to it. Adding an engine means writing an adapter and registering it — the block never changes. The search widget is the first of several booking elements (`<thr-onenight>`, `<thr-favorites>`, …) that will be their own blocks sharing this layer.
+`BookingSearchBlock` renders a property's availability search widget. Booking engines integrate in fundamentally different ways — THR injects a third-party script that renders its own Web Component, others embed an iframe, others would be a native form we build and submit to an API. A single block trying to handle every engine would need per-engine conditionals in `@hwe/core-ui` (forbidden — no `if (engine === '…')` in core). Instead the block is **engine-agnostic**: the **engine and its account credentials are authoritative in the tenant config** (`client.config.ts` → `booking`, a discriminated union by engine — DEC-025). The block reads them via `useTenant()`, resolves a `BookingSearchAdapter` for that engine, assembles the adapter config (tenant credentials + tenant locale + block presentation), and delegates the entire mount/destroy lifecycle to it. The block content carries **only presentation** (no engine, no fallback). Adding an engine means adding it to the tenant union + writing an adapter and registering it — the block never changes. The search widget is the first of several booking elements (`<thr-onenight>`, `<thr-favorites>`, …) that will be their own blocks sharing this layer.
 
 ## Architecture
 
 ```mermaid
 flowchart TB
-  payload["Page builder / Payload\nBlockInstance { type: 'BookingSearchBlock', variant, content }"]
+  cfg["client.config.ts → booking\n{ engine, codeCamping, … }  (tenant, authoritative)"]
+  payload["Page builder / Payload\nBlockInstance { type: 'BookingSearchBlock', variant, content (presentation) }"]
   renderer["BlockRenderer\n(baseBlockRegistry)"]
-  block["BookingSearchBlock  ('use client')\nbase-blocks/BookingSearchBlock/"]
-  resolve["resolveSearchAdapter(content.engine)\nadapters/booking/registry.ts"]
+  block["BookingSearchBlock  ('use client')\nuseTenant() + base-blocks/BookingSearchBlock/"]
+  resolve["resolveSearchAdapter(tenant.booking.engine)\nadapters/booking/registry.ts"]
 
   subgraph adapters["@hwe/core-ui/src/adapters/booking/"]
     thr["THR adapter\n✅ implemented\nscript-injection"]
@@ -27,18 +28,48 @@ flowchart TB
 
   pms["External PMS\n(THR ILib v3 Web Component, …)"]
 
+  cfg -- "TenantProvider / useTenant()" --> block
   payload --> renderer --> block --> resolve
   resolve --> thr
   resolve --> wit
   resolve --> mc
   resolve --> res
   thr -- loadScript() --> loader
-  block -. "mount(container, content, events)" .-> thr
+  block -. "mount(container, assembledConfig, events)" .-> thr
   block -. "result.destroy() on unmount" .-> thr
   thr -- "<script> + <thr-search-engine>" --> pms
 ```
 
-The block owns three things only: the container element, the loading/error chrome, and the `data-engine` attribute used to scope CSS overrides. Everything inside the widget belongs to the engine.
+The block owns three things only: the container element, the loading/error chrome, and the `data-engine` attribute (from `tenant.booking.engine`) used to scope CSS overrides. Everything inside the widget belongs to the engine. The adapter config it passes to `mount` is assembled as `{ ...tenant.booking, locale: tenant.locale, ...content }`.
+
+## Configuration — tenant vs block
+
+The engine + account credentials are declared **once per client** in `client.config.ts`; each block instance carries only presentation. The `codeCamping` (and equivalents) are **public** account IDs (visible in any THR site's HTML), so they live in config, not env vars.
+
+```ts
+// client.config.ts — tenant (authoritative). Discriminated union by engine.
+export const config: TenantConfig = {
+  name: 'Camping Mer et Camargue',
+  locale: 'fr',
+  booking: { engine: 'thr', codeCamping: 'demo', siteId: '6955' },
+};
+
+// A BookingSearchBlock instance — presentation only (no engine, no credentials):
+{ type: 'BookingSearchBlock', variant: 'inline',
+  content: { widgetTitle: 'Réservation', accommodationType: 'locatif' } }
+```
+
+`TenantConfig.booking` (in `providers/TenantProvider.tsx`) is the discriminated union:
+
+```ts
+booking?:
+  | { engine: 'thr'; codeCamping: string; siteId?: string }
+  | { engine: 'witbooking'; hotelId: string }          // placeholder names
+  | { engine: 'mastercamping'; campingCode: string }    // until implemented
+  | { engine: 'resalys'; propertyId: string };
+```
+
+If `booking` is absent, the block renders an always-visible config-error message (no retry). The app must be wrapped in `TenantProvider` for `useTenant()` to work (`site-demo/src/app/layout.tsx` does this).
 
 ## Integration types
 
@@ -62,8 +93,8 @@ sequenceDiagram
   participant W as window.thelisresa
   participant D as container (DOM)
 
-  B->>A: mount(container, content, events)
-  A->>A: validateConfig(content)
+  B->>A: mount(container, assembledConfig, events)
+  A->>A: validateConfig(config)  (checks codeCamping + locale)
   A->>W: set codeCamping + language  (before script)
   A->>L: loadScript(THR_ILIB_V3_SRC)  (deduped)
   L-->>A: resolved (script loaded)
@@ -94,7 +125,8 @@ Key invariants (from `ThrSearchAdapter.ts` + `docs/integrations/bookings/thr/`):
 | THR types / constants / mappings | `@hwe/core-ui/src/adapters/booking/thr/thr.types.ts` |
 | The block (dispatcher, `'use client'`) | `@hwe/core-ui/src/base-blocks/BookingSearchBlock/BookingSearchBlock.tsx` |
 | Block presentation variants (CVA) | `@hwe/core-ui/src/base-blocks/BookingSearchBlock/BookingSearchBlock.variants.ts` |
-| Content schema (engine-discriminated union) | `@hwe/core-ui/src/schemas/BookingSearchBlock.schema.ts` |
+| Content schema (presentation only) | `@hwe/core-ui/src/schemas/BookingSearchBlock.schema.ts` |
+| Tenant booking config (engine + credentials, union) | `@hwe/core-ui/src/providers/TenantProvider.tsx` (`TenantConfig.booking`) |
 | Registry wiring (platform default) | `@hwe/core-ui/src/renderer/baseBlockRegistry.ts` |
 | Engine integration docs | `docs/integrations/bookings/{engine}/` |
 
@@ -122,7 +154,7 @@ Rules: always scope to `[data-engine="…"]` (no naked `.thr-*`), use `!importan
 | Witbooking / Mastercamping / Resalys adapters | 🔴 placeholder factories that throw "not yet implemented" |
 | Cookiebot → THR consent bridge | 🟡 adapter accepts `consentAds`; live Cookiebot wiring is a TODO |
 | CSP domains for THR | 🟡 documented in `thr-notes.md`; not yet added to client CSP config |
-| `TenantConfig.booking` expansion | 🟡 still `{ provider?: string }`; engine config currently lives in block content |
+| `TenantConfig.booking` (engine + credentials, discriminated union) | ✅ implemented; engine is authoritative at the tenant level, block content is presentation only |
 | Multiple widgets / SPA re-navigation | 🟡 destroy/mount support it; not yet verified against a live THR account |
 
 See the add-an-engine guide: [`docs/skills/frontend/booking-adapter.md`](../skills/frontend/booking-adapter.md).

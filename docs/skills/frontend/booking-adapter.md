@@ -56,16 +56,19 @@ src/adapters/booking/{engine}/
 └── index.ts                     ← barrel export
 ```
 
-`{engine}.types.ts` extends the base config with the engine's fields (mirror `thr.types.ts`):
+`{engine}.types.ts` extends the base config (`{ engine, locale, … }` — no generic `propertyId`) with the engine's **real-named** credential + presentation fields (mirror `thr.types.ts`, which uses `codeCamping`):
 
 ```ts
 import type { BookingSearchBaseConfig } from '../types';
 
 export interface WitbookingSearchConfig extends BookingSearchBaseConfig {
   engine: 'witbooking';
-  // engine-specific fields…
+  hotelId: string;        // real credential name — matches TenantConfig.booking
+  // …other engine-specific fields
 }
 ```
+
+The adapter reads its real field names directly (e.g. `config.codeCamping`) — there is no generic-name mapping layer.
 
 ### 3. Implement the adapter — by integration type
 
@@ -103,19 +106,18 @@ const factories: Record<BookingEngineType, BookingSearchAdapterFactory> = {
 
 No `if/else` — the map is the only switch point. `resolveSearchAdapter(engine)`, `isEngineSupported(engine)`, and `getRegisteredEngines()` need no changes.
 
-### 5. Extend the schema — `src/schemas/BookingSearchBlock.schema.ts`
+### 5. Declare the engine in the tenant config — `providers/TenantProvider.tsx`
 
-Replace the engine's placeholder schema with the real fields, keeping `engine: z.literal('{engine}')` so it stays a member of the discriminated union:
+The engine + credentials are authoritative in `TenantConfig.booking` (a discriminated union by `engine`, DEC-025) — **not** in block content. Replace the engine's placeholder member with the real credential field names (these become what `client.config.ts` declares and what the adapter reads):
 
 ```ts
-export const witbookingSearchConfigSchema = z.object({
-  engine: z.literal('witbooking'),
-  ...bookingSearchBaseShape,
-  // engine-specific fields…
-});
+export type TenantBookingConfig =
+  | { engine: 'thr'; codeCamping: string; siteId?: string }
+  | { engine: 'witbooking'; hotelId: string }   // ← real fields (was a placeholder)
+  | …;
 ```
 
-The union `bookingSearchBlockSchema = z.discriminatedUnion('engine', […])` already lists the member — just enrich it. The inferred type must stay structurally compatible with your adapter's config (the block passes `content` straight to `adapter.mount`).
+Block content (`src/schemas/BookingSearchBlock.schema.ts`) stays **presentation-only and engine-agnostic** — extend it only if the new engine needs a genuinely new presentation field. There is no engine field in content and no per-instance engine override. The block assembles `{ ...tenant.booking, locale: tenant.locale, ...content }` and hands it to your adapter, so your adapter's config type must be structurally compatible with that merge.
 
 ### 6. Add CSP domains
 
@@ -139,11 +141,11 @@ cd hwe-core && pnpm run typecheck && pnpm run test && pnpm run lint && pnpm run 
 
 ### 8. Smoke test
 
-Mount the block in `site-demo` with a real account: add a `BookingSearchBlock` `BlockInstance` to a composition with `{ engine: '{engine}', propertyId: '…', locale: '…' }`, open `localhost:3000`, confirm the widget renders and `data-status="mounted"`. Keep this out of CI — it loads the engine's real external script.
+Mount the block in `site-demo` with a real account: set `booking: { engine: '{engine}', …credentials }` in `site-demo/client.config.ts`, add a `BookingSearchBlock` `BlockInstance` (presentation-only `content`, e.g. `{ widgetTitle: '…' }`) to a composition, open `localhost:3000`, confirm the widget renders and `data-status="mounted"`. (`site-demo` is already wrapped in `TenantProvider`.) Keep this out of CI — it loads the engine's real external script.
 
 ## Reference implementation
 
-`@hwe/core-ui/src/adapters/booking/thr/` is the canonical `script-injection` adapter. Read `ThrSearchAdapter.ts` for the mount/destroy lifecycle, `thr.types.ts` for the config-extends-base + mapping pattern, and `ThrSearchAdapter.test.ts` for the mocked-externals test shape.
+`@hwe/core-ui/src/adapters/booking/thr/` is the canonical `script-injection` adapter. Read `ThrSearchAdapter.ts` for the mount/destroy lifecycle, `thr.types.ts` for the config-extends-base + real-named-fields pattern (the adapter reads `codeCamping` directly), and `ThrSearchAdapter.test.ts` for the mocked-externals test shape.
 
 ## Checklist
 
@@ -155,7 +157,8 @@ Copy into the story:
 - [ ] src/adapters/booking/{engine}/ created: {engine}.types.ts, {Engine}SearchAdapter.ts, test, index.ts
 - [ ] adapter implements BookingSearchAdapter (mount resolves on failure; re-mountable after destroy)
 - [ ] registry.ts: placeholder factory replaced with create{Engine}SearchAdapter
-- [ ] BookingSearchBlock.schema.ts: engine placeholder schema replaced with real fields (still in the union)
+- [ ] TenantConfig.booking (TenantProvider.tsx): engine placeholder member replaced with real credential fields
+- [ ] BookingSearchBlock.schema.ts: extended only if the engine needs a new presentation field (content stays engine-agnostic)
 - [ ] CSP domains documented; client-CSP task filed (separate)
 - [ ] adapter tests green (externals mocked); 4 gates green
 - [ ] smoke-tested in site-demo with a real account
