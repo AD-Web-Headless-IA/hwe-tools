@@ -136,7 +136,14 @@ If `--with-block [Composition]` is passed (default composition: `HomeComposition
 { type: 'BookingSearchBlock', variant: 'inline', content: { widgetTitle: '...' } },
 ```
 
-If the composition does not exist → suggest running `/create-page` first; do not create it here.
+**Placement (`variant`) — check the Figma:** `inline` (default, in flow) · `sticky` (pins on scroll) · `modal` (deferred). If the design pins the bar on scroll, use `variant: 'sticky'`. Its anchor + shadow are **token-driven** (no code): if the Figma pins it **below the menu** (not top:0) or wants a shadow, set in the client's `globals.css`:
+
+```css
+:root { --booking-sticky-top: var(--navbar-height, 4.5rem); /* default 0 */
+        --booking-sticky-shadow: var(--shadow-elevated);    /* default none */ }
+```
+
+See [`booking-architecture.md` §Placement & sticky](../../../docs/diagrams/booking-architecture.md). If the composition does not exist → suggest running `/create-page` first; do not create it here.
 
 ## Step 8 — Verify
 
@@ -149,6 +156,7 @@ Print a per-file summary, then the tasks this skill does NOT do:
 - Inspect the engine widget in DevTools → fill the real CSS class names in `globals.css`.
 - Run `/security-audit` to validate/harden the CSP (this skill only adds the engine domains).
 - Wire Cookiebot → engine consent if the engine loads external scripts (THR: `consentAds`).
+- Match the Figma's **placement**: pick the block `variant` (inline/sticky) and, for sticky, set `--booking-sticky-top` / `--booking-sticky-shadow` in `globals.css` (see Step 7).
 - For placeholder engines: implement the adapter (see `docs/skills/frontend/booking-adapter.md`).
 
 # Examples
