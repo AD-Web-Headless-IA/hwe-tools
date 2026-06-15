@@ -11,7 +11,8 @@ Empieza aquí — en este orden:
 3. **[🔄 Diccionario WordPress → hwe](./guides/wordpress-to-hwe.md)** — traduce lo que ya sabes
 4. **[🗓️ Tu día a día](./guides/daily-workflow.md)** — el flujo de trabajo diario
 5. **[📖 Glosario](./guides/glossary.md)** — cuando encuentres un término que no reconoces
-6. **[🤖 Agentes](./specs/ai/agent-directory.md)** — qué agentes hay y cuándo convocarlos
+6. **[🧱 Bloques](./guides/guia-bloques.md)** — cómo crear/añadir un bloque y sus variantes ([fichas](./guides/bloques/README.md))
+7. **[🤖 Agentes](./specs/ai/agent-directory.md)** — qué agentes hay y cuándo convocarlos
 
 > El resto de esta página es para agentes de IA y developers con más contexto del proyecto.
 
@@ -119,6 +120,8 @@ docs/
 | `guides/wordpress-to-hwe.md` | Concept translation dictionary WP → hwe | Onboarding from WP background |
 | `guides/daily-workflow.md` | Day-to-day commands and patterns | Reference during normal work |
 | `guides/glossary.md` | Plain-language definitions of all technical terms | When a term is unfamiliar |
+| `guides/guia-bloques.md` | How to create/add a block, how to ask Claude for it, and the variants | Adding blocks to a page; learning the catalog |
+| `guides/bloques/` | One usage card per block (qué es · variantes · dónde · ejemplo) | Looking up a specific block's fields/variants |
 | `architecture/architecture.md` | Overview (~1 screen): vision, current stack, "where each thing lives" index (DEC-018) | Orientation; finding the canonical doc for a topic |
 | `architecture/architecture-legacy.md` | 🗄️ Historical archive of the old constitution (cdmon/Hetzner/MariaDB/PHP, `hwe-platform` monorepo, eliminated packages). **Not current.** | Only when researching *why* a past approach existed |
 | `architecture/architecture-all-options.md` | Options evaluated before decisions were made | Only when revisiting a past architectural choice |
