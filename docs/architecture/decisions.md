@@ -1529,3 +1529,39 @@ Booking engines (THR, Witbooking, Mastercamping, Resalys) do not share an integr
 - **Data-only adapter (`checkAvailability`/`createReservation`), block always renders our form.** Rejected — does not fit script-injection/iframe engines that render their own UI; the variation is in mounting, not just data.
 - **A block per engine (`ThrSearchBlock`, `WitbookingSearchBlock`).** Rejected — duplicates the block per engine and re-introduces engine names into the block layer; the engine belongs in the adapter, selected by config.
 - **`next/script` for loading.** Rejected — couples the adapter layer to React/Next; a plain-DOM loader keeps adapters portable and testable with mocked externals.
+
+## DEC-026 — Mobile disclosure as a pluggable strategy on BookingSearchBlock
+
+> **Status:** Proposed
+> **Date:** 2026-06-15
+> **Deciders:** Cristina Gutiérrez
+> **Builds on:** [DEC-025](#dec-025--booking-adapter-pattern--engine-agnostic-blocks-with-ui-delegation) (the block is engine-agnostic, content is presentation only), [DEC-017](#dec-017--repo-split-tools-submodule--core-npm--template--client-repos) (map-pattern registries, no branching in `@hwe/core-ui`).
+
+### Context
+
+On small viewports the booking search widget is tall and pushes page content far down — clients want it collapsed behind a toggle that expands in place, while desktop always shows it open. There will be more than one way to collapse it (an in-place `accordion` now; a full-screen app-style `sheet` with a close button is foreseeable), and the engine widget mounts into its container imperatively (DEC-025) — so the container must stay mounted at all times; only its visibility may change. We do not want this UX axis to grow `if (mode === '…')` conditionals inside the block.
+
+### Decision
+
+1. **Mobile collapse is a separate presentation axis, expressed in block content.** `BookingSearchBlockContent.mobile?: 'accordion'` (`bookingMobileModeSchema`). Omitted → no collapse (the widget is always shown). It is distinct from the `variant` axis (`inline`/`sticky`/`modal`, DEC-023) — a `sticky` bar can also be an `accordion` on mobile.
+2. **Each mode maps to a disclosure strategy via a registry, no branching in the block.** `base-blocks/BookingSearchBlock/disclosure/registry.ts` maps each mode to a strategy component (mirrors the booking adapter registry, DEC-017). Adding a mode = a member in `bookingMobileModeSchema` + one entry in the registry. The block resolves the strategy and renders it; it never names a mode.
+3. **A strategy is a component that wraps the widget container and owns its toggle chrome.** Contract (`disclosure/types.ts`): `({ title, children }) => ReactElement`. It MUST NOT unmount `children` (the engine is mounted into it) — it toggles visibility with CSS (`hidden`/`block`) and must keep the widget shown on `md+` regardless of collapsed state.
+4. **`accordion` is the first strategy.** A full-width toggle button (`md:hidden`) labelled with the widget title; the panel is `hidden` when collapsed and `md:block` so desktop never collapses. `aria-expanded` + `aria-controls` wire the toggle to the panel.
+
+### Why
+
+- **New collapse modes don't touch the block.** `sheet` (or any future mode) = a new strategy + one registry entry, exactly like adding a booking engine.
+- **The imperative-mount invariant is preserved.** Hiding via CSS (never unmounting) keeps the adapter lifecycle identical with or without disclosure.
+- **Orthogonal to `variant`.** Collapse behaviour and page-placement are independent axes, so they compose freely.
+
+### Consequences
+
+- `disclosure/` lives inside the block (strategies are presentation-only and block-specific; not exported from the package barrel — same as `bookingSearchVariantSchema`).
+- `site-demo` exercises `mobile: 'accordion'` on its sticky BookingSearchBlock.
+- A `sheet` mode is left unimplemented by design (added when a client needs it).
+
+### Alternatives considered
+
+- **A boolean `collapsibleOnMobile` flag with the behaviour hard-coded in the block.** Rejected — bakes one UX into the block and forces an `if` when a second mode (`sheet`) arrives; the registry is the same pattern already used for engines.
+- **CSS-only `<details>`/`<summary>`.** Rejected — gives no control over the `md+` always-open requirement or the toggle styling/a11y wiring, and would still need block-level branching per future mode.
+- **Putting the mode on the `variant` axis (`accordion` as a variant).** Rejected — conflates page-placement with collapse behaviour; they must compose (`sticky` + `accordion`), so they are separate axes.
