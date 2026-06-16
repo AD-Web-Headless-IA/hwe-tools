@@ -1499,7 +1499,7 @@ Booking engines (THR, Witbooking, Mastercamping, Resalys) do not share an integr
 
 ### Decision
 
-1. **One block per booking UI element, not modes of a mega-block.** `BookingSearchBlock` is its own block; future `BookingOnenightBlock`, `BookingFavoritesBlock`, `BookingRatesBlock` are separate blocks. (The pre-existing `BookingBlock.schema.ts` — labels only, no component — is a distinct, untouched artifact.)
+1. **One block per booking UI element, not modes of a mega-block.** `BookingSearchBlock` is its own block; future `BookingSimpleBlock`, `BookingFavoritesBlock`, `BookingRatesBlock` are separate blocks. (The pre-existing `BookingBlock.schema.ts` — labels only, no component — is a distinct, untouched artifact.)
 2. **Blocks are engine-agnostic and delegate rendering.** A booking block resolves a `BookingSearchAdapter` via `resolveSearchAdapter(engine)` and hands it the container; it never imports a concrete adapter. The block depends on the interface (the port); infrastructure provides the adapter (hexagonal).
 3. **The adapter encapsulates the integration type and the full mount/destroy lifecycle.** The contract declares `integrationType: 'script-injection' | 'iframe' | 'native'` and an idempotent `mount(container, config, events) → { destroy, mounted }` that resolves even on failure and is safe to re-call after `destroy()` (SPA re-navigation).
 4. **Registry is a map, no if/else, no engine names in block code.** `adapters/booking/registry.ts` maps each engine to a factory; unimplemented engines register a factory that throws "not yet implemented". Adding an engine = writing an adapter + swapping its factory.
@@ -1572,7 +1572,7 @@ On small viewports the booking search widget is tall and pushes page content far
 > **Date:** 2026-06-16
 > **Deciders:** Cristina Gutiérrez
 > **Builds on:** [DEC-025](#dec-025--booking-adapter-pattern--engine-agnostic-blocks-with-ui-delegation) (one block per booking UI element, engine-agnostic delegation, registry map), [DEC-017](#dec-017--repo-split-tools-submodule--core-npm--template--client-repos) (adapters in `@hwe/core-ui`, no branching), [DEC-016](#dec-016) (visual spec without Figma via `/design-block`).
-> **Scope:** establishes the pattern for the *second and subsequent* THR widgets (favorites/offers first — `<thr-favorites>` → `BookingFavoritesBlock`; later `<thr-onenight>`, `<thr-tarifs>`, `<thr-categories>`). Does **not** cover page placement (a composition decision, not architecture).
+> **Scope:** establishes the pattern for the *second and subsequent* THR widgets (favorites/offers first — `<thr-favorites>` → `BookingFavoritesBlock`; later `<thr-simpleblock>`, `<thr-tarifs>`, `<thr-categories>`). Does **not** cover page placement (a composition decision, not architecture).
 
 ### Context
 
@@ -1590,7 +1590,7 @@ DEC-025 implemented the first booking UI element (`BookingSearchBlock` + `ThrSea
    function buildThrScriptUrl(features: TenantBookingFeatures): string {
      const flags = ['searchengine'];            // always present when booking is configured
      if (features.favorites) flags.push('favorites');
-     if (features.onenight) flags.push('simpleblock');
+     if (features.simpleblock) flags.push('simpleblock');
      return `https://thelisresa.webcamp.fr/ilib/v4/?${flags.join('&')}`;
    }
    ```
@@ -1614,7 +1614,7 @@ DEC-025 implemented the first booking UI element (`BookingSearchBlock` + `ThrSea
 - `TenantConfig.booking.features` is additive and optional — existing configs keep working.
 - `/setup-booking` grows a `--with-favorites` path (config flag + CSS scaffold); `docs/skills/frontend/booking-adapter.md` gains an "add a widget" section.
 - **SPA navigation is an open verification (TODO).** When a user navigates from a search-only page to a search+favorites page within the SPA, it is unverified whether THR needs `?favorites` present in the initial script URL to include the widget code, or loads widget code on demand. Since the URL is tenant-derived (all active widgets' flags present from the first load), this should be a non-issue — but it needs a **real test against a live account** to confirm; left as a TODO (ties into US-006 smoke test) if not verifiable now.
-- Future THR widgets (`onenight`, `tarifs`, `categories`) follow this DEC verbatim (add a `features` flag + its script flag in `buildThrScriptUrl`).
+- Subsequent THR widgets follow this DEC verbatim (add a `features` flag + its script flag in `buildThrScriptUrl`): `simpleblock` (`<thr-simpleblock>`, done — US-008), then `tarifs`, `categories`.
 
 ### Alternatives considered
 

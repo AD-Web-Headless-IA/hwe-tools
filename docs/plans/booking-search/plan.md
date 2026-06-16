@@ -12,7 +12,7 @@ A single, engine-agnostic availability-search experience that any hwe client sit
 
 The client never writes engine-specific code. The engine and its account credentials are authoritative in the tenant config (`TenantConfig.booking`, a discriminated union by engine); the block (`BookingSearchBlock`) is presentation-only and delegates the mount/destroy lifecycle to an **adapter** resolved from a registry. Adding an engine = writing one adapter + one registry entry, never touching the block, the renderer, or any client site. Styling the third-party widget happens through `[data-engine]`-scoped overrides in the client's `globals.css` — zero CSS in the block.
 
-This is hexagonal: the block depends on the `BookingSearchAdapter` port; concrete adapters are the infrastructure. The same pattern will host future booking UI elements (one-night, favorites, rates) as separate blocks.
+This is hexagonal: the block depends on the `BookingSearchAdapter` port; concrete adapters are the infrastructure. The same pattern will host future booking UI elements (simple-block, favorites, rates) as separate blocks.
 
 ## Stories
 
@@ -25,7 +25,7 @@ This is hexagonal: the block depends on the `BookingSearchAdapter` port; concret
 | US-005 | Cookiebot consent bridge — wire `consentAds` to live consent state (read + listen for changes) | 📋 Planned |
 | US-006 | Real-engine smoke test (Playwright) — load a live THR account and assert the widget mounts | 📋 Planned |
 | [US-007](stories/US-007-booking-favorites-block.md) | THR offers module — `BookingFavoritesBlock` (`<thr-favorites>`), tenant feature toggle, colors-only theming (DEC-027) | ✅ Done (live-DOM CSS classes + SPA nav pending US-006 smoke test) |
-| [US-008](stories/US-008-booking-onenight-block.md) | THR one-night/passage module — `BookingOnenightBlock` (`<thr-onenight>` → `simpleblock`), closes THR's 3 widgets (DEC-027) | ✅ Done (demo on home is temporary; live class snapshot + real category pending US-006) |
+| [US-008](stories/US-008-booking-simpleblock.md) | THR simple-block module — `BookingSimpleBlock` (`<thr-simpleblock>` → `simpleblock` flag), closes THR's 3 widgets (DEC-027) | ✅ Done (demo on home is temporary; live class snapshot + real categories pending US-006) |
 
 ## Current state
 
@@ -43,10 +43,10 @@ This is hexagonal: the block depends on the `BookingSearchAdapter` port; concret
 - `/setup-booking --with-favorites`; site-demo demos search + favorites on Home (one combined ILib script).
 
 **Done (US-008, DEC-027):**
-- One-night adapter family — `BookingOnenightAdapter` port + `resolveOnenightAdapter` registry + `ThrOnenightAdapter` (`<thr-onenight>`, **required `category`**).
-- `BookingOnenightBlock` — gated by `booking.features.onenight`, registered as platform default; reserve button reuses the shared `.btn.btn-primary` theme.
-- `/setup-booking --with-onenight --category <id>`; site-demo demos all three widgets on Home (combined `?searchengine&favorites&simpleblock` script) — **onenight placement is temporary** (moves to an accommodation page later).
-- 114 core-ui tests green; typecheck clean (core-ui + site-demo). **THR widget coverage complete (search + favorites + onenight).**
+- Simple-block adapter family — `BookingSimpleBlockAdapter` port + `resolveSimpleBlockAdapter` registry + `ThrSimpleBlockAdapter` (`<thr-simpleblock>`, **required `categories` array**, plus `search-type`/`day`/`show-picture` + `on-search`).
+- `BookingSimpleBlock` — gated by `booking.features.simpleblock`, registered as platform default; reserve button reuses the shared `.btn.btn-primary` theme.
+- `/setup-booking --with-simpleblock --categories <ids>`; site-demo demos all three widgets on Home (combined `?searchengine&favorites&simpleblock` script) — **simpleblock placement is temporary** (moves to an accommodation page later).
+- 115 core-ui tests green; typecheck clean (core-ui + site-demo); production build green. **THR widget coverage complete (search + favorites + simpleblock).**
 
 **Pending (carried as TODOs / explicit non-goals):**
 - Witbooking / Mastercamping / Resalys adapters are throwing placeholders (search + favorites registry entries only).

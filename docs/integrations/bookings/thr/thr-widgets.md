@@ -8,7 +8,7 @@ Quick reference for all THR ILib v4 widgets. For full integration docs see `thr-
 |---|---|---|---|
 | `<thr-search-engine>` | `BookingSearchBlock` | `mount()` in `ThrSearchAdapter` | ✅ implemented |
 | `<thr-favorites>` | `BookingFavoritesBlock` | `mount()` in `ThrFavoritesAdapter` | ✅ implemented (DEC-027) |
-| `<thr-onenight>` | `BookingOnenightBlock` | `mount()` in `ThrOnenightAdapter` | ✅ implemented (DEC-027) |
+| `<thr-simpleblock>` | `BookingSimpleBlock` | `mount()` in `ThrSimpleBlockAdapter` | ✅ implemented (DEC-027) |
 | `<thr-tarifs>` | `BookingRatesBlock` (future) | TBD | P3 |
 | `<thr-categories>` | `BookingCategoriesBlock` (future) | TBD | P3 |
 
@@ -32,19 +32,26 @@ Quick reference for all THR ILib v4 widgets. For full integration docs see `thr-
 
 **⚠️ Attribute list incomplete — see `thr-ilib-v4.md` §4.**
 
-## `<thr-onenight>` — Passage booking
+## `<thr-simpleblock>` — Category availability block
 
 ```html
-<thr-onenight category="13" show-picture="true"></thr-onenight>
+<thr-simpleblock categories="[12]" day="samedi" show-picture="true" search-type="1"></thr-simpleblock>
 ```
 
 | Attribute | Type | Default | Notes |
 |---|---|---|---|
-| `category` | string | **required** | Category ID (with or without enterprise ID) |
+| `categories` | array literal | **required** | Category IDs, e.g. `[12]`, `['13','7']`, `['18675,13']` (enterprise id). Mutually exclusive with `category-type`. |
+| `category-type` | string | — | Alternative filter: `camping`/`location`/`both` or a sub-type. Mutually exclusive with `categories`. |
 | `site` | string | — | Required for group accounts |
-| `show-picture` | `"true"` \| `"false"` | `"false"` | Show accommodation photo |
-| `on-load` | string | — | Global function name |
-| `on-book` | string | — | Global function name |
+| `show-picture` | `"true"` \| `"false"` | `"false"` | Show accommodation photo (auto when multiple categories) |
+| `search-type` | `"1"` \| `"2"` | `"2"` | `1` flexible (by month) · `2` exact dates (single category only) |
+| `one-mode` | `"1"` \| `"2"` | `"2"` | Restrict to one search mode (single category only) |
+| `date` | `YYYY-MM` | — | Default month (flexible mode) |
+| `day` | string | — | Default arrival weekday in French (lundi…dimanche), flexible mode |
+| `duration` | `1`–`21` | — | Default stay length |
+| `on-load` / `on-search` / `on-book` | string | — | Global callback function names |
+
+> Full attribute semantics in `thr-ilib-v4.md` §5. HWE exposes `categories` (required), `site`, `showPicture`, `searchType`, `day` as first-class `BookingSimpleBlock` content; the rest go through the `attributes` passthrough.
 
 ## `<thr-favorites>` — Featured accommodations
 

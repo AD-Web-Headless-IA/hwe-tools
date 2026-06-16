@@ -7,7 +7,7 @@ This file is for the HWE team — not from THR's official docs.
 
 | Resource | URL | Notes |
 |---|---|---|
-| **ILib v4 script** ✅ | `https://thelisresa.webcamp.fr/ilib/v4/?<widgets>` | HTTPS. Widgets selected via query flags (`searchengine`, `favorites`→offers, `simpleblock`→onenight, `categories`). HWE composes the URL **once from `tenant.booking.features`** via `buildThrScriptUrl` (DEC-027) — search + favorites converge on one deduped `?searchengine&favorites` script, no per-adapter negotiation. |
+| **ILib v4 script** ✅ | `https://thelisresa.webcamp.fr/ilib/v4/?<widgets>` | HTTPS. Widgets selected via query flags (`searchengine`, `favorites`→offers, `simpleblock`→category availability block, `categories`). HWE composes the URL **once from `tenant.booking.features`** via `buildThrScriptUrl` (DEC-027) — search + favorites converge on one deduped `?searchengine&favorites` script, no per-adapter negotiation. |
 | `/ilib/` (no version) | `https://thelisresa.webcamp.fr/ilib/` | Returns the **legacy** `ThelisResa.options` script (200). Not Web Components — **do not use.** |
 | Booking tunnel | `https://thelisresa.webcamp.fr/` | Where users land after search. Hosted by THR. |
 | Legacy ILib (v1/v2) | `https://ajax.webcamp.fr/ilib/` | **Do not use.** Old global-config pattern. |
@@ -117,9 +117,9 @@ Snapshot from THR's ILib v4 bundle (favorites.html/.css), **2026-06-16**. THR do
 
 THR's themed layer here uses deep `html.thr .thr-favorites div .thr-favorite … { …!important }` selectors — overrides mirror that depth under `[data-engine="thr"]` + `!important`. **Visual theming (typography, button, arrows), not colours-only** — full reviewed baseline in `site-demo/src/app/globals.css` §THIRD-PARTY OVERRIDES, driven by `docs/block-specs/BookingFavoritesBlock.visual-spec.md`.
 
-### Class map (`<thr-onenight>` — one-night/passage, DEC-027)
+### Class map (`<thr-simpleblock>` — category availability block, DEC-027)
 
-**Not yet captured** — implemented (`ThrOnenightAdapter` + `BookingOnenightBlock`) from the documented attributes (`thr-ilib-v4.md §5`), but its rendered DOM class names were not in the provided bundle. Its reserve button reuses the generic `[data-engine="thr"] .btn.btn-primary` theme; **TODO: capture the `<thr-onenight>` card classes against a live account (US-006)** and add typography/price overrides mirroring favorites. The widget requires a `category` attribute.
+**Not yet captured** — implemented (`ThrSimpleBlockAdapter` + `BookingSimpleBlock`) from the documented attributes (`thr-ilib-v4.md §5`), but its rendered DOM class names were not in the provided bundle. Its reserve button reuses the generic `[data-engine="thr"] .btn.btn-primary` theme; **TODO: capture the `<thr-simpleblock>` card classes against a live account (US-006)** and add typography/price overrides mirroring favorites. The widget requires a `categories` attribute (array literal, ≥1 id).
 
 ## Known quirks
 

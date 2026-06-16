@@ -23,8 +23,8 @@
   y `witbooking/`, `mastercamping/`, `resalys/` cuando se implementen). El bloque
   `BookingSearchBlock` es engine-agnostic (el motor se elige en `client.config.ts`),
   pero su ficha vive bajo el motor porque los campos de contenido son específicos de
-  cada motor. Los futuros widgets de reservas (`BookingOnenightBlock`,
-  `BookingFavoritesBlock`…) seguirán el mismo esquema por motor.
+  cada motor. Los futuros widgets de reservas (`BookingFavoritesBlock`,
+  `BookingSimpleBlock`…) seguirán el mismo esquema por motor.
 
 ## Aún sin componente (no se pueden colocar todavía)
 

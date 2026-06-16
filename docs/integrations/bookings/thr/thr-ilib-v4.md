@@ -93,7 +93,7 @@ ILib v4 provides the following widgets as custom HTML elements (verified present
 |---|---|---|
 | `<thr-search-engine>` | Availability search form | ✅ Implemented (`ThrSearchAdapter` + `BookingSearchBlock`) |
 | `<thr-favorites>` | Featured accommodations ("coups de coeur") | ✅ Implemented (`ThrFavoritesAdapter` + `BookingFavoritesBlock`, DEC-027) |
-| `<thr-onenight>` | One-night / passage booking | ✅ Implemented (`ThrOnenightAdapter` + `BookingOnenightBlock`, DEC-027) |
+| `<thr-simpleblock>` | Category availability block (one or more categories) | ✅ Implemented (`ThrSimpleBlockAdapter` + `BookingSimpleBlock`, DEC-027) |
 | `<thr-tarifs>` | Rates & availability table | 🔴 Not started |
 | `<thr-categories>` | Accommodation categories listing | 🔴 Not started |
 
@@ -138,28 +138,44 @@ The search engine widget renders an availability search form.
 
 > The account ID itself (`camping`) is **not** an attribute — it is set via `thelisresa.ilib('camping', …)` (see §1). These attributes map 1:1 to HWE's `BookingSearchBlock` content / `ThrSearchConfig` fields (`type`, `hideCategoriesType`, `hideCapacity`, `searchText`, `setDayOfWeek`, `widgetTitle`), plus a generic `attributes` passthrough for any not listed here.
 
-## 5. Widget: `<thr-onenight>`
+## 5. Widget: `<thr-simpleblock>`
 
-One-night / passage booking widget for immediate availability.
+A category-restricted availability block (ILib `simpleblock` flag). Shows availability
+for one or more accommodation categories, with either a flexible (by-month) or
+exact-dates search mode.
 
 ### Example
 
 ```html
-<thr-onenight category="13"></thr-onenight>
+<thr-simpleblock
+    categories="[12]"
+    day="samedi"
+    show-picture="true"
+    search-type="1">
+</thr-simpleblock>
 ```
 
-### Attributes
+### Attributes (authoritative — from THR)
 
 | Attribute | Required | Description | Values |
 |---|---|---|---|
 | `site` | Groups only | Site ID for group accounts | e.g. `site="6955"` |
-| `category` | Yes | Accommodation category ID | Category ID, optionally with enterprise ID: `category="13"` or `category="22628,13"` |
-| `show-picture` | No | Show accommodation photo | `true` / `false` |
-| `on-load` | No | Callback when widget loads | Function name |
+| `categories` | **Yes** (or `category-type`) | Restrict results to these category IDs. Mutually exclusive with `category-type`. | Array literal, with or without enterprise ID: `categories="[1,3,5,8]"`, `categories="['13','7']"`, `categories="['18675,13']"` |
+| `category-type` | (alternative) | Filter by accommodation type instead of explicit IDs. Mutually exclusive with `categories`. | `camping`, `location`, `both`, or a sub-type (`Insolite`, `Tente`, `Chalet`, `Bungalow`, `Appartement`, `Villa`, `Roulotte`, `Standard`, `Grande taille`, `Camping-Car`, `Gite`, `Mobil-Home`, `Glamping`) |
+| `show-picture` | No | Show the accommodation photo (auto when multiple categories) | `true` / `false` |
+| `search-type` | No | Default search mode (single category only) | `1` flexible (by month) · `2` exact dates. Default `2`. |
+| `one-mode` | No | Restrict to a single search mode (single category only) | `1` / `2`. Default `2`. |
+| `date` | No | Default month for flexible mode (with `one-mode="1"` + `search-type="1"`) | `YYYY-MM`, e.g. `date="2020-01"` |
+| `day` | No | Default arrival weekday for flexible mode | French weekday: `lundi`…`dimanche` |
+| `duration` | No | Default stay length | `1`–`21` nights |
+| `on-load` | No | Callback when widget loads | Function name (no parentheses) |
+| `on-search` | No | Callback after each availability response | Function name |
 | `on-book` | No | Callback on "Book" click | Function name |
 
+> **HWE mapping:** `ThrSimpleBlockConfig` / `BookingSimpleBlock` expose `categories` (required, array), `site`, `showPicture`, `searchType`, `day` as first-class fields; `category-type`, `one-mode`, `date`, `duration` go through the generic `attributes` passthrough. HWE serialises `categories: string[]` to the array-literal form `categories="['12']"`.
+
 Notes:
-- Recommended for categories without arrival day restrictions (to always offer "today" or "tomorrow")
+- Recommended for categories without arrival-day restrictions (to always offer "today"/"tomorrow")
 - Use on categories with high availability
 - Do not display during closure periods
 

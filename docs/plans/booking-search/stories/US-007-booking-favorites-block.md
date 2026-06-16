@@ -19,7 +19,7 @@ Personalization is **colors only** — the widget renders THR's own light DOM, s
 
 **Out of scope (other stories / non-goals):**
 - Page placement is a composition decision, not part of this block. For the **site-demo fixture only**, place the block in `HomeComposition` immediately after the sticky `BookingSearchBlock` (this also validates the combined script-URL builder, since search + favorites coexist on one page).
-- Cookiebot consent wiring (US-005), CSP hardening (US-004), and the other THR widgets (`onenight`/`tarifs`/`categories`) are separate.
+- Cookiebot consent wiring (US-005), CSP hardening (US-004), and the other THR widgets (`simpleblock`/`tarifs`/`categories`) are separate.
 
 ## Scope checklist (for the enricher to expand)
 
