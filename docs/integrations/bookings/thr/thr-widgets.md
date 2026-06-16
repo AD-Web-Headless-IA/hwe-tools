@@ -7,8 +7,8 @@ Quick reference for all THR ILib v4 widgets. For full integration docs see `thr-
 | THR widget | HWE block | Adapter method | Priority |
 |---|---|---|---|
 | `<thr-search-engine>` | `BookingSearchBlock` | `mount()` in `ThrSearchAdapter` | ✅ implemented |
+| `<thr-favorites>` | `BookingFavoritesBlock` | `mount()` in `ThrFavoritesAdapter` | ✅ implemented (DEC-027) |
 | `<thr-onenight>` | `BookingOnenightBlock` (future) | TBD | P2 |
-| `<thr-favorites>` | `BookingFavoritesBlock` (future) | TBD | P2 |
 | `<thr-tarifs>` | `BookingRatesBlock` (future) | TBD | P3 |
 | `<thr-categories>` | `BookingCategoriesBlock` (future) | TBD | P3 |
 

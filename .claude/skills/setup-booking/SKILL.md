@@ -1,7 +1,7 @@
 ---
 name: setup-booking
-description: Configure a client site for a booking engine — writes booking into client.config.ts, adds the engine's CSP domains to next.config.mjs, scaffolds the [data-engine] CSS override section in globals.css, ensures TenantProvider wraps the app, and optionally adds a BookingSearchBlock instance. DEC-025.
-argument-hint: --engine <thr|witbooking|mastercamping|resalys> --codeCamping <id> [--siteId <id>] [--with-block [Composition]]
+description: Configure a client site for a booking engine — writes booking into client.config.ts, adds the engine's CSP domains to next.config.mjs, scaffolds the [data-engine] CSS override section in globals.css, ensures TenantProvider wraps the app, and optionally adds BookingSearchBlock / BookingFavoritesBlock instances. DEC-025, DEC-027.
+argument-hint: --engine <thr|witbooking|mastercamping|resalys> --codeCamping <id> [--siteId <id>] [--with-block [Composition]] [--with-favorites [Composition]]
 allowed-tools: Read, Edit, Write, Bash, Glob
 ---
 
@@ -9,7 +9,7 @@ allowed-tools: Read, Edit, Write, Bash, Glob
 
 You are the hwe booking onboarding configurator. Given a booking engine and its account credentials, you wire a **client site** so its booking search works end-to-end: tenant config, CSP domains, a CSS-override scaffold, the `TenantProvider` boundary, and (optionally) a block instance. You configure the *site* — you never touch `@hwe/core-ui` (that is platform code; engines + adapters live there already).
 
-This is the operational complement of [DEC-025](../../../docs/architecture/decisions.md#dec-025--booking-adapter-pattern--engine-agnostic-blocks-with-ui-delegation): DEC-025 defined *how* booking works; this skill automates the per-client wiring. Architecture overview: [`docs/diagrams/booking-architecture.md`](../../../docs/diagrams/booking-architecture.md).
+This is the operational complement of [DEC-025](../../../docs/architecture/decisions.md#dec-025--booking-adapter-pattern--engine-agnostic-blocks-with-ui-delegation): DEC-025 defined *how* booking works; this skill automates the per-client wiring. Additional booking widgets beyond search (the offers/favorites gallery) are toggled per tenant via `booking.features` and wired here too — [DEC-027](../../../docs/architecture/decisions.md#dec-027--booking-widgets-beyond-search-adapter-per-widget-shared-thr-script-url-composition-and-a-tenant-feature-toggle). There is **no per-widget skill** — widgets are flags on this one. Architecture overview: [`docs/diagrams/booking-architecture.md`](../../../docs/diagrams/booking-architecture.md).
 
 # Constraints
 
@@ -145,6 +145,22 @@ If `--with-block [Composition]` is passed (default composition: `HomeComposition
 
 See [`booking-architecture.md` §Placement & sticky](../../../docs/diagrams/booking-architecture.md). If the composition does not exist → suggest running `/create-page` first; do not create it here.
 
+## Step 7b — `--with-favorites` (optional, DEC-027)
+
+The offers/favorites gallery (`<thr-favorites>` → `BookingFavoritesBlock`) is a second booking widget, gated by a **tenant feature toggle** (not by block presence). When `--with-favorites [Composition]` is passed:
+
+1. **Toggle the feature** in `{SITE_DIR}/client.config.ts`: set `features.favorites: true` on the `booking` object (idempotent — merge into the existing `booking`, do not duplicate; key on the `features` property). The block renders nothing until this is on.
+   ```ts
+   booking: { engine: 'thr', codeCamping: 'ABC123', features: { favorites: true } },
+   ```
+2. **Add the block instance** to the composition (default `HomeComposition`), reusing `/add-block`. Content is presentation only:
+   ```ts
+   { type: 'BookingFavoritesBlock', content: { title: 'Our offers', quantityToShow: 3 } },
+   ```
+3. **Extend the CSS scaffold** (Step 5) with a colors-only favorites section under the same `[data-engine="{engine}"]` marker. Per DEC-027 the gallery reuses the engine's themed button/typography; add card-accent selectors as TODOs (class names are widget-specific and unverified — inspect in DevTools).
+
+This **only** flips the feature + places the block; the engine itself (Steps 2–6) must already be configured. Engines other than `thr` have no favorites adapter yet → WARN like the placeholder-engine case. No script-URL work is needed here — THR composes one combined ILib script from `booking.features` automatically (DEC-027, `buildThrScriptUrl`).
+
 ## Step 8 — Verify
 
 - **Fixture (`site-demo`):** run the gates and report — `cd hwe-core && pnpm run typecheck && pnpm run test && pnpm run lint && pnpm run build`. (Windows: stop dev server, free ports 3000/3001, `rm -rf apps/site-demo/.next` before build.) `site-demo` is git-revertible, so this is the fix-and-verify guardrail (DEC-021).
@@ -163,6 +179,7 @@ Print a per-file summary, then the tasks this skill does NOT do:
 
 ```
 /setup-booking --engine thr --codeCamping ABC123 --siteId 6955 --with-block
+/setup-booking --engine thr --codeCamping ABC123 --with-block --with-favorites
 /setup-booking --engine thr --codeCamping demo --dry-run
 /setup-booking --engine witbooking --hotelId 12345 --site hotel-balneario-fuente-de-cabriel
 ```

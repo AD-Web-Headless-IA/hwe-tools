@@ -92,8 +92,8 @@ ILib v4 provides the following widgets as custom HTML elements (verified present
 | Element | Purpose | Status in HWE |
 |---|---|---|
 | `<thr-search-engine>` | Availability search form | ✅ Implemented (`ThrSearchAdapter` + `BookingSearchBlock`) |
+| `<thr-favorites>` | Featured accommodations ("coups de coeur") | ✅ Implemented (`ThrFavoritesAdapter` + `BookingFavoritesBlock`, DEC-027) |
 | `<thr-onenight>` | One-night / passage booking | 🔴 Not started |
-| `<thr-favorites>` | Featured accommodations ("coups de coeur") | 🔴 Not started |
 | `<thr-tarifs>` | Rates & availability table | 🔴 Not started |
 | `<thr-categories>` | Accommodation categories listing | 🔴 Not started |
 

@@ -164,9 +164,20 @@ Copy into the story:
 - [ ] smoke-tested in site-demo with a real account
 ```
 
+## Adding a widget (beyond search) — DEC-027
+
+The same engine has more than one UI element (search, offers/favorites, one-night, rates). Each is its **own adapter family + block**, never a mode of a mega-component. The favorites/offers widget is the reference (`ThrFavoritesAdapter` + `BookingFavoritesBlock`). To add another widget for an engine:
+
+1. **Port + registry per widget.** Add a `Booking{Widget}Adapter` port + `resolve{Widget}Adapter(engine)` map registry in `adapters/booking/` (mirror `favorites-registry.ts`; placeholders throw). The mount/validation shapes are reused from the search port.
+2. **Concrete adapter over the shared runtime.** Implement `Thr{Widget}Adapter` using `thr-runtime.ts` (`ensureThelisResaBootstrap`, callback helpers, `buildThrScriptUrl`) — do not re-implement THR plumbing.
+3. **Script flag is tenant-derived, not per-adapter.** Add the widget's `features` flag to `BookingFeatures` and its ILib query flag to `buildThrScriptUrl` (e.g. `onenight` → `simpleblock`). THR loads one combined script from `tenant.booking.features`; never negotiate flags between adapters at mount time (timing-fragile — see DEC-027).
+4. **Block + feature gate.** Scaffold `Booking{Widget}Block` (`/scaffold-block --target base`); it renders nothing unless `booking.features.{widget}` is on, else resolves the adapter and delegates mount/destroy like `BookingFavoritesBlock`. Register it in `baseBlockRegistry`.
+5. **Per-client wiring.** Extend `/setup-booking` with a `--with-{widget}` flag (toggle `features.{widget}` + CSS scaffold) — **no per-widget skill**. Placement is `/add-block`.
+
 ## Where to read next
 
 - [`docs/diagrams/booking-architecture.md`](../../diagrams/booking-architecture.md) — the architecture overview + diagrams.
+- [`docs/architecture/decisions.md` §DEC-027](../../architecture/decisions.md#dec-027--booking-widgets-beyond-search-adapter-per-widget-shared-thr-script-url-composition-and-a-tenant-feature-toggle) — adding widgets beyond search.
 - [`docs/architecture/decisions.md` §DEC-025](../../architecture/decisions.md#dec-025--booking-adapter-pattern--engine-agnostic-blocks-with-ui-delegation) — why this pattern.
 - [`docs/integrations/bookings/`](../../integrations/bookings/README.md) — per-engine integration docs.
 - [`docs/skills/frontend/block-creation.md`](./block-creation.md) — adding a new booking *block* (vs a new engine adapter).

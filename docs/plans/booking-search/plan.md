@@ -24,7 +24,7 @@ This is hexagonal: the block depends on the `BookingSearchAdapter` port; concret
 | US-004 | CSP hardening per engine — add each engine's script/frame domains to client `next.config.mjs` | 📋 Planned |
 | US-005 | Cookiebot consent bridge — wire `consentAds` to live consent state (read + listen for changes) | 📋 Planned |
 | US-006 | Real-engine smoke test (Playwright) — load a live THR account and assert the widget mounts | 📋 Planned |
-| [US-007](stories/US-007-booking-favorites-block.md) | THR offers module — `BookingFavoritesBlock` (`<thr-favorites>`), tenant feature toggle, colors-only theming (DEC-027) | 📝 Raw — awaiting DEC-027 ratification |
+| [US-007](stories/US-007-booking-favorites-block.md) | THR offers module — `BookingFavoritesBlock` (`<thr-favorites>`), tenant feature toggle, colors-only theming (DEC-027) | ✅ Done (live-DOM CSS classes + SPA nav pending US-006 smoke test) |
 
 ## Current state
 
@@ -34,10 +34,17 @@ This is hexagonal: the block depends on the `BookingSearchAdapter` port; concret
 - `BookingSearchBlock` — engine-agnostic, tenant-driven, registered as a platform default; `inline`/`sticky`/`modal` variants; `sticky` is opaque + token-driven (`--booking-sticky-top`, `--booking-sticky-shadow`).
 - DEC-026 mobile disclosure — pluggable `accordion` strategy.
 - `/setup-booking` skill + `scaffold-site` TenantProvider fix; full docs set (diagram, integration guides, adapter skill).
-- 61 core-ui tests green; typecheck clean (core-ui + site-demo).
+
+**Done (US-007, DEC-027):**
+- Shared `thr-runtime.ts` (bootstrap, callbacks, tenant-derived `buildThrScriptUrl`); `ThrSearchAdapter` refactored onto it (own commit, search tests green).
+- Favorites adapter family — `BookingFavoritesAdapter` port + `resolveFavoritesAdapter` registry + `ThrFavoritesAdapter` (`<thr-favorites>`).
+- `BookingFavoritesBlock` — engine-agnostic, gated by `booking.features.favorites` (off → renders nothing), registered as a platform default; defaults to THR 6/3, no layout variants.
+- `/setup-booking --with-favorites`; site-demo demos search + favorites on Home (one combined ILib script).
+- 92 core-ui tests green; typecheck clean (core-ui + site-demo).
 
 **Pending (carried as TODOs / explicit non-goals):**
-- Witbooking / Mastercamping / Resalys adapters are throwing placeholders (registry entries only).
+- Witbooking / Mastercamping / Resalys adapters are throwing placeholders (search + favorites registry entries only).
+- `<thr-favorites>` real CSS class names + SPA-navigation script behavior are unverified — need a live-account test (US-006).
 - `consentAds` is passed explicitly — Cookiebot wiring is a separate task (`thr.types.ts` TODO → US-005).
 - CSP domains are documented but not enforced per client (US-004).
 - The THR widget's real CSS class names / semantic HTML are not yet audited (US-002).

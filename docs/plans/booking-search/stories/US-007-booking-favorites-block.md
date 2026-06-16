@@ -62,8 +62,11 @@ Personalization is **colors only** — the widget renders THR's own light DOM, s
 - [ ] site-demo demonstrates search + favorites on Home.
 - [ ] Conventional Commits.
 
+## Resolved decisions
+
+- **Defaults — keep THR 6/3.** No hwe-specific defaults; `quantity`/`quantityToShow` stay optional in the schema and are omitted unless a client overrides, so THR applies its own 6 fetched / 3 shown. No reason to invent others. (Cristina, 2026-06-16.)
+- **No layout variants.** THR owns the gallery layout; the block owns only its section wrapper. The CVA carries a single `default` variant — no grid/carousel axis. (Cristina, 2026-06-16.)
+
 ## Open Questions
 
-- Default `quantity` / `quantity-to-show` for hwe (THR defaults 6/3) — keep THR defaults or set hwe defaults?
-- Should `BookingFavoritesBlock` expose presentation variants (e.g. grid vs carousel) or rely entirely on THR's gallery layout? (Likely none initially — confirm during `/design-block`.)
 - **SPA navigation (TODO — needs a live-account test, ties into US-006).** When navigating from a search-only page to a search+favorites page within the SPA, does THR need `?favorites` present in the initial script URL to include the widget code, or does it load on demand? Since the URL is tenant-derived (all active flags present from first load), this should be a non-issue — but confirm with a real test; leave a code TODO if not verifiable now.
