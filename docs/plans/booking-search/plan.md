@@ -4,7 +4,7 @@
 > **Status:** In progress — foundation Done, hardening + second-engine pending
 > **Owner:** Cristina Gutiérrez
 > **Branches:** `feat/booking-search-block` (hwe-core), `docs/booking-adapter` (hwe-tools)
-> **Decisions:** [DEC-025](../../architecture/decisions.md#dec-025--booking-adapter-pattern--engine-agnostic-blocks-with-ui-delegation) (Accepted), [DEC-026](../../architecture/decisions.md#dec-026--mobile-disclosure-as-a-pluggable-strategy-on-bookingsearchblock) (Proposed)
+> **Decisions:** [DEC-025](../../architecture/decisions.md#dec-025--booking-adapter-pattern--engine-agnostic-blocks-with-ui-delegation) (Accepted), [DEC-026](../../architecture/decisions.md#dec-026--mobile-disclosure-as-a-pluggable-strategy-on-bookingsearchblock) (Proposed), [DEC-027](../../architecture/decisions.md#dec-027--booking-widgets-beyond-search-adapter-per-widget-shared-thr-script-url-composition-and-a-tenant-feature-toggle) (Proposed)
 
 ## Vision
 
@@ -24,6 +24,7 @@ This is hexagonal: the block depends on the `BookingSearchAdapter` port; concret
 | US-004 | CSP hardening per engine — add each engine's script/frame domains to client `next.config.mjs` | 📋 Planned |
 | US-005 | Cookiebot consent bridge — wire `consentAds` to live consent state (read + listen for changes) | 📋 Planned |
 | US-006 | Real-engine smoke test (Playwright) — load a live THR account and assert the widget mounts | 📋 Planned |
+| [US-007](stories/US-007-booking-favorites-block.md) | THR offers module — `BookingFavoritesBlock` (`<thr-favorites>`), tenant feature toggle, colors-only theming (DEC-027) | 📝 Raw — awaiting DEC-027 ratification |
 
 ## Current state
 

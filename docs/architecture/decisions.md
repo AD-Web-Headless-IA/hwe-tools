@@ -1565,3 +1565,63 @@ On small viewports the booking search widget is tall and pushes page content far
 - **A boolean `collapsibleOnMobile` flag with the behaviour hard-coded in the block.** Rejected — bakes one UX into the block and forces an `if` when a second mode (`sheet`) arrives; the registry is the same pattern already used for engines.
 - **CSS-only `<details>`/`<summary>`.** Rejected — gives no control over the `md+` always-open requirement or the toggle styling/a11y wiring, and would still need block-level branching per future mode.
 - **Putting the mode on the `variant` axis (`accordion` as a variant).** Rejected — conflates page-placement with collapse behaviour; they must compose (`sticky` + `accordion`), so they are separate axes.
+
+## DEC-027 — Booking widgets beyond search: adapter-per-widget, shared THR script-URL composition, and a tenant feature toggle
+
+> **Status:** Accepted
+> **Date:** 2026-06-16
+> **Deciders:** Cristina Gutiérrez
+> **Builds on:** [DEC-025](#dec-025--booking-adapter-pattern--engine-agnostic-blocks-with-ui-delegation) (one block per booking UI element, engine-agnostic delegation, registry map), [DEC-017](#dec-017--repo-split-tools-submodule--core-npm--template--client-repos) (adapters in `@hwe/core-ui`, no branching), [DEC-016](#dec-016) (visual spec without Figma via `/design-block`).
+> **Scope:** establishes the pattern for the *second and subsequent* THR widgets (favorites/offers first — `<thr-favorites>` → `BookingFavoritesBlock`; later `<thr-onenight>`, `<thr-tarifs>`, `<thr-categories>`). Does **not** cover page placement (a composition decision, not architecture).
+
+### Context
+
+DEC-025 implemented the first booking UI element (`BookingSearchBlock` + `ThrSearchAdapter`) and anticipated more ("one block per booking UI element, not modes of a mega-block"). Adding the THR **favorites/offers** widget (`<thr-favorites>`, the *coups de cœur* gallery) is the first time the pattern is exercised for a second widget, and it surfaces three decisions that every future booking widget will inherit:
+
+1. **Adapter granularity.** The existing port is `BookingSearchAdapter` / `resolveSearchAdapter` — search-shaped. A second widget needs its own mount signature and config, but `ThrSearchAdapter` already contains THR-runtime plumbing (the `thelisresa.ilib` queueing bootstrap, unique global-callback naming, `data-engine` tagging) that a second THR adapter would duplicate.
+2. **ILib script composition.** THR loads **one** script per site with the widget set selected by query flags (`/ilib/v4/?favorites&searchengine&…`). Today `THR_ILIB_SRC` is hardcoded to `?searchengine`. With search + favorites on the same page, two adapters requesting two different `src` values would make the `src`-deduping `script-loader` load **two** scripts — wrong per THR's integration model.
+3. **"Active or not" per client.** A client must be able to mark the offers widget active/inactive in `client.config.ts`, independent of whether a block instance is placed (e.g. the account may not have featured accommodations configured).
+
+### Decision
+
+1. **One adapter family per widget, sharing a THR runtime module.** Each booking UI element gets its own port + registry + concrete adapter, mirroring search: `BookingFavoritesAdapter` (port) + `resolveFavoritesAdapter(engine)` (map registry, placeholders throw) + `ThrFavoritesAdapter`. The shared THR plumbing is **extracted** from `ThrSearchAdapter` into `adapters/booking/thr/thr-runtime.ts` (`ensureThelisResaBootstrap`, `uniqueCallbackName`, global-callback helpers) and reused by both adapters — no duplication, `ThrSearchAdapter` refactored to consume it with its tests staying green.
+2. **The THR script URL is computed once from tenant features, not negotiated between adapters.** A pure function `buildThrScriptUrl(features: TenantBookingFeatures)` derives the final `/ilib/v4/?<flags>` from `tenant.booking.features` — the tenant already knows which widgets are active, so the URL is **definitive before any adapter mounts**:
+   ```ts
+   function buildThrScriptUrl(features: TenantBookingFeatures): string {
+     const flags = ['searchengine'];            // always present when booking is configured
+     if (features.favorites) flags.push('favorites');
+     if (features.onenight) flags.push('simpleblock');
+     return `https://thelisresa.webcamp.fr/ilib/v4/?${flags.join('&')}`;
+   }
+   ```
+   The computed URL is passed to the THR adapters; the `script-loader` dedupes by `src` **unchanged** because the URL is already final. **No dynamic convergence in the loader** — uniting flags by mutating an already-loaded script is fragile by timing (if search mounts before favorites, the script is already loaded as `?searchengine` and the favorites flag arrives too late). Computing once from the tenant eliminates the race entirely.
+3. **A tenant-level feature toggle, separate from credentials.** `TenantConfig.booking` gains an optional, engine-agnostic `features?: { favorites?: boolean; … }`. The block reads it via `useTenant()`; when its feature is absent/false the block renders nothing (not an error — it is a deliberate off state). Credentials stay in the engine-discriminated union (DEC-025); `features` is the capability switch.
+4. **Per-client wiring extends `/setup-booking`; placement uses `/add-block`.** Enabling a widget for a client (set the `features` flag, extend the `[data-engine]` CSS color-override scaffold) is added to `/setup-booking` (e.g. `--with-favorites`) — **no per-widget skill**. Placing the block on a page is the existing `/add-block` once the block is in `baseBlockRegistry`.
+5. **Design customization is colors-only, via the existing `[data-engine]` overrides.** The widget renders THR's own light DOM; the block owns only its section wrapper (title, container width, padding). Visual spec without Figma is produced by `/design-block` (DEC-016) and is intentionally light (section + color mapping).
+
+### Why
+
+- **Adding a widget never touches existing blocks/adapters.** New widget = new adapter family + new block + registry entry, exactly the DEC-025 shape — now proven for N>1.
+- **Honest to THR's integration model.** One combined script per site is what THR documents; deriving the URL from tenant features makes that deterministic, never an accident of which adapter mounted first.
+- **Toggle ≠ placement ≠ credentials.** Three orthogonal concerns kept in three places: `features` (tenant capability), composition (where it shows), the discriminated union (account IDs).
+- **No skill sprawl.** One `/setup-booking` owns per-client booking wiring; widgets are flags, not new skills.
+
+### Consequences
+
+- **Refactor lands before the feature.** Extracting `thr-runtime.ts` (+ `buildThrScriptUrl`) and refactoring `ThrSearchAdapter` to use it is its **own commit with the existing 13 tests green**, before any favorites code — the two are never mixed.
+- `script-loader` is **unchanged** — it keeps deduping by final `src`. No convergence logic added.
+- `buildThrScriptUrl` is a pure function (trivially unit-tested); the URL is computed once at the booking boundary and threaded to the adapters.
+- `TenantConfig.booking.features` is additive and optional — existing configs keep working.
+- `/setup-booking` grows a `--with-favorites` path (config flag + CSS scaffold); `docs/skills/frontend/booking-adapter.md` gains an "add a widget" section.
+- **SPA navigation is an open verification (TODO).** When a user navigates from a search-only page to a search+favorites page within the SPA, it is unverified whether THR needs `?favorites` present in the initial script URL to include the widget code, or loads widget code on demand. Since the URL is tenant-derived (all active widgets' flags present from the first load), this should be a non-issue — but it needs a **real test against a live account** to confirm; left as a TODO (ties into US-006 smoke test) if not verifiable now.
+- Future THR widgets (`onenight`, `tarifs`, `categories`) follow this DEC verbatim (add a `features` flag + its script flag in `buildThrScriptUrl`).
+
+### Alternatives considered
+
+- **Generalize one `BookingWidgetAdapter` with a `widget` discriminator instead of an adapter per widget.** Rejected — collapses distinct mount signatures/configs into one branching component, re-introducing the per-widget `if` DEC-025 forbids; the registry-per-widget keeps each adapter cohesive.
+- **Each adapter loads its own `?widget` script (no shared builder).** Rejected — violates THR's one-combined-script model and double-loads the ILib bundle when widgets coexist.
+- **Dynamic convergence in the `script-loader` — adapters declare their flag and the loader unions them onto one script.** Rejected — **fragile by timing**: if search mounts before favorites, the script is already loaded as `?searchengine` and the late favorites flag cannot be merged. Deriving the URL once from tenant features sidesteps the race entirely.
+- **Always load the full ILib bundle (`?categories&favorites&searchengine&simpleblock`).** Rejected — simpler but ships widget code the site doesn't use; the tenant-derived URL gives the same single-script guarantee without the dead weight.
+- **A dedicated `/setup-favorites` skill.** Rejected — duplicates the booking onboarding machinery (config + CSP + CSS + TenantProvider) and splits ownership; widgets are flags on `/setup-booking`.
+- **A per-instance `enabled` flag in block content instead of a tenant feature toggle.** Rejected — "active for this client" is a tenant capability, not per-placement presentation; block content stays presentation-only (DEC-025).
+
