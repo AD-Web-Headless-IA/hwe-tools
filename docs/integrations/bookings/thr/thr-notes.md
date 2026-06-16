@@ -117,6 +117,10 @@ Snapshot from THR's ILib v4 bundle (favorites.html/.css), **2026-06-16**. THR do
 
 THR's themed layer here uses deep `html.thr .thr-favorites div .thr-favorite … { …!important }` selectors — overrides mirror that depth under `[data-engine="thr"]` + `!important`. **Visual theming (typography, button, arrows), not colours-only** — full reviewed baseline in `site-demo/src/app/globals.css` §THIRD-PARTY OVERRIDES, driven by `docs/block-specs/BookingFavoritesBlock.visual-spec.md`.
 
+### Class map (`<thr-onenight>` — one-night/passage, DEC-027)
+
+**Not yet captured** — implemented (`ThrOnenightAdapter` + `BookingOnenightBlock`) from the documented attributes (`thr-ilib-v4.md §5`), but its rendered DOM class names were not in the provided bundle. Its reserve button reuses the generic `[data-engine="thr"] .btn.btn-primary` theme; **TODO: capture the `<thr-onenight>` card classes against a live account (US-006)** and add typography/price overrides mirroring favorites. The widget requires a `category` attribute.
+
 ## Known quirks
 
 1. **Config is queued, order is forgiving** — push config with `thelisresa.ilib('camping', …)` / `ilib('language', …)` after bootstrapping the `ilib` setter; calls before the script finishes are queued in `thelisresa.a` and consumed on load. (The adapter sets them before calling `loadScript`.)

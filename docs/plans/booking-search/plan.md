@@ -25,6 +25,7 @@ This is hexagonal: the block depends on the `BookingSearchAdapter` port; concret
 | US-005 | Cookiebot consent bridge — wire `consentAds` to live consent state (read + listen for changes) | 📋 Planned |
 | US-006 | Real-engine smoke test (Playwright) — load a live THR account and assert the widget mounts | 📋 Planned |
 | [US-007](stories/US-007-booking-favorites-block.md) | THR offers module — `BookingFavoritesBlock` (`<thr-favorites>`), tenant feature toggle, colors-only theming (DEC-027) | ✅ Done (live-DOM CSS classes + SPA nav pending US-006 smoke test) |
+| [US-008](stories/US-008-booking-onenight-block.md) | THR one-night/passage module — `BookingOnenightBlock` (`<thr-onenight>` → `simpleblock`), closes THR's 3 widgets (DEC-027) | ✅ Done (demo on home is temporary; live class snapshot + real category pending US-006) |
 
 ## Current state
 
@@ -40,7 +41,12 @@ This is hexagonal: the block depends on the `BookingSearchAdapter` port; concret
 - Favorites adapter family — `BookingFavoritesAdapter` port + `resolveFavoritesAdapter` registry + `ThrFavoritesAdapter` (`<thr-favorites>`).
 - `BookingFavoritesBlock` — engine-agnostic, gated by `booking.features.favorites` (off → renders nothing), registered as a platform default; defaults to THR 6/3, no layout variants.
 - `/setup-booking --with-favorites`; site-demo demos search + favorites on Home (one combined ILib script).
-- 92 core-ui tests green; typecheck clean (core-ui + site-demo).
+
+**Done (US-008, DEC-027):**
+- One-night adapter family — `BookingOnenightAdapter` port + `resolveOnenightAdapter` registry + `ThrOnenightAdapter` (`<thr-onenight>`, **required `category`**).
+- `BookingOnenightBlock` — gated by `booking.features.onenight`, registered as platform default; reserve button reuses the shared `.btn.btn-primary` theme.
+- `/setup-booking --with-onenight --category <id>`; site-demo demos all three widgets on Home (combined `?searchengine&favorites&simpleblock` script) — **onenight placement is temporary** (moves to an accommodation page later).
+- 114 core-ui tests green; typecheck clean (core-ui + site-demo). **THR widget coverage complete (search + favorites + onenight).**
 
 **Pending (carried as TODOs / explicit non-goals):**
 - Witbooking / Mastercamping / Resalys adapters are throwing placeholders (search + favorites registry entries only).

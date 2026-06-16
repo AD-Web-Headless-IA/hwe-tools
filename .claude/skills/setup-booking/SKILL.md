@@ -1,7 +1,7 @@
 ---
 name: setup-booking
-description: Configure a client site for a booking engine — writes booking into client.config.ts, adds the engine's CSP domains to next.config.mjs, scaffolds the [data-engine] CSS override section in globals.css, ensures TenantProvider wraps the app, and optionally adds BookingSearchBlock / BookingFavoritesBlock instances. DEC-025, DEC-027.
-argument-hint: --engine <thr|witbooking|mastercamping|resalys> --codeCamping <id> [--siteId <id>] [--with-block [Composition]] [--with-favorites [Composition]]
+description: Configure a client site for a booking engine — writes booking into client.config.ts, adds the engine's CSP domains to next.config.mjs, scaffolds the [data-engine] CSS override section in globals.css, ensures TenantProvider wraps the app, and optionally adds BookingSearchBlock / BookingFavoritesBlock / BookingOnenightBlock instances. DEC-025, DEC-027.
+argument-hint: --engine <thr|witbooking|mastercamping|resalys> --codeCamping <id> [--siteId <id>] [--with-block [Composition]] [--with-favorites [Composition]] [--with-onenight --category <id> [Composition]]
 allowed-tools: Read, Edit, Write, Bash, Glob
 ---
 
@@ -161,6 +161,20 @@ The offers/favorites gallery (`<thr-favorites>` → `BookingFavoritesBlock`) is 
 
 This **only** flips the feature + places the block; the engine itself (Steps 2–6) must already be configured. Engines other than `thr` have no favorites adapter yet → WARN like the placeholder-engine case. No script-URL work is needed here — THR composes one combined ILib script from `booking.features` automatically (DEC-027, `buildThrScriptUrl`).
 
+## Step 7c — `--with-onenight` (optional, DEC-027)
+
+The one-night / passage widget (`<thr-onenight>` → `BookingOnenightBlock`), gated by `booking.features.onenight`. Same shape as `--with-favorites`, with one extra requirement:
+
+1. **`--category <id>` is REQUIRED** — `<thr-onenight>` cannot render without an accommodation-category ID. Refuse if `--with-onenight` is passed without `--category`.
+2. **Toggle the feature**: set `features.onenight: true` on `booking` (merge, idempotent).
+3. **Add the block instance** (default `HomeComposition`):
+   ```ts
+   { type: 'BookingOnenightBlock', content: { title: '...', category: '<id>', showPicture: true } },
+   ```
+4. **CSS scaffold:** the reserve button reuses the generic `[data-engine="thr"] .btn.btn-primary` theme; add onenight-specific text overrides only once the live `<thr-onenight>` class names are known (US-006). Same `[data-engine]` marker.
+
+THR composes the combined script (`?…&simpleblock`) from `booking.features` automatically.
+
 ## Step 8 — Verify
 
 - **Fixture (`site-demo`):** run the gates and report — `cd hwe-core && pnpm run typecheck && pnpm run test && pnpm run lint && pnpm run build`. (Windows: stop dev server, free ports 3000/3001, `rm -rf apps/site-demo/.next` before build.) `site-demo` is git-revertible, so this is the fix-and-verify guardrail (DEC-021).
@@ -180,6 +194,7 @@ Print a per-file summary, then the tasks this skill does NOT do:
 ```
 /setup-booking --engine thr --codeCamping ABC123 --siteId 6955 --with-block
 /setup-booking --engine thr --codeCamping ABC123 --with-block --with-favorites
+/setup-booking --engine thr --codeCamping ABC123 --with-onenight --category 12
 /setup-booking --engine thr --codeCamping demo --dry-run
 /setup-booking --engine witbooking --hotelId 12345 --site hotel-balneario-fuente-de-cabriel
 ```
@@ -189,6 +204,7 @@ Print a per-file summary, then the tasks this skill does NOT do:
 - Unknown `--engine`, or a credential flag that does not belong to the engine, or a missing required credential.
 - Target resolves inside `hwe-core/packages/` (platform code, not a site).
 - The target composition for `--with-block` does not exist (suggest `/create-page`).
+- `--with-onenight` without `--category` (the THR one-night widget requires a category ID).
 
 # Known pitfalls
 
