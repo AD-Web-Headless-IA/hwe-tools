@@ -1,7 +1,7 @@
 ---
 name: setup-booking
 description: Configure a client site for a booking engine — writes booking into client.config.ts, adds the engine's CSP domains to next.config.mjs, scaffolds the [data-engine] CSS override section in globals.css, ensures TenantProvider wraps the app, and optionally adds BookingSearchBlock / BookingFavoritesBlock / BookingSimpleBlock instances. DEC-025, DEC-027.
-argument-hint: --engine <thr|witbooking|mastercamping|resalys> --codeCamping <id> [--siteId <id>] [--with-block [Composition]] [--with-favorites [Composition]] [--with-simpleblock --categories <ids> [Composition]]
+argument-hint: --engine <thr|witbooking|mastercamping|resalys> [thr: --codeCamping <id> [--siteId <id>]] [mastercamping: --idProperty <n> --bookingUrl <url> [--layout <vertical|horizontal>]] [--with-block [Composition]] [--with-favorites [Composition]] [--with-simpleblock --categories <ids> [Composition]]
 allowed-tools: Read, Edit, Write, Bash, Glob
 ---
 
@@ -26,8 +26,10 @@ This is the operational complement of [DEC-025](../../../docs/architecture/decis
 |---|---|---|---|---|
 | `thr` | `--codeCamping` (+ `--siteId` optional) | `{ engine: 'thr', codeCamping, siteId? }` | from `docs/integrations/bookings/thr/thr-notes.md` (`thelisresa.webcamp.fr`) | ✅ implemented |
 | `witbooking` | `--hotelId` | `{ engine: 'witbooking', hotelId }` | from notes (pending) | 🔴 placeholder |
-| `mastercamping` | `--campingCode` | `{ engine: 'mastercamping', campingCode }` | from notes (pending) | 🔴 placeholder |
+| `mastercamping` | `--idProperty` + `--bookingUrl` (+ `--layout` optional) | `{ engine: 'mastercamping', idProperty, bookingUrl, layout? }` | from `docs/integrations/bookings/mastercamping/mastercamping-notes.md` (`rsv4.mastercamping.com` + the client `bookingUrl` domain) | ✅ implemented (search) |
 | `resalys` | `--propertyId` | `{ engine: 'resalys', propertyId }` | from notes (pending) | 🔴 placeholder |
+
+`idProperty` is **numeric** — write it as a number literal in `client.config.ts` (`idProperty: 1234`, not `'1234'`). `--layout` defaults to `vertical`; `horizontal` renders the columns layout with dropdown selectors.
 
 # Process
 
@@ -39,7 +41,7 @@ Resolve the target site per `workspace-structure.md` (DEC-021): `--site <slug>` 
 
 - `--engine` ∈ {`thr`, `witbooking`, `mastercamping`, `resalys`} — else refuse.
 - Required credential flag(s) for the engine present and non-empty (see Engine reference). A credential flag that does not belong to the engine (e.g. `--codeCamping` with `--engine witbooking`) → refuse.
-- If the engine's adapter is a **placeholder** (`witbooking`/`mastercamping`/`resalys`), continue but **WARN loudly**: "the {engine} adapter is not implemented yet (it throws 'not implemented'); the search will render the block's error state at runtime until the adapter lands."
+- If the engine's adapter is a **placeholder** (`witbooking`/`resalys`), continue but **WARN loudly**: "the {engine} adapter is not implemented yet (it throws 'not implemented'); the search will render the block's error state at runtime until the adapter lands." (`thr` and `mastercamping` search adapters are implemented.)
 - Check the installed `@hwe/core-ui` (`PKG`) exposes the `TenantConfig.booking` union; if older → WARN about incompatibility.
 - `--dry-run` → print the intended diffs for every step and stop.
 
@@ -54,6 +56,8 @@ In `{SITE_DIR}/client.config.ts`, set the `booking` property on the exported `co
 ```ts
 // thr example
 booking: { engine: 'thr', codeCamping: 'ABC123', siteId: '6955' },
+// mastercamping example (idProperty is numeric)
+booking: { engine: 'mastercamping', idProperty: 1234, bookingUrl: 'https://booking.familycampings.com', layout: 'horizontal' },
 ```
 
 If switching engines, the old `booking` is replaced; WARN that the previous engine's CSP domains and CSS overrides (Steps 4–5) are now orphaned and should be removed by hand (do not auto-delete them).
@@ -92,6 +96,17 @@ const nextConfig = {
 ```
 
 **If `headers()` already exists** → insert the engine's directive lines (each tagged `// booking:{engine}`) into the CSP value array, deduping. On re-run for the same engine, replace the lines tagged `// booking:{engine}`.
+
+For **mastercamping**, the entries are (note `connect-src`/`frame-src` must also allow the per-client `bookingUrl` domain — substitute it):
+
+```js
+// booking:mastercamping
+"script-src 'self' 'unsafe-inline' https://rsv4.mastercamping.com",
+"style-src 'self' 'unsafe-inline' https://rsv4.mastercamping.com",
+"connect-src 'self' https://rsv4.mastercamping.com https://booking.familycampings.com",
+"frame-src https://booking.familycampings.com",
+"img-src 'self' data: https://rsv4.mastercamping.com",
+```
 
 **WARN** if `next.config.mjs` sets `output: 'export'` — Next ignores `headers()` for a fully static export, so the CSP would not apply. (Not our case: DEC-007 deploys SSR/ISR on Vercel, where `headers()` works.)
 
@@ -196,6 +211,8 @@ Print a per-file summary, then the tasks this skill does NOT do:
 /setup-booking --engine thr --codeCamping ABC123 --with-block --with-favorites
 /setup-booking --engine thr --codeCamping ABC123 --with-simpleblock --categories 12
 /setup-booking --engine thr --codeCamping demo --dry-run
+/setup-booking --engine mastercamping --idProperty 1234 --bookingUrl https://booking.familycampings.com --with-block
+/setup-booking --engine mastercamping --idProperty 1234 --bookingUrl https://booking.familycampings.com --layout horizontal --with-block
 /setup-booking --engine witbooking --hotelId 12345 --site hotel-balneario-fuente-de-cabriel
 ```
 
@@ -211,6 +228,6 @@ Print a per-file summary, then the tasks this skill does NOT do:
 1. **Putting the engine in block content.** The engine is authoritative in `TenantConfig.booking` (DEC-025); block content is presentation only.
 2. **Missing `TenantProvider`.** Without it `useTenant()` throws — Step 6 guards this (scaffold-site now emits it; this covers older/hand-built layouts).
 3. **`output: 'export'`** silently drops `headers()` → the CSP never applies. Warn; not our deploy mode.
-4. **Placeholder engines** (`witbooking`/`mastercamping`/`resalys`) set valid config but their adapter throws at runtime until implemented — warn, don't block.
+4. **Placeholder engines** (`witbooking`/`resalys`) set valid config but their adapter throws at runtime until implemented — warn, don't block. (`thr` + `mastercamping` search adapters are implemented.)
 5. **Non-idempotent edits.** Always key on the `booking:{engine}` marker so re-runs update rather than duplicate.
 6. **AST parsing.** Don't — marker/regex edits are sufficient for this scaffolding skill.
