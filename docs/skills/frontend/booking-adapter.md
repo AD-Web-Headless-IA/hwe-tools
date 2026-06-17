@@ -2,7 +2,7 @@
 
 > The **how-to** for adding a booking engine (Witbooking, Mastercamping, Resalys, …) to the booking adapter layer. Companion to the architecture overview [`docs/diagrams/booking-architecture.md`](../../diagrams/booking-architecture.md) and the decision [DEC-025](../../architecture/decisions.md#dec-025--booking-adapter-pattern--engine-agnostic-blocks-with-ui-delegation).
 >
-> The block (`BookingSearchBlock`) is **engine-agnostic and already built** — you never touch it to add an engine. You write an adapter and register it. THR (`ThrSearchAdapter`) is the canonical reference for a `script-injection` engine.
+> The block (`BookingSearchBlock`) is **engine-agnostic and already built** — you never touch it to add an engine. You write an adapter and register it. There are **two reference `script-injection` implementations**: **THR** (`ThrSearchAdapter`) — Web Components, one tenant-composed ILib script; and **Mastercamping** (`MastercampingSearchAdapter`) — a global `MasterWidget` JS constructor with two **static** assets (JS + a required CSS `<link>`). Pick the closer one to your engine's real integration.
 
 ## When to use this guide
 
@@ -72,12 +72,13 @@ The adapter reads its real field names directly (e.g. `config.codeCamping`) — 
 
 ### 3. Implement the adapter — by integration type
 
-**`script-injection`** (follow `ThrSearchAdapter.ts`):
+**`script-injection`** — two reference shapes: `ThrSearchAdapter.ts` (Web Components) and `MastercampingSearchAdapter.ts` (a global JS constructor + a required CSS asset). Follow whichever matches your engine:
 - Set any required global config **before** loading the script.
 - `await loadScript({ src, attributes: { 'data-engine': '{engine}' } })` — the shared loader dedupes by `src`, so multiple widgets on a page never double-inject.
-- Do any post-load setup (e.g. consent) **after** the load resolves.
-- Create the engine's DOM element / call its init, wire callbacks via **uniquely-named** globals (use `crypto.randomUUID()`), append to `container`.
-- Return `{ mounted: true, destroy }`. `destroy` removes what you added and clears global callbacks. **Do not unload the script** unless the engine genuinely needs a fresh load.
+- **If the engine ships a separate CSS file it needs to render** (Mastercamping does), also `await loadStylesheet({ href, attributes: { 'data-engine': '{engine}' } })` — the same loader module, deduped by `href`. Await **both** (e.g. `Promise.all`) before instantiating; the CSS is not optional styling.
+- Do any post-load setup (e.g. consent) **after** the load resolves; if the engine exposes a global (e.g. `window.MasterWidget`), guard that it exists before using it.
+- Create the engine's DOM element / call its init, wire callbacks via **uniquely-named** globals/ids (use `crypto.randomUUID()`), append to `container`. A constructor-style widget that takes a string id needs a uniquely-id'd inner `<div>`.
+- Return `{ mounted: true, destroy }`. `destroy` removes what you added and clears global callbacks. **Do not unload the script/stylesheet** unless the engine genuinely needs a fresh load (THR and Mastercamping both keep them — deduped, shared across widgets).
 
 **`iframe`**: build the `<iframe>` src with config params, append to `container`, handle `postMessage` if the engine emits events. `destroy` removes the iframe.
 
@@ -145,7 +146,10 @@ Mount the block in `site-demo` with a real account: set `booking: { engine: '{en
 
 ## Reference implementation
 
-`@hwe/core-ui/src/adapters/booking/thr/` is the canonical `script-injection` adapter. Read `ThrSearchAdapter.ts` for the mount/destroy lifecycle, `thr.types.ts` for the config-extends-base + real-named-fields pattern (the adapter reads `codeCamping` directly), and `ThrSearchAdapter.test.ts` for the mocked-externals test shape.
+Two `script-injection` references, by widget shape:
+
+- **Web Components / tenant-composed script — `@hwe/core-ui/src/adapters/booking/thr/`.** Read `ThrSearchAdapter.ts` for the mount/destroy lifecycle, `thr.types.ts` for the config-extends-base + real-named-fields pattern (the adapter reads `codeCamping` directly), and `ThrSearchAdapter.test.ts` for the mocked-externals test shape.
+- **Global JS constructor + static JS/CSS assets — `@hwe/core-ui/src/adapters/booking/mastercamping/`.** Read `MastercampingSearchAdapter.ts` (validates `idProperty`/`bookingUrl`, awaits both assets, guards `window.MasterWidget`, mounts into a uniquely-id'd inner `<div>`, maps `layout → widget_columns`/`dropdown`), `mastercamping-runtime.ts` (the static-asset loader over `loadScript` + `loadStylesheet`, real-named-field types in `mastercamping.types.ts`), and the two `*.test.ts` for the mocked-externals shape (mock `../script-loader`, stub `window.MasterWidget`).
 
 ## Checklist
 

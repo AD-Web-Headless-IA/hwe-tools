@@ -98,7 +98,7 @@ docs/
 │   └── cms/
 ├── clients/            ← per-client design analysis (one subfolder per client slug)
 ├── integrations/       ← external service integration docs
-│   └── bookings/       ← booking engines (THR done; Witbooking/Mastercamping/Resalys planned)
+│   └── bookings/       ← booking engines (THR + Mastercamping done; Witbooking/Resalys planned)
 ├── diagrams/           ← Mermaid architecture diagrams
 │   ├── block-variant-resolution.md
 │   ├── booking-architecture.md
@@ -158,9 +158,10 @@ docs/
 | `specs/frontend/coding-standards.md` | Day-to-day coding rules: component structure, TS strict patterns, React patterns, anti-patterns table | Any frontend task; code review; onboarding |
 | `specs/security/security-standards.md` | RGPD compliance, input handling, HTTP headers, secrets, prompt injection, pre-deploy checklist | New site setup; Payload/booking integration; any block with user input; pre-deploy |
 | `diagrams/booking-architecture.md` | Booking adapter layer + `BookingSearchBlock` — architecture, mount sequence, file map, CSS overrides, status | Understanding or extending booking; before adding an engine |
-| `skills/frontend/booking-adapter.md` | How-to: add a new booking engine adapter (steps + checklist) | Adding/implementing Witbooking/Mastercamping/Resalys (or a new booking widget) |
+| `skills/frontend/booking-adapter.md` | How-to: add a new booking engine adapter (steps + checklist); two reference implementations (THR Web Components, Mastercamping JS constructor) | Adding/implementing Witbooking/Resalys (or a new booking widget) |
 | `integrations/bookings/README.md` | Booking engine integrations index | Any booking adapter task |
 | `integrations/bookings/thr/*` | THR ILib v4 docs (`thr-ilib-v4.md`), widget reference, internal notes + CSS personalization reference | Implementing or modifying THR adapter, or theming the THR widget |
+| `integrations/bookings/mastercamping/*` | Mastercamping docs: integration overview, widget reference (`MasterWidget` constructor + options, vertical/horizontal layout), internal notes (render mode, CSP domains, verified CSS class map) | Implementing or modifying the Mastercamping adapter, or theming the Mastercamping widget |
 
 ## Rules layer (always loaded)
 

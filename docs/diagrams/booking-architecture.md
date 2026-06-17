@@ -19,11 +19,11 @@ flowchart TB
   resolve["resolveSearchAdapter(tenant.booking.engine)\nadapters/booking/registry.ts"]
 
   subgraph adapters["@hwe/core-ui/src/adapters/booking/"]
-    thr["THR adapter\n✅ implemented\nscript-injection"]
+    thr["THR adapter\n✅ implemented\nscript-injection (Web Components)"]
     wit["Witbooking\n🔴 placeholder (throws)"]
-    mc["Mastercamping\n🔴 placeholder (throws)"]
+    mc["Mastercamping adapter\n✅ implemented\nscript-injection (JS constructor)"]
     res["Resalys\n🔴 placeholder (throws)"]
-    loader["script-loader.ts\n(shared, deduped)"]
+    loader["script-loader.ts\n(shared, deduped: scripts + stylesheets)"]
   end
 
   pms["External PMS\n(THR ILib v4 Web Component, …)"]
@@ -64,9 +64,9 @@ export const config: TenantConfig = {
 ```ts
 booking?:
   | { engine: 'thr'; codeCamping: string; siteId?: string }
+  | { engine: 'mastercamping'; idProperty: number; bookingUrl: string; layout?: 'vertical' | 'horizontal'; … }
   | { engine: 'witbooking'; hotelId: string }          // placeholder names
-  | { engine: 'mastercamping'; campingCode: string }    // until implemented
-  | { engine: 'resalys'; propertyId: string };
+  | { engine: 'resalys'; propertyId: string };          // until implemented
 ```
 
 If `booking` is absent, the block renders an always-visible config-error message (no retry). The app must be wrapped in `TenantProvider` for `useTenant()` to work (`site-demo/src/app/layout.tsx` does this).
@@ -93,7 +93,7 @@ The adapter declares its `integrationType` so the block (and the team) knows how
 
 | Type | How it mounts | Styling control | Engines |
 |---|---|---|---|
-| `script-injection` | Load an external `<script>`; the engine renders via custom elements / DOM injection. We own the container, they own the internals. | CSS overrides in client `globals.css`, scoped + `!important`. | **THR** ✅ |
+| `script-injection` | Load an external `<script>`; the engine renders via custom elements / DOM injection. We own the container, they own the internals. | CSS overrides in client `globals.css`, scoped + `!important`. | **THR** ✅ (Web Components), **Mastercamping** ✅ (JS constructor + static JS/CSS) |
 | `iframe` | Mount an `<iframe>` at the engine URL with params. Fully isolated. | Minimal (URL params only). | TBD |
 | `native` | We build the form with our primitives, then redirect or call the engine API on submit. | Full. | TBD |
 
@@ -138,6 +138,8 @@ Key invariants (from `ThrSearchAdapter.ts` + `docs/integrations/bookings/thr/`):
 | Shared deduping script loader | `@hwe/core-ui/src/adapters/booking/script-loader.ts` |
 | THR adapter | `@hwe/core-ui/src/adapters/booking/thr/ThrSearchAdapter.ts` |
 | THR types / constants / mappings | `@hwe/core-ui/src/adapters/booking/thr/thr.types.ts` |
+| Mastercamping adapter | `@hwe/core-ui/src/adapters/booking/mastercamping/MastercampingSearchAdapter.ts` |
+| Mastercamping runtime (asset loading) / types | `@hwe/core-ui/src/adapters/booking/mastercamping/mastercamping-runtime.ts`, `mastercamping.types.ts` |
 | The block (dispatcher, `'use client'`) | `@hwe/core-ui/src/base-blocks/BookingSearchBlock/BookingSearchBlock.tsx` |
 | Block presentation variants (CVA) | `@hwe/core-ui/src/base-blocks/BookingSearchBlock/BookingSearchBlock.variants.ts` |
 | Content schema (presentation only) | `@hwe/core-ui/src/schemas/BookingSearchBlock.schema.ts` |
@@ -168,8 +170,9 @@ Rules: always scope to `[data-engine="…"]`; use `!important` + extra specifici
 |---|---|
 | Adapter layer (types, registry, script-loader) | ✅ implemented |
 | `BookingSearchBlock` (loading/mounted/error, retry, a11y) | ✅ implemented, registered as platform default |
-| THR `<thr-search-engine>` adapter | ✅ implemented (script-injection) |
-| Witbooking / Mastercamping / Resalys adapters | 🔴 placeholder factories that throw "not yet implemented" |
+| THR `<thr-search-engine>` adapter | ✅ implemented (script-injection, Web Components) |
+| Mastercamping `MasterWidget` adapter | ✅ implemented (script-injection, JS constructor + static JS/CSS assets; `layout` vertical/horizontal) |
+| Witbooking / Resalys adapters | 🔴 placeholder factories that throw "not yet implemented" |
 | Cookiebot → THR consent bridge | 🟡 adapter accepts `consentAds`; live Cookiebot wiring is a TODO |
 | CSP domains for THR | 🟡 documented in `thr-notes.md`; not yet added to client CSP config |
 | `TenantConfig.booking` (engine + credentials, discriminated union) | ✅ implemented; engine is authoritative at the tenant level, block content is presentation only |

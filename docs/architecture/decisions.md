@@ -1516,7 +1516,7 @@ Booking engines (THR, Witbooking, Mastercamping, Resalys) do not share an integr
 ### Consequences
 
 - Adding a new engine follows [`docs/skills/frontend/booking-adapter.md`](../skills/frontend/booking-adapter.md); each engine's integration docs live in `docs/integrations/bookings/{engine}/`.
-- THR is implemented (`script-injection`); Witbooking/Mastercamping/Resalys are throwing placeholders.
+- THR is implemented (`script-injection`); Witbooking/Mastercamping/Resalys are throwing placeholders. *(Amended 2026-06-17: Mastercamping search is now implemented too — `MastercampingSearchAdapter`, a second `script-injection` reference using a global `MasterWidget` JS constructor + static JS/CSS assets, vs THR's Web Components. Only Witbooking/Resalys remain placeholders. See `docs/integrations/bookings/mastercamping/`.)*
 - **Client-specific CSS overrides are required per engine per client** — the platform does not manage widget skins.
 - **A GDPR consent bridge must be implemented per engine that loads external scripts.** THR's adapter accepts `consentAds`; the live Cookiebot wiring (and THR CSP domains in client `next.config.mjs`) are separate, still-open tasks.
 - `BookingSearchBlock` is registered as a **platform default** in `baseBlockRegistry` (uncommon — most blocks are client-owned per DEC-015 — justified because the block is fully engine-agnostic).
@@ -1609,7 +1609,7 @@ DEC-025 implemented the first booking UI element (`BookingSearchBlock` + `ThrSea
 ### Consequences
 
 - **Refactor lands before the feature.** Extracting `thr-runtime.ts` (+ `buildThrScriptUrl`) and refactoring `ThrSearchAdapter` to use it is its **own commit with the existing 13 tests green**, before any favorites code — the two are never mixed.
-- `script-loader` is **unchanged** — it keeps deduping by final `src`. No convergence logic added.
+- `script-loader` is **unchanged** — it keeps deduping by final `src`. No convergence logic added. *(Amended 2026-06-17: a sibling `loadStylesheet` (deduped by `href`) was added **additively** for `script-injection` engines that ship a separate required CSS file — Mastercamping loads JS + CSS together. The script path is untouched. Note Mastercamping currently implements **search only**; its favorites/simpleblock adapters remain placeholders, and the THR script-URL composition here is THR-specific — Mastercamping uses fixed static asset URLs, no feature-flag composition.)*
 - `buildThrScriptUrl` is a pure function (trivially unit-tested); the URL is computed once at the booking boundary and threaded to the adapters.
 - `TenantConfig.booking.features` is additive and optional — existing configs keep working.
 - `/setup-booking` grows a `--with-favorites` path (config flag + CSS scaffold); `docs/skills/frontend/booking-adapter.md` gains an "add a widget" section.
