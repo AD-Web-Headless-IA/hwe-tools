@@ -22,22 +22,45 @@ Add these to the client's `Content-Security-Policy` (`next.config.mjs`) for any 
 
 ## CSS override pattern
 
-The block scopes the widget under `[data-engine="mastercamping"]` (set on both the block `<section>` and the adapter's inner container). Client overrides go in the site's `globals.css`, scoped to that selector, using `!important` + theme tokens. **Don't hardcode colors here — each client customizes in its own repo.** Class names below are placeholders: inspect the live widget in DevTools and replace.
+The block scopes the widget under `[data-engine="mastercamping"]` (set on both the block `<section>` and the adapter's inner container). Client overrides go in the site's `globals.css`, scoped to that selector, using `!important` + theme tokens. **Don't hardcode colors here — each client customizes in its own repo.**
+
+The vendor bundle is **low-specificity** (mostly single-class rules, only 2 `!important` in the whole file), so `[data-engine="mastercamping"]` + `!important` wins without selector gymnastics — unlike THR, which needs extra class depth to beat its account theme layer.
+
+### Verified class map (`master_booking_plugin.min.css`, `latest`, snapshot 2026-06-17)
+
+| Class | Element | Vendor default worth overriding |
+|---|---|---|
+| `.widgetBookingContainer` | Outer panel | `background:#e6e6e6` (flat grey) |
+| `.searchButton` | Submit button | `background:rgba(0,0,0,.6)` (dark grey); in `widget_columns` it also becomes `width:20%` |
+| `.inputBox`, `.comboBox`, `.datePicker`, `.categorySelector` | Field boxes / selects | bordered inputs |
+| `.categoryGroupLabel`, `.categoryLabel`, `.facilityContainer label` | Category / facility row labels | default link-blue text |
+| `.categoryGroupCB`, `.facilityGroupCB` | Checkboxes | native checkbox colour (use `accent-color`) |
+| `.facilitiesTitle`, `.popupTitle` | Section / popup headers | `font-weight:300`; popup is white-on-`#5d5d5d` |
+| `.comboPopup`, `.datePickerPopup`, `.categoriesPopup`, `.fullScreenPopup` | Dropdown / picker popups | borders + shadow |
+| `.comboboxOption.selected`, `.stayDay.selected`, `.checkinDay.selected` | Selected option / day | selected-state colour |
+
+> In `widget_columns` (horizontal `layout`) the main sections — `.categorySelector`, `.checkinCheckoutContainer`, `.childAgeContainer`, `.facilities`, `.peopleContainer`, `.searchButton` — each become `display:inline-block; width:20%`, i.e. a one-row search bar. The Search button therefore renders compact (not full-width) in horizontal mode.
 
 ```css
 /* site-{slug}/src/app/globals.css — Mastercamping widget overrides.
-   Scope to [data-engine="mastercamping"], use !important + theme tokens, zero CSS per block. */
-[data-engine="mastercamping"] .searchButton {
-  background: var(--color-primary) !important;
-  color: var(--color-on-primary) !important;
-}
-
+   Scope to [data-engine="mastercamping"], use !important + theme tokens, zero CSS per block.
+   Worked, verified example: hwe-core/apps/site-demo/src/app/globals.css §booking:mastercamping. */
 [data-engine="mastercamping"] .widgetBookingContainer {
-  /* background / spacing overrides */
+  background: var(--color-secondary) !important;          /* was flat #e6e6e6 */
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-md) !important;
 }
 
-[data-engine="mastercamping"] .popupTitle {
-  /* popup header colors */
+[data-engine="mastercamping"] .searchButton {
+  background: var(--color-primary) !important;            /* was rgba(0,0,0,.6) */
+  color: var(--color-primary-foreground) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+[data-engine="mastercamping"] .categoryGroupCB,
+[data-engine="mastercamping"] .facilityGroupCB,
+[data-engine="mastercamping"] input[type="checkbox"] {
+  accent-color: var(--color-primary) !important;
 }
 ```
 
