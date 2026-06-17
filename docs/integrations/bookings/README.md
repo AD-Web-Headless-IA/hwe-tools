@@ -10,7 +10,7 @@ Each engine has its own subdirectory with integration docs, widget reference, an
 |---|---|---|---|---|
 | THR (eSeasonResa) | Sequoiasoft / Thelis | script-injection (ILib v4 Web Components) | ✅ Implemented (search) | `thr/` |
 | Witbooking | Witbooking | TBD | 🔴 Not started | `witbooking/` |
-| Mastercamping | Mastercamping | TBD | 🔴 Not started | `mastercamping/` |
+| Mastercamping | Mastercamping | script-injection (MasterWidget JS constructor) | ✅ Implemented (search) | `mastercamping/` |
 | Resalys | Resalys | TBD | 🔴 Not started | `resalys/` |
 
 ## Integration types
