@@ -1,6 +1,6 @@
 # US-008: THR simple-block module — BookingSimpleBlock
 
-> **Status:** ✅ Done (2026-06-16) — implemented per DEC-027. Demo placement on the home is temporary; live `<thr-simpleblock>` class snapshot + real `categories` ids pending US-006.
+> **Status:** ✅ Done (2026-06-16) — implemented per DEC-027. **CSS brand theming added 2026-06-17** from the verified ILib v4 bundle (simpleblock.html/.css), driven by the reviewed visual spec (`apps/site-demo/docs/block-specs/BookingSimpleBlock.visual-spec.md`); mirrors the favorites methodology. Demo placement on the home is temporary; real `categories` ids + live-DOM re-verification of the class snapshot still pending US-006.
 > **Epic:** [Multi-engine Booking Search](../plan.md)
 > **Depends on:** [DEC-025](../../../architecture/decisions.md#dec-025--booking-adapter-pattern--engine-agnostic-blocks-with-ui-delegation), **[DEC-027](../../../architecture/decisions.md#dec-027--booking-widgets-beyond-search-adapter-per-widget-shared-thr-script-url-composition-and-a-tenant-feature-toggle)** (no new DEC — simple-block follows the pattern verbatim).
 > **Bounded context:** Booking · **Pattern precedent:** US-007 (favorites) — mirror it.
@@ -66,5 +66,5 @@ Third and final of the currently-scoped THR widgets (after search + favorites), 
 ## Open Questions
 
 - **OQ-1 — Valid `categories` ID(s) for the demo account.** `<thr-simpleblock>` needs real accommodation-category IDs for the demo THR account (`mercamargue`/`demosalons`) or it renders empty/errors. Demo currently uses `['12']` (provided by Cristina). (Visibility-only; code/tests don't need it.)
-- **OQ-2 — Visual pass:** does the simple-block card introduce any element not already themed for favorites/search? If yes, a short `/design-block` pass; if it reuses the shared card+button theme, skip.
+- **OQ-2 — Visual pass: RESOLVED (2026-06-17).** Yes — the simple-block introduces several elements not themed by favorites/search (a category-availability **grid**, month tabs, an overlaid accommodation name, and a **bare `<button>` book CTA that is NOT the search `.btn.btn-primary`**). A `/design-block` pass was done → `BookingSimpleBlock.visual-spec.md` (approved by Cristina), implemented in `globals.css` §THIRD-PARTY OVERRIDES. Corrects the earlier assumption that the reserve button reused the shared `.btn.btn-primary` theme.
 - **OQ-3 — SPA / live-DOM verification** remains the standing TODO across THR widgets (US-006) — simple-block class snapshot to be re-verified against the mounted widget.

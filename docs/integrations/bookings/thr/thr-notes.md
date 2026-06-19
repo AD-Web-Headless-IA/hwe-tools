@@ -119,7 +119,30 @@ THR's themed layer here uses deep `html.thr .thr-favorites div .thr-favorite …
 
 ### Class map (`<thr-simpleblock>` — category availability block, DEC-027)
 
-**Not yet captured** — implemented (`ThrSimpleBlockAdapter` + `BookingSimpleBlock`) from the documented attributes (`thr-ilib-v4.md §5`), but its rendered DOM class names were not in the provided bundle. Its reserve button reuses the generic `[data-engine="thr"] .btn.btn-primary` theme; **TODO: capture the `<thr-simpleblock>` card classes against a live account (US-006)** and add typography/price overrides mirroring favorites. The widget requires a `categories` attribute (array literal, ≥1 id).
+Snapshot from THR's ILib v4 bundle (simpleblock.html/.css), **2026-06-17**. The widget is a **category-availability grid** (month selector + one row per category × columns of stay periods), NOT a carousel. THR doesn't publish class names → **TODO: re-verify against the live mounted widget (US-006 smoke test)** and adjust any drift. The widget requires a `categories` attribute (array literal, ≥1 id).
+
+| Class | Element |
+|---|---|
+| `.thr-simpleblock.thr` | root wrapper |
+| `.thr-simpleblock-engine` · `-engine-row-simple` / `-precise` (+ `.active`) | engine controls + search-mode row |
+| **`.thr-simpleblock-engine-radio`** | **mode-switch text** ("I prefer to precise…") — account color1 `#EDB736` |
+| `.thr-simpleblock-engine-row + …-engine-row` (`border-top`) · `…:not(:only-child).active:after` | mode separator (`#9E0457`) · active radio dot fill (`#9E0457`) |
+| `.thr-simpleblock-engine-inputs` | the 3 selects wrapper (simple mode) |
+| **`.thr-simpleblock-engine-label`** · `.thr-simpleblock-engine-inputs > * > span` | **field labels** (Month / Length / Arrival) |
+| `.form-control` | the `<select>`s (inherit the generic `[data-engine="thr"] .form-control` theme) |
+| `.thr-simpleblock-months` | month-nav bar |
+| **`.thr-simpleblock-month`** (clickable next) · **`.thr-simpleblock-month-current`** | **month tabs** (next = account color1 `#EDB736`; current = `#333`/white) |
+| `.thr-simpleblock-results` · `.thr-simpleblock-row` | results container + one row per category |
+| `.thr-simpleblock-row.thr-simpleblock-headers` | header row (`.thr-simpleblock-category` = column eyebrow `#EDB736`; `.thr-simpleblock-stay > div > div` = date labels) |
+| `.thr-simpleblock-category` · `.thr-simpleblock-category-picture` | category cell + photo area (photo left as-is) |
+| **`.thr-simpleblock-category-name`** | **accommodation name** — absolute overlay on the photo, account color1 `#EDB736` |
+| `.thr-simpleblock-stays` · `.thr-simpleblock-stay` (+ `.unavailable`) | period columns + one stay cell |
+| `.thr-simpleblock-stay-period` (`> span > .label` / `.date` / `.date.mobile`) | mobile from/to date metadata |
+| **`.thr-simpleblock-stay-price-container`** (+ `.thr-simpleblock-stay-unavailable`) | price/CTA cell · unavailable variant (`#494949` italic) |
+| **`.thr-simpleblock-price`** · `.thr-simpleblock-striked-price` | **price** (account color2 `#9E0457` bold) · struck promo price (`#929292`) |
+| **`.thr-simpleblock-stay-price-container:not(.thr-simpleblock-stay-unavailable) button`** (`> .fa-shopping-cart`) | **the book CTA — a bare `<button>` with a cart icon, themed by THR's account `.btn-primary` (`#9E0457`).** NOT the search `.btn.btn-primary`; needs its own override. |
+
+THR's themed layer here uses deep `html.thr .thr-simpleblock .thr-simpleblock-simple .thr-simpleblock-results … { …!important }` selectors plus `html.thr`-prefixed font-size bumps (e.g. category-name → `1.6rem`) — overrides mirror that depth under `[data-engine="thr"]` + `!important`. **Visual theming (typography, colours, month tabs, book button), structure/grid untouched** — full reviewed baseline in `site-demo/src/app/globals.css` §THIRD-PARTY OVERRIDES, driven by `apps/site-demo/docs/block-specs/BookingSimpleBlock.visual-spec.md`.
 
 ## Known quirks
 
