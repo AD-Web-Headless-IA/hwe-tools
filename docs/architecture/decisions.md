@@ -1625,3 +1625,47 @@ DEC-025 implemented the first booking UI element (`BookingSearchBlock` + `ThrSea
 - **A dedicated `/setup-favorites` skill.** Rejected — duplicates the booking onboarding machinery (config + CSP + CSS + TenantProvider) and splits ownership; widgets are flags on `/setup-booking`.
 - **A per-instance `enabled` flag in block content instead of a tenant feature toggle.** Rejected — "active for this client" is a tenant capability, not per-placement presentation; block content stays presentation-only (DEC-025).
 
+---
+
+## DEC-028 — SwiperPrimitive: the single shared carousel primitive
+
+> **Status:** Accepted
+> **Date:** 2026-06-19
+> **Deciders:** Cristina Gutiérrez
+> **Builds on:** [DEC-008](#dec-008--structural-variants-for-complex-blocks) (structural variants — GalleryBlock's carousel variants), [DEC-017](#dec-017--repo-split-tools-submodule--core-npm--template--client-repos) (primitives live in `@hwe/core-ui`), [DEC-022](#dec-022--design-system-token-driven-shared-primitives-globalscss-theme-is-the-single-per-project-visual-source) (token-driven shared primitives).
+> **Scope:** establishes where carousel/slider behaviour lives and its contract surface. Does **not** cover any individual block's variants, schema, or placement (those stay per-block).
+
+### Context
+
+GalleryBlock (US-001) introduces the platform's first carousel. The team guide (`docs/guides/guia-galleryblock.md` §8) already plans **five+ blocks** that need a slider: GalleryBlock (`slider`, `slider-thumbs`, lightbox), ReviewsBlock (opinions slider), AccommodationCardBlock (photo slider on the listing card), PromoBlock (rotating banner, fade), and the footer logo slider (partners/certifications).
+
+The existing primitives — `Button`, `Icon`, `Eyebrow`, `DevWarning` — are stateless atoms. A carousel is the opposite: stateful, requires `swiper` as a dependency, modular module/CSS imports, the full WAI-ARIA carousel wiring, keyboard handling, and `prefers-reduced-motion` behaviour. If each block wired Swiper itself, that logic (and its a11y correctness) would be duplicated five times and drift. Because five blocks will depend on it, the carousel's home and public contract must be decided **once, formally**, before the second consumer exists — not set implicitly by whatever GalleryBlock happens to do internally.
+
+### Decision
+
+1. **One primitive, one location.** `SwiperPrimitive` lives at `packages/core-ui/src/primitives/Swiper/`. It is the **only** place in the platform that imports from `swiper/*`. No block (base or client) imports Swiper directly — they consume `SwiperPrimitive`.
+2. **It is a client component** (`'use client'`). It encapsulates: module selection, modular CSS imports (`swiper/css`, `swiper/css/navigation`, …, never the bundle), the ARIA carousel wiring (`role="region"` + `aria-roledescription="carousel"` on the container; `role="group"` + `aria-roledescription="slide"` + `aria-label="Image X of Y"` per slide), keyboard navigation, and `prefers-reduced-motion` (disables autoplay, collapses transitions to instant).
+3. **Contract surface (props).** `SwiperPrimitive` accepts: the slides (children), the set of Swiper modules to enable, a typed config object (autoplay/loop/effect/navigation/pagination/thumbs), and a **required** `ariaLabel`. No `any`. Lightbox/thumbs are composed by passing the relevant modules and a second synced instance — the primitive does not hardcode a single use case.
+4. **The primitive owns no brand visuals.** Control colours come from theme tokens via the consuming block's `[data-block]` scope (DEC-022); `SwiperPrimitive` ships only structural/base CSS (Swiper's own + layout utilities).
+5. **`swiper` becomes a dependency of `@hwe/core-ui`** (`pnpm add swiper`, modular imports only), pinned to the latest stable major.
+
+### Why
+
+- **One a11y implementation.** The ARIA carousel pattern and keyboard/reduced-motion handling are written and tested once, not re-derived per block.
+- **No direct-Swiper drift.** A single import site means one upgrade point and one place to enforce modular imports / tree-shaking.
+- **Consistent with the layered model.** Carousel behaviour is cross-block plumbing, exactly what the primitives layer is for (DEC-017); blocks stay focused on content + variants.
+- **Decided before the dependents exist.** Five blocks will build on it; ratifying the contract now prevents each from coupling to incidental internals of GalleryBlock.
+
+### Consequences
+
+- **First non-atomic primitive.** The `primitives/` layer now holds a stateful, dependency-bearing component alongside the atoms; acceptable and intended.
+- `swiper` is added to `core-ui` dependencies; its base CSS is imported modularly by the primitive.
+- **GalleryBlock (US-001) is the first consumer** and the reference for the primitive's API. Subsequent slider blocks (Reviews, AccommodationCard, Promo, footer) consume `SwiperPrimitive` verbatim — adding one is a new block, never a new carousel.
+- `SwiperPrimitive` must be registered/documented like other primitives (catalog/project-map) at `/archive` time.
+
+### Alternatives considered
+
+- **Each block imports Swiper directly.** Rejected — duplicates module/CSS wiring and the a11y implementation across five blocks; guarantees drift and inconsistent keyboard/reduced-motion behaviour.
+- **Reuse a `GalleryCarousel` sub-component from GalleryBlock.** Rejected — couples every other block's slider to GalleryBlock's internal structure and import graph; a shared need belongs in `primitives/`, not inside a block.
+- **A headless carousel library (Embla, Keen) instead of Swiper.** Rejected — the team guide already standardizes on Swiper, and the gallery lightbox relies on Swiper's `Zoom`/fullscreen; introducing a second carousel engine for the same need is redundant.
+
