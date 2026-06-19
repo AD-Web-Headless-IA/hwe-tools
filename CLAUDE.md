@@ -155,6 +155,7 @@ Skills disponibles (registradas en `docs/catalog.md`):
 - `/design-block {BlockName} --client {slug}` — visual spec para bloques sin referencia Figma (DEC-016).
 - `/enrich-us <path>` — enriquece una user story.
 - `/plan-to-stories <plan>` — pipeline plan → stories enriquecidas.
+- `/generate-block-story {BlockName}` — genera la user story completa de un bloque base nuevo (contraparte de `/enrich-us` específica de bloques; alimenta `/scaffold-block --target base`).
 - `/seo-audit [slug]` — auditoría SEO completa.
 - `/security-audit [slug]` — auditoría de seguridad completa.
 - `/archive <story-path>` — cierra story tras verify verde.
