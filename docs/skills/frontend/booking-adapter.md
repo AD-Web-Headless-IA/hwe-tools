@@ -9,7 +9,7 @@
 - You are adding a new booking engine adapter (the registry currently has a throwing placeholder for it), **or**
 - You are adding a new booking widget block (`BookingRatesBlock`, …) that needs a new adapter method.
 
-If you only need to restyle an existing engine's widget for a client, you do **not** need this guide — that is CSS in the client's `globals.css` (see [CSS override pattern](../../diagrams/booking-architecture.md#css-override-pattern)).
+If you only need to restyle an existing engine's widget for a client, you do **not** need this guide — that is CSS in the client's per-engine override file `src/app/booking/{engine}-overrides.css` (imported conditionally in `layout.tsx`; `globals.css` carries zero engine CSS). See [CSS override pattern](../../diagrams/booking-architecture.md#css-override-pattern).
 
 ## Prerequisites
 
@@ -105,7 +105,7 @@ const factories: Record<BookingEngineType, BookingSearchAdapterFactory> = {
 };
 ```
 
-No `if/else` — the map is the only switch point. `resolveSearchAdapter(engine)`, `isEngineSupported(engine)`, and `getRegisteredEngines()` need no changes.
+No `if/else` — the map is the only switch point. `resolveSearchAdapter(engine)`, `isSearchAdapterAvailable(engine)`, and `getRegisteredEngines()` need no changes. `isSearchAdapterAvailable` (the per-registry `is{Widget}AdapterAvailable` family) is how the block degrades gracefully when an engine has no real adapter yet — try-catch the placeholder factory, returning `false` — so registering a real factory flips it to `true` automatically.
 
 ### 5. Declare the engine in the tenant config — `providers/TenantProvider.tsx`
 
@@ -176,7 +176,7 @@ The same engine has more than one UI element (search, offers/favorites, simple-b
 2. **Concrete adapter over the shared runtime.** Implement `Thr{Widget}Adapter` using `thr-runtime.ts` (`ensureThelisResaBootstrap`, callback helpers, `buildThrScriptUrl`) — do not re-implement THR plumbing.
 3. **Script flag is tenant-derived, not per-adapter.** Add the widget's `features` flag to `BookingFeatures` and its ILib query flag to `buildThrScriptUrl` (e.g. `simpleblock` → `simpleblock`). THR loads one combined script from `tenant.booking.features`; never negotiate flags between adapters at mount time (timing-fragile — see DEC-027).
 4. **Block + feature gate.** Scaffold `Booking{Widget}Block` (`/scaffold-block --target base`); it renders nothing unless `booking.features.{widget}` is on, else resolves the adapter and delegates mount/destroy like `BookingFavoritesBlock`. Register it in `baseBlockRegistry`.
-5. **Per-client wiring.** Extend `/setup-booking` with a `--with-{widget}` flag (toggle `features.{widget}` + CSS scaffold) — **no per-widget skill**. Placement is `/add-block`.
+5. **Per-client wiring.** Extend `/setup-booking` with a `--with-{widget}` flag (toggle `features.{widget}` + add the widget's section to the engine override file `src/app/booking/{engine}-overrides.css`) — **no per-widget skill**. Placement is `/add-block`.
 
 ## Where to read next
 

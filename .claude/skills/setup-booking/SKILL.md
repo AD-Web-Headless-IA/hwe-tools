@@ -1,6 +1,6 @@
 ---
 name: setup-booking
-description: Configure a client site for a booking engine — writes booking into client.config.ts, adds the engine's CSP domains to next.config.mjs, scaffolds the [data-engine] CSS override section in globals.css, ensures TenantProvider wraps the app, and optionally adds BookingSearchBlock / BookingFavoritesBlock / BookingSimpleBlock instances. DEC-025, DEC-027.
+description: Configure a client site for a booking engine — writes booking into client.config.ts, adds the engine's CSP domains to next.config.mjs, scaffolds the per-engine [data-engine] CSS override file (src/app/booking/{engine}-overrides.css) and imports it conditionally in layout.tsx, ensures TenantProvider wraps the app, and optionally adds BookingSearchBlock / BookingFavoritesBlock / BookingSimpleBlock instances. DEC-025, DEC-027.
 argument-hint: --engine <thr|witbooking|mastercamping|resalys> [thr: --codeCamping <id> [--siteId <id>]] [mastercamping: --idProperty <n> --bookingUrl <url> [--layout <vertical|horizontal>]] [--with-block [Composition]] [--with-favorites [Composition]] [--with-simpleblock --categories <ids> [Composition]]
 allowed-tools: Read, Edit, Write, Bash, Glob
 ---
@@ -60,7 +60,7 @@ booking: { engine: 'thr', codeCamping: 'ABC123', siteId: '6955' },
 booking: { engine: 'mastercamping', idProperty: 1234, bookingUrl: 'https://booking.familycampings.com', layout: 'horizontal' },
 ```
 
-If switching engines, the old `booking` is replaced; WARN that the previous engine's CSP domains and CSS overrides (Steps 4–5) are now orphaned and should be removed by hand (do not auto-delete them).
+If switching engines, the old `booking` is replaced; WARN that the previous engine's CSP domains (Step 4), its override file `src/app/booking/{old-engine}-overrides.css`, and its import in `layout.tsx` (Step 5) are now orphaned and should be removed by hand (do not auto-delete them).
 
 ## Step 4 — `next.config.mjs` — CSP domains (simple)
 
@@ -110,21 +110,32 @@ For **mastercamping**, the entries are (note `connect-src`/`frame-src` must also
 
 **WARN** if `next.config.mjs` sets `output: 'export'` — Next ignores `headers()` for a fully static export, so the CSP would not apply. (Not our case: DEC-007 deploys SSR/ISR on Vercel, where `headers()` works.)
 
-## Step 5 — `globals.css` — `[data-engine]` override scaffold
+## Step 5 — per-engine CSS override file + conditional import
 
-In `{SITE_DIR}/src/app/globals.css`, add an idempotent override block scoped to the engine. If the file has a `=== THIRD-PARTY OVERRIDES ===` marker (from `/scaffold-site`), insert under it; otherwise append a new section at the end. Idempotent on the `booking:{engine}` marker — replace if present.
+Engine overrides live in their **own file per engine**, not in `globals.css`. A client loads **only** the file for the engine it runs, so it never ships dead styles for engines it doesn't use, and `globals.css` keeps **zero** engine-specific CSS.
+
+**5a — Create `{SITE_DIR}/src/app/booking/{engine}-overrides.css`** (idempotent: if it already exists, leave its rules and only ensure the header). All rules scoped to `[data-engine="{engine}"]`; **client brand customizations only** — the base widget styles ship in the vendor's own bundle (loaded by the adapter at runtime), so do **not** duplicate vendor styles here. Class names are widget-specific and (for THR) undocumented — inspect in DevTools and replace the TODO selectors (`docs/integrations/bookings/{engine}/{engine}-notes.md §CSS`).
 
 ```css
-/* === THIRD-PARTY OVERRIDES === */
-/* booking:thr — restyle the THR widget to the brand. The widget renders its own
-   markup; class names are NOT documented by THR — inspect in DevTools and replace
-   the TODO selectors (docs/integrations/bookings/thr/thr-notes.md §CSS). Always
-   scope to [data-engine="thr"], use !important + theme tokens, zero CSS per block. */
-[data-engine="thr"] {
-  /* TODO: e.g. .thr-search-engine__btn { background-color: var(--color-primary) !important;
+/* booking:{engine} — per-engine brand overrides. Loaded ONLY when this client's
+   booking engine is "{engine}" (conditional import in layout.tsx). globals.css
+   carries zero engine CSS. Brand customizations only — base widget styles ship in
+   the vendor bundle; do not duplicate them here. Scope to [data-engine="{engine}"],
+   use !important + theme tokens, zero CSS per block. */
+[data-engine="{engine}"] {
+  /* TODO: e.g. .thr-btn-search { background-color: var(--color-primary) !important;
      border-radius: var(--radius-md) !important; } */
 }
 ```
+
+**5b — Import it conditionally in `{SITE_DIR}/src/app/layout.tsx`.** The engine is known at build time (`client.config.ts`), so this is a static import of just that one file — add it right after the `globals.css` import. Idempotent on the import line. **Never** import another engine's override file.
+
+```tsx
+import './globals.css';
+import './booking/{engine}-overrides.css'; // only the engine this client runs
+```
+
+If you find engine rules still living in `globals.css` (older sites scaffolded before this pattern), move them into the per-engine file and leave `globals.css` engine-free.
 
 ## Step 6 — `layout.tsx` — ensure `TenantProvider`
 
@@ -172,7 +183,7 @@ The offers/favorites gallery (`<thr-favorites>` → `BookingFavoritesBlock`) is 
    ```ts
    { type: 'BookingFavoritesBlock', content: { title: 'Our offers', quantityToShow: 3 } },
    ```
-3. **Extend the CSS scaffold** (Step 5) with a colors-only favorites section under the same `[data-engine="{engine}"]` marker. Per DEC-027 the gallery reuses the engine's themed button/typography; add card-accent selectors as TODOs (class names are widget-specific and unverified — inspect in DevTools).
+3. **Extend the engine override file** (Step 5, `src/app/booking/{engine}-overrides.css`) with a colors-only favorites section under the same `[data-engine="{engine}"]` scope. Per DEC-027 the gallery reuses the engine's themed button/typography; add card-accent selectors as TODOs (class names are widget-specific and unverified — inspect in DevTools).
 
 This **only** flips the feature + places the block; the engine itself (Steps 2–6) must already be configured. Engines other than `thr` have no favorites adapter yet → WARN like the placeholder-engine case. No script-URL work is needed here — THR composes one combined ILib script from `booking.features` automatically (DEC-027, `buildThrScriptUrl`).
 
@@ -186,7 +197,7 @@ The category-availability block (`<thr-simpleblock>` → `BookingSimpleBlock`), 
    ```ts
    { type: 'BookingSimpleBlock', content: { title: '...', categories: ['<id>'], showPicture: true } },
    ```
-4. **CSS scaffold:** the reserve button reuses the generic `[data-engine="thr"] .btn.btn-primary` theme; add simpleblock-specific text overrides only once the live `<thr-simpleblock>` class names are known (US-006). Same `[data-engine]` marker.
+4. **Engine override file:** the reserve button reuses the generic `[data-engine="thr"] .btn.btn-primary` theme; add simpleblock-specific text overrides to `src/app/booking/{engine}-overrides.css` only once the live `<thr-simpleblock>` class names are known (US-006). Same `[data-engine]` scope.
 
 THR composes the combined script (`?…&simpleblock`) from `booking.features` automatically.
 
@@ -198,7 +209,7 @@ THR composes the combined script (`?…&simpleblock`) from `booking.features` au
 ## Step 9 — Report + next steps
 
 Print a per-file summary, then the tasks this skill does NOT do:
-- Inspect the engine widget in DevTools → fill the real CSS class names in `globals.css`.
+- Inspect the engine widget in DevTools → fill the real CSS class names in the engine override file `src/app/booking/{engine}-overrides.css`.
 - Run `/security-audit` to validate/harden the CSP (this skill only adds the engine domains).
 - Wire Cookiebot → engine consent if the engine loads external scripts (THR: `consentAds`).
 - Match the Figma's **placement**: pick the block `variant` (inline/sticky) and, for sticky, set `--booking-sticky-top` / `--booking-sticky-shadow` in `globals.css` (see Step 7).
@@ -231,3 +242,4 @@ Print a per-file summary, then the tasks this skill does NOT do:
 4. **Placeholder engines** (`witbooking`/`resalys`) set valid config but their adapter throws at runtime until implemented — warn, don't block. (`thr` + `mastercamping` search adapters are implemented.)
 5. **Non-idempotent edits.** Always key on the `booking:{engine}` marker so re-runs update rather than duplicate.
 6. **AST parsing.** Don't — marker/regex edits are sufficient for this scaffolding skill.
+7. **Engine CSS in `globals.css`.** Don't — engine overrides go in their own `src/app/booking/{engine}-overrides.css`, imported conditionally in `layout.tsx`. `globals.css` stays engine-free so a client never ships overrides for an engine it doesn't run. Never import another engine's override file.

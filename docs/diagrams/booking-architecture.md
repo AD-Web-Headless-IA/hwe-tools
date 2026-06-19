@@ -93,7 +93,7 @@ The adapter declares its `integrationType` so the block (and the team) knows how
 
 | Type | How it mounts | Styling control | Engines |
 |---|---|---|---|
-| `script-injection` | Load an external `<script>`; the engine renders via custom elements / DOM injection. We own the container, they own the internals. | CSS overrides in client `globals.css`, scoped + `!important`. | **THR** ✅ (Web Components), **Mastercamping** ✅ (JS constructor + static JS/CSS) |
+| `script-injection` | Load an external `<script>`; the engine renders via custom elements / DOM injection. We own the container, they own the internals. | CSS overrides in the client's per-engine `src/app/booking/{engine}-overrides.css`, scoped + `!important`. | **THR** ✅ (Web Components), **Mastercamping** ✅ (JS constructor + static JS/CSS) |
 | `iframe` | Mount an `<iframe>` at the engine URL with params. Fully isolated. | Minimal (URL params only). | TBD |
 | `native` | We build the form with our primitives, then redirect or call the engine API on submit. | Full. | TBD |
 
@@ -149,12 +149,12 @@ Key invariants (from `ThrSearchAdapter.ts` + `docs/integrations/bookings/thr/`):
 
 ## CSS override pattern
 
-External widgets ship their own styles. The block sets `data-engine="{engine}"` on its `<section>`; clients restyle the widget from their own `globals.css` — never inside the block (zero CSS per block). The block also **constrains its own layout** (centers within `--width-container`) so a `width:100%` widget isn't full-bleed.
+External widgets ship their own styles. The block sets `data-engine="{engine}"` on its `<section>`; clients restyle the widget from a **per-engine override file** — `src/app/booking/{engine}-overrides.css`, imported conditionally in `layout.tsx` so a client loads only the engine it runs. Never inside the block (zero CSS per block), and never in `globals.css` (which stays engine-free, so a client ships no overrides for engines it doesn't use). These files hold **client brand customizations only** — base widget styles ship in the vendor bundle (loaded by the adapter); don't duplicate them. The block also **constrains its own layout** (centers within `--width-container`) so a `width:100%` widget isn't full-bleed.
 
 **THR specifics (verified):** the widget is **AngularJS light DOM** (overrides reach it — not shadow DOM/iframe), styled with **Bootstrap 3 + an account-theme layer that uses `!important`** (the account's `color1`/`color2`). So theming is **two layers**: (1) the account colours set **in THR's back-office** per client; (2) CSS overrides here. Because THR's rules use `!important`, overrides need **`!important` AND extra specificity** (chain a second class).
 
 ```css
-/* site-{slug}/src/app/globals.css — token-driven, beats THR's themed !important */
+/* site-{slug}/src/app/booking/thr-overrides.css — token-driven, beats THR's themed !important */
 [data-engine="thr"] .btn.btn-primary,
 [data-engine="thr"] .thr-btn-search {
   background-color: var(--color-primary) !important;
@@ -162,7 +162,7 @@ External widgets ship their own styles. The block sets `data-engine="{engine}"` 
 }
 ```
 
-Rules: always scope to `[data-engine="…"]`; use `!important` + extra specificity; use theme tokens so overrides adapt per client. The full THR class map + baseline live in [`thr-notes.md` §CSS](../integrations/bookings/thr/thr-notes.md) (THR doesn't publish class names; v4 is its stable/only version, so they're fixed once captured). Working example: `site-demo/src/app/globals.css` §THIRD-PARTY OVERRIDES.
+Rules: always scope to `[data-engine="…"]`; use `!important` + extra specificity; use theme tokens so overrides adapt per client. The full THR class map + baseline live in [`thr-notes.md` §CSS](../integrations/bookings/thr/thr-notes.md) (THR doesn't publish class names; v4 is its stable/only version, so they're fixed once captured). Working example: `site-demo/src/app/booking/{mastercamping,thr}-overrides.css`, imported conditionally in `site-demo/src/app/layout.tsx`.
 
 ## Status — implemented vs not
 
