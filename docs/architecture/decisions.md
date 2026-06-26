@@ -1669,3 +1669,43 @@ The existing primitives — `Button`, `Icon`, `Eyebrow`, `DevWarning` — are st
 - **Reuse a `GalleryCarousel` sub-component from GalleryBlock.** Rejected — couples every other block's slider to GalleryBlock's internal structure and import graph; a shared need belongs in `primitives/`, not inside a block.
 - **A headless carousel library (Embla, Keen) instead of Swiper.** Rejected — the team guide already standardizes on Swiper, and the gallery lightbox relies on Swiper's `Zoom`/fullscreen; introducing a second carousel engine for the same need is redundant.
 
+---
+
+## DEC-029 — Per-instance block config flows through `BlockInstance.config`
+
+> **Status:** Accepted
+> **Date:** 2026-06-19
+> **Deciders:** Cristina Gutiérrez
+> **Builds on:** [DEC-023](#dec-023) (variant flows via `BlockInstance.variant` through `BlockRenderer`), [DEC-015](#dec-015--client-owned-blocks-with-shared-schemas-slot-based-composition-and-npm-subpath-exports) / [DEC-021](#dec-021) (flat registry; the block owns its own validation), [DEC-008](#dec-008--structural-variants-for-complex-blocks) (structural variants are a different axis from behavioral config).
+> **Scope:** how per-instance *behavioral config* reaches a block at render time. Does not change how *content* or *variant* flow, nor the registry shape.
+
+### Context
+
+`BlockInstance` carried only `content` + `variant` (DEC-023), and `BlockRenderer` passed only those to the block. GalleryBlock (US-001) is the first block with a **Layer-3 config schema** (`columns`, `aspectRatio`, `lightbox`, `autoplay`, `effect`, `headingLevel`, …). With no channel for config, every gallery instance on a site was forced to the schema **defaults**; the only thing a composition could vary per placement was the structural `variant`. That blocks real per-placement needs — e.g. a 4-column facilities grid next to a 2-column rooms grid, an autoplaying home banner vs a manual room slider, lightbox off on a decorative strip, a nested gallery at `h3` instead of `h2`. The gap is not gallery-specific: it hits every future block that has a config schema. US-001 flagged it as the deferred "renderer/config bridge".
+
+### Decision
+
+1. **`BlockInstance` gains an optional `config?: unknown`** — raw and unvalidated — as a sibling of `content` and `variant`.
+2. **`BlockRenderer` forwards `instance.config` untouched** to the block component; the `BlockComponent` signature becomes `{ content: unknown; variant?: string; config?: unknown }`. **No Zod in the renderer.**
+3. **The block parses config against its own config schema and applies defaults** (flat registry — the block owns validation, per the 2026-06-19 resolution). When a composition omits `config`, the block applies all defaults; partial config is merged with defaults by the block's own `.default()`s.
+4. **`variant` stays on `BlockInstance.variant`** (DEC-023). When both `variant` and `config.variant` are present, `BlockInstance.variant` wins (the resolver already does this).
+
+### Why
+
+- **Per-placement configuration without polluting content** (config ≠ content, block-contract §40) and without exploding structural variants (DEC-008) for every knob combination.
+- **Validation stays in the block** — consistent with the flat registry; the renderer remains a dumb dispatcher.
+- **Additive and backwards-compatible** — `config` is optional, so every existing composition keeps working unchanged.
+
+### Consequences
+
+- `BlockInstance` and `BlockComponent` contracts are extended (one optional field each). All blocks may now receive `config`; blocks without a config schema simply ignore it.
+- **GalleryBlock is the first consumer** — its `GalleryShell` already `safeParse`s config and applies defaults; the site-demo compositions now set real config (e.g. home grid `{ columns: 4, aspectRatio: '4/3' }`, accommodation `{ aspectRatio: '3/2' }`).
+- Resolves the deferred renderer/config bridge recorded in US-001; the "Config: lo que vendrá" examples in `docs/guides/guia-uso-galleryblock.md` are now live.
+- A `BlockRenderer.test.tsx` now covers the config flow (forwarded, undefined when absent, alongside content/variant).
+
+### Alternatives considered
+
+- **Put behavioral options inside `content`.** Rejected — mixes content and behavior, violating the content/config separation (block-contract §40, block-architecture §Layer 3).
+- **Extend the registry to a rich entry carrying schemas and validate config in the renderer.** Rejected/deferred — the flat registry was kept deliberately (2026-06-19); validation belongs in the block.
+- **A structural variant (DEC-008) per config combination.** Rejected — combinatorial explosion (columns × ratio × autoplay…) for what are value changes, not divergent DOM/hooks.
+
