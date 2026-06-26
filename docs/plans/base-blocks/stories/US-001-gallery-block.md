@@ -58,6 +58,7 @@ Separate Zod schema for behavioral options (NOT content):
 | `variant` | enum `slider \| slider-thumbs \| grid \| masonry \| collage` | `slider` | — | Selects the structural variant. |
 | `headingLevel` | `2 \| 3 \| 4` | `2` | all (when `title` set) | Heading level for `title`. **Explicit prop, not inferred from context** — predictable across compositions (resolved decision #3). Never `<h1>`. |
 | `columns` | `2 \| 3 \| 4` | `3` | grid, masonry | Desktop columns; collapses to 1–2 on mobile. |
+| `slidesPerView` | `1 \| 2 \| 3 \| 4` | `1` | slider | Slides visible at once on desktop; responsive ramp 1→2→N (mobile→tablet→desktop). `1` = classic one-at-a-time carousel. |
 | `aspectRatio` | enum `16/9 \| 4/3 \| 3/2 \| 1/1 \| auto` | `16/9` | all | Unifies visual ratio. |
 | `lightbox` | boolean | `true` | all | Enable/disable lightbox on click. |
 | `autoplay` | boolean | `false` | slider, slider-thumbs | |
@@ -179,8 +180,8 @@ Rationale: the `seo-audit-geo-llm` audit performs an SSR check; injecting JSON-L
 - **Divergences from proposal (resolved by Cristina, 2026-06-19):**
   - Schema home → co-located in `base-blocks/GalleryBlock/` + re-exported from `schemas/index.ts` (contract precedent), not `schemas/`-canonical.
   - Registry stays flat → `GalleryShell` parses its own content + config schemas at the block boundary.
-  - **Per-instance Layer-3 config is not yet wired through `BlockInstance`/`BlockRenderer`** (only `content` + `variant` flow today — the renderer/config bridge is a deferred follow-up). site-demo demos select the structural variant via `BlockInstance.variant`; other config uses schema defaults.
+  - **Per-instance Layer-3 config** was not wired through `BlockInstance`/`BlockRenderer` at archive time (only `content` + `variant` flowed). → **Resolved 2026-06-19 by [DEC-029](../../../architecture/decisions.md):** `BlockInstance.config` now flows through `BlockRenderer` to the block; site-demo demos set real config (home grid `{ columns: 4, aspectRatio: '4/3' }`, accommodation `{ aspectRatio: '3/2' }`).
 - **Design source — token-driven neutrality accepted (Cristina, 2026-06-19):** GalleryBlock is a platform **base block**, so it ships intentionally neutral and **token-driven** (controls/spacing/width from theme tokens, zero per-block CSS) rather than matching a specific Figma or visual spec. No Figma reference existed and `/design-block` was **not** run — this is a deliberate choice, not an omission: a base block adapts to each site's "general style" automatically through that client's tokens. The planner's visual-spec/Figma precondition (`planner.md` §7) is therefore treated as applying to **client-level** blocks, not platform base blocks. Per-client visual adaptation (Figma-driven or `/design-block {slug}`, plus Level 2/3 overrides) happens later, **at client integration time**.
 - **Follow-up / tech debt:**
-  - Wire Layer-3 config through `BlockInstance`/`BlockRenderer` (the deferred renderer bridge) so per-instance config (columns, autoplay, aspectRatio…) reaches blocks.
+  - ~~Wire Layer-3 config through `BlockInstance`/`BlockRenderer`~~ — **done 2026-06-19 (DEC-029).**
   - `generate-block-story` and `archive` skills assume a YAML `status:` frontmatter that no story actually uses (the convention is a `> **Status:**` blockquote) — reconcile the skills with the real format.
