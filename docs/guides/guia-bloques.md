@@ -72,25 +72,32 @@ Ojo: en `/add-block` el `BlockType` va **sin** el sufijo `Block` (`Hero`, `Media
 
 ## Parte 2 — El catálogo: bloques, variantes y campos
 
-> ⚠️ **Solo estos 3 bloques renderizan hoy.** Hay schemas en el repo para otros
-> (`AccommodationGrid`, `Amenities`, `Reviews`, `Booking`) pero **aún no tienen
-> componente**, así que no se pueden colocar en una página todavía. Si necesitas uno
-> de esos, es un caso de la Parte 4 (crear bloque nuevo).
+> ⚠️ Hay schemas en el repo para otros bloques (`AccommodationGrid`, `Amenities`,
+> `Reviews`…) que **aún no tienen componente**, así que no se pueden colocar en una página
+> todavía. Si necesitas uno de esos, es un caso de la Parte 4 (crear bloque nuevo).
 
-Cada bloque tiene su **ficha de uso** (qué es · para qué sirve · cómo se instancia ·
-variantes · dónde se añade · ejemplo real) en [`bloques/`](./bloques/README.md):
+Cada bloque tiene una **guía práctica paso a paso** (concepto · variantes · contenido ·
+config · ejemplo completo) y, algunos, una **ficha breve** en [`bloques/`](./bloques/README.md):
 
-| Bloque | Categoría | Variantes | Ficha |
-|---|---|---|---|
-| `HeroBlock` | frontend | — | [HeroBlock.md](./bloques/frontend/HeroBlock.md) |
-| `MediaTextBlock` | frontend | `media-left` · `media-right` | [MediaTextBlock.md](./bloques/frontend/MediaTextBlock.md) |
-| `BookingSearchBlock` | booking · THR | `inline` · `sticky` · `modal`¹ | [BookingSearchBlock.md](./bloques/booking/thr/BookingSearchBlock.md) |
+| Bloque | Categoría | Variantes | Guía práctica | Ficha breve |
+|---|---|---|---|---|
+| `HeroBlock` | frontend | — | [guia-uso-HeroBlock.md](./guia-uso-HeroBlock.md) | [HeroBlock.md](./bloques/frontend/HeroBlock.md) |
+| `MediaTextBlock` | frontend | `media-left` · `media-right` | [guia-uso-MediaTextBlock.md](./guia-uso-MediaTextBlock.md) | [MediaTextBlock.md](./bloques/frontend/MediaTextBlock.md) |
+| `GalleryBlock` | frontend | `slider` · `slider-thumbs` · `grid` · `masonry` · `collage` | [guia-uso-galleryblock.md](./guia-uso-galleryblock.md) | — |
+| `BookingSearchBlock` | booking | `inline` · `sticky` · `modal`¹ | [guia-uso-bookingSearchblock.md](./guia-uso-bookingSearchblock.md) | [BookingSearchBlock.md](./bloques/booking/thr/BookingSearchBlock.md) |
+| `BookingFavoritesBlock` | booking | — | [guia-uso-bookingFavoritesBlock.md](./guia-uso-bookingFavoritesBlock.md) | — |
+| `BookingSimpleBlock` | booking | — | [guia-uso-BookingSimpleBlock.md](./guia-uso-BookingSimpleBlock.md) | — |
 
 ¹ `modal` está diferido (aún no operativo).
 
+> **Familia booking (DEC-025 / DEC-027):** los tres bloques son **engine-agnostic** — el motor
+> y las credenciales viven en `client.config.ts` (`booking`), **nunca** en el bloque. `Favorites`
+> y `Simple` además se activan por toggle (`booking.features.favorites` / `.simpleblock`); sin él
+> no se ven. Hoy solo **THR** implementa los tres widgets (search también `mastercamping`).
+
 **Atajo a lo que más se pregunta:** el buscador **sticky** → `variant: 'sticky'` (y, si el
 Figma lo quiere debajo del menú o con sombra, dos tokens en `globals.css`). Detalle en la
-[ficha de BookingSearchBlock](./bloques/booking/thr/BookingSearchBlock.md#personalizar-el-sticky).
+[guía de BookingSearchBlock](./guia-uso-bookingSearchblock.md#1-inline--en-el-flujo-de-la-página-default).
 
 ---
 
@@ -154,7 +161,7 @@ acordamos el diseño (specs antes que código) y luego implemento con tests.
 ## Resumen rápido
 
 - **Añadir un bloque del catálogo a una página** → `/add-block` o pídemelo: bloque + página + variante + contenido.
-- **Bloques disponibles hoy:** `HeroBlock` (sin variantes), `MediaTextBlock` (`media-left`/`media-right`), `BookingSearchBlock` (`inline`/`sticky`/`modal`).
+- **Bloques disponibles hoy:** `HeroBlock`, `MediaTextBlock` (`media-left`/`media-right`), `GalleryBlock` (5 variantes), `BookingSearchBlock` (`inline`/`sticky`/`modal`), `BookingFavoritesBlock`, `BookingSimpleBlock`.
 - **Buscador sticky** → `variant: 'sticky'`; debajo del menú/sombra → tokens en `globals.css`.
-- **El motor de reservas no va en el bloque** → `client.config.ts` vía `/setup-booking`.
+- **Familia booking:** el motor no va en el bloque → `client.config.ts` (`booking`) vía `/setup-booking`; `Favorites`/`Simple` además requieren su toggle en `booking.features`.
 - **Bloque que no existe** → `/scaffold-block` (trabajo de sistema, diseño antes que código).
